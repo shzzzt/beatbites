@@ -5,6 +5,7 @@ var song_time: float = 0.0 # Seconds heard by the player.
 var last_beat: int = -1 # Remember which beat we already printed.
 var test_judged: bool = false # Judge this apple only once.
 var breakfast_notes: Array[Dictionary] = [] # Our playable note list.
+var test_note: Dictionary = {} # Holds our chosen chart note.
 
 @onready var music: AudioStreamPlayer = $Music # Find our Music child.
 @onready var output_latency: float = AudioServer.get_output_latency()
@@ -30,7 +31,8 @@ func _ready() -> void:
 				"midi": int(note["midi"]), # Original melody pitch.
 				"lane": pitch_to_lane(int(note["midi"])) # Chosen lane.
 			})
-
+	test_note = breakfast_notes[6] # Index 6 is the seventh note.
+	print("Testing chart note: ", test_note)
 	print("Breakfast playable notes: ", breakfast_notes.size())
 	print("First playable note: ", breakfast_notes[0])
 	# Check that we loaded the expected song and notes.
@@ -51,12 +53,13 @@ func _process(_delta: float) -> void:
 		return # The first sound hasn't reached the speakers yet.
 
 	song_time = maxf(song_time, clock) # Prevent small backward jumps.
-	# Start falling at 1 second; reach the catch line at 4 seconds.
-	var progress: float = (song_time - 1.0) / 3.0
+	# Begin falling three seconds before this note's arrival.
+	var progress: float = (song_time - (float(test_note["time"]) - 3.0)) / 3.0
 	# Keep the apple hidden after it has been judged.
 	test_food.visible = not test_judged and progress >= 0.0 and progress <= 1.2
-	# Keep the apple in the middle lane.
-	test_food.position.x = get_viewport_rect().size.x / 2.0
+	# Place the apple in the lane chosen from its pitch.
+	var lane_width: float = get_viewport_rect().size.x / 3.0
+	test_food.position.x = (int(test_note["lane"]) + 0.5) * lane_width
 	# Move from above the screen to our temporary catch line.
 	test_food.position.y = lerpf(-96.0, 960.0, progress)
 	judge_test_food() # Check this apple against the audio clock.
@@ -69,13 +72,13 @@ func _process(_delta: float) -> void:
 
 
 func judge_test_food() -> void:
-	if test_judged or song_time < 4.0:
-		return # Wait for arrival; skip apples already judged.
+	if test_judged or song_time < float(test_note["time"]):
+		return # Wait until this chart note arrives.
 
-	var lateness: float = song_time - 4.0
+	var lateness: float = song_time - float(test_note["time"])
 	if lateness > 0.16:
 		judgment_label.text = "MISS" # Show a missed apple.
-	elif catcher.get("lane") == 1:
+	elif catcher.get("lane") == int(test_note["lane"]):
 		# Read the catcher's lane: 1 means the middle.
 		if lateness <= 0.06:
 			judgment_label.text = "PERFECT" # Show an on-time catch.
