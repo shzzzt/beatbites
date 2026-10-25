@@ -7,7 +7,18 @@ var last_beat: int = -1 # Remember which beat we already printed.
 @onready var music: AudioStreamPlayer = $Music # Find our Music child.
 @onready var output_latency: float = AudioServer.get_output_latency()
 
-
+func _ready() -> void:
+	# Read the chart file as text.
+	var text: String = FileAccess.get_file_as_string(
+		"res://assets/audio/music_breakfast.json"
+	)
+	# Convert JSON text into data we can access by name.
+	var chart: Dictionary = JSON.parse_string(text)
+	# Check that we loaded the expected song and notes.
+	print("Chart BPM: ", chart["bpm"])
+	print("Melody notes: ", chart["lead_notes"].size())
+	print("First note: ", chart["lead_notes"][0])
+	
 func _process(_delta: float) -> void:
 	if not music.playing:
 		return # Stop checking when the music isn't playing.
