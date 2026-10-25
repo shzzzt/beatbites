@@ -3,10 +3,12 @@ extends Node2D
 const BPM: float = 90.0 # Breakfast's exact tempo.
 var song_time: float = 0.0 # Seconds heard by the player.
 var last_beat: int = -1 # Remember which beat we already printed.
+var test_judged: bool = false # Judge this apple only once.
 
 @onready var music: AudioStreamPlayer = $Music # Find our Music child.
 @onready var output_latency: float = AudioServer.get_output_latency()
 @onready var test_food: Node2D = $Food # Find our test apple.
+@onready var catcher: Node2D = $Catcher # Find the catcher in this level.
 
 func _ready() -> void:
 	# Read the chart file as text.
@@ -35,13 +37,36 @@ func _process(_delta: float) -> void:
 	song_time = maxf(song_time, clock) # Prevent small backward jumps.
 	# Start falling at 1 second; reach the catch line at 4 seconds.
 	var progress: float = (song_time - 1.0) / 3.0
-	test_food.visible = progress >= 0.0 and progress <= 1.2
+	# Keep the apple hidden after it has been judged.
+	test_food.visible = not test_judged and progress >= 0.0 and progress <= 1.2
 	# Keep the apple in the middle lane.
 	test_food.position.x = get_viewport_rect().size.x / 2.0
 	# Move from above the screen to our temporary catch line.
 	test_food.position.y = lerpf(-96.0, 960.0, progress)
+	judge_test_food() # Check this apple against the audio clock.
 	var beat: int = floori(song_time * BPM / 60.0)
+	
 
 	if beat > last_beat:
 		last_beat = beat # Print only when we reach a new beat.
 		print("Beat ", beat + 1) # Show human-friendly numbering from 1.
+
+
+func judge_test_food() -> void:
+	if test_judged or song_time < 4.0:
+		return # Wait for arrival; skip apples already judged.
+
+	var lateness: float = song_time - 4.0
+	if lateness > 0.16:
+		print("MISS") # The catch window has ended.
+	elif catcher.get("lane") == 1:
+		# Read the catcher's lane: 1 means the middle.
+		if lateness <= 0.06:
+			print("PERFECT")
+		else:
+			print("GOOD")
+	else:
+		return # There's still time to move into the middle.
+
+	test_judged = true # Prevent repeated catches or misses.
+	test_food.hide() # Remove the judged apple immediately.
