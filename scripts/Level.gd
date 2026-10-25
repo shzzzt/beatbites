@@ -9,6 +9,7 @@ var test_judged: bool = false # Judge this apple only once.
 @onready var output_latency: float = AudioServer.get_output_latency()
 @onready var test_food: Node2D = $Food # Find our test apple.
 @onready var catcher: Node2D = $Catcher # Find the catcher in this level.
+@onready var judgment_label: Label = $HUD/Judgment # Find the HUD text.
 
 func _ready() -> void:
 	# Read the chart file as text.
@@ -58,13 +59,13 @@ func judge_test_food() -> void:
 
 	var lateness: float = song_time - 4.0
 	if lateness > 0.16:
-		print("MISS") # The catch window has ended.
+		judgment_label.text = "MISS" # Show a missed apple.
 	elif catcher.get("lane") == 1:
 		# Read the catcher's lane: 1 means the middle.
 		if lateness <= 0.06:
-			print("PERFECT")
+			judgment_label.text = "PERFECT" # Show an on-time catch.
 		else:
-			print("GOOD")
+			judgment_label.text = "GOOD" # Show a slightly late catch.
 	else:
 		return # There's still time to move into the middle.
 
