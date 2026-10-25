@@ -2,6 +2,7 @@ extends Node2D
 # Load the scene we'll use to create food.
 const FOOD_SCENE = preload("res://scenes/actors/food.tscn")
 const BPM: float = 90.0 # Breakfast's exact tempo.
+const TARGET_CATCHES: int = 40 # Successful catches needed to clear.
 
 var score: int = 0 # Total points earned.
 var combo: int = 0 # Consecutive successful catches.
@@ -10,6 +11,7 @@ var song_time: float = 0.0 # Seconds heard by the player.
 var last_beat: int = -1 # Remember which beat we already printed.	
 var breakfast_notes: Array[Dictionary] = [] # Our playable note list.
 var active_food: Array[FallingFood] = [] # Remember our spawned foods.
+var finished: bool = false # Prevent gameplay updates after the ending.
 
 @onready var music: AudioStreamPlayer = $Music # Find our Music child.
 @onready var output_latency: float = AudioServer.get_output_latency()
@@ -47,7 +49,9 @@ func _ready() -> void:
 		add_child(food) # Put this instance into the level.
 		active_food.append(food) # Remember it for updates.
 			
-	
+	# End the attempt when the non-looping song finishes.
+	music.finished.connect(_on_song_finished)
+	judgment_label.text = "Goal: catch %d bites!" % TARGET_CATCHES
 
 	print("Breakfast playable notes: ", breakfast_notes.size())
 	print("First playable note: ", breakfast_notes[0])
@@ -57,7 +61,7 @@ func _ready() -> void:
 	print("First note: ", chart["lead_notes"][0])
 	
 func _process(_delta: float) -> void:
-	if not music.playing:
+	if finished or not music.playing:
 		return # Stop checking when the music isn't playing.
 
 	# Read playback time and compensate for audio buffering.
@@ -104,3 +108,19 @@ func pitch_to_lane(midi: int) -> int:
 	elif midi <= 81:
 		return 1 # Middle pitches go in the middle.
 	return 2 # Higher pitches go right.
+
+func _on_song_finished() -> void:
+	if finished:
+		return # End this attempt only once.
+
+	finished = true # Stop updating food.
+	for food in active_food:
+		food.hide() # Clear the remaining food artwork.
+
+	var outcome: String = "TRY AGAIN"
+	if caught_count >= TARGET_CATCHES:
+		outcome = "LEVEL CLEARED!" # Check catches, not points or combo.
+
+	judgment_label.text = "%s\nScore: %d\nCaught: %d / %d" % [
+		outcome, score, caught_count, TARGET_CATCHES
+	]
