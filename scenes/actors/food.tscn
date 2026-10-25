@@ -1,8 +1,10 @@
 [gd_scene format=3 uid="uid://d4muuhsci516r"]
 
 [ext_resource type="Texture2D" uid="uid://ioy6pltrvhhc" path="res://assets/art/good_apple.png" id="1_baqyw"]
+[ext_resource type="Script" uid="uid://dhe1mniqktks2" path="res://scripts/Food.gd" id="1_yeqfj"]
 
 [node name="Food" type="Node2D" unique_id=949842495]
+script = ExtResource("1_yeqfj")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1042148292]
 scale = Vector2(6, 6)

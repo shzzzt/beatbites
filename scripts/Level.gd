@@ -1,15 +1,16 @@
 extends Node2D
-
+# Load the scene we'll use to create food.
+const FOOD_SCENE = preload("res://scenes/actors/food.tscn")
 const BPM: float = 90.0 # Breakfast's exact tempo.
+
 var song_time: float = 0.0 # Seconds heard by the player.
-var last_beat: int = -1 # Remember which beat we already printed.
-var test_judged: bool = false # Judge this apple only once.
+var last_beat: int = -1 # Remember which beat we already printed.	
 var breakfast_notes: Array[Dictionary] = [] # Our playable note list.
 var test_note: Dictionary = {} # Holds our chosen chart note.
 
 @onready var music: AudioStreamPlayer = $Music # Find our Music child.
 @onready var output_latency: float = AudioServer.get_output_latency()
-@onready var test_food: Node2D = $Food # Find our test apple.
+var test_food: FallingFood # We'll create this node ourselves.
 @onready var catcher: Node2D = $Catcher # Find the catcher in this level.
 @onready var judgment_label: Label = $HUD/Judgment # Find the HUD text.
 
@@ -31,7 +32,18 @@ func _ready() -> void:
 				"midi": int(note["midi"]), # Original melody pitch.
 				"lane": pitch_to_lane(int(note["midi"])) # Chosen lane.
 			})
+			
+	test_food = FOOD_SCENE.instantiate() as FallingFood # Create a food.
+	test_food.hide() # Keep it hidden until its falling time.
+	add_child(test_food) # Add it to the running level.
+	
 	test_note = breakfast_notes[6] # Index 6 is the seventh note.
+	test_food.arrival_time = float(test_note["time"]) # Copy its timing.
+	test_food.lane = int(test_note["lane"]) # Copy its lane.
+	
+	# Run our HUD function whenever this food reports a judgment.
+	test_food.judgment_made.connect(_on_food_judgment)
+	
 	print("Testing chart note: ", test_note)
 	print("Breakfast playable notes: ", breakfast_notes.size())
 	print("First playable note: ", breakfast_notes[0])
@@ -53,16 +65,11 @@ func _process(_delta: float) -> void:
 		return # The first sound hasn't reached the speakers yet.
 
 	song_time = maxf(song_time, clock) # Prevent small backward jumps.
-	# Begin falling three seconds before this note's arrival.
-	var progress: float = (song_time - (float(test_note["time"]) - 3.0)) / 3.0
-	# Keep the apple hidden after it has been judged.
-	test_food.visible = not test_judged and progress >= 0.0 and progress <= 1.2
-	# Place the apple in the lane chosen from its pitch.
-	var lane_width: float = get_viewport_rect().size.x / 3.0
-	test_food.position.x = (int(test_note["lane"]) + 0.5) * lane_width
-	# Move from above the screen to our temporary catch line.
-	test_food.position.y = lerpf(-96.0, 960.0, progress)
-	judge_test_food() # Check this apple against the audio clock.
+	
+	# Ask the food to position itself using the music clock.
+	test_food.update_from_song(song_time, get_viewport_rect().size.x)
+	# Give this food the current audio time and catcher lane.
+	test_food.judge_catch(song_time, int(catcher.get("lane")))
 	var beat: int = floori(song_time * BPM / 60.0)
 	
 
@@ -70,26 +77,9 @@ func _process(_delta: float) -> void:
 		last_beat = beat # Print only when we reach a new beat.
 		print("Beat ", beat + 1) # Show human-friendly numbering from 1.
 
-
-func judge_test_food() -> void:
-	if test_judged or song_time < float(test_note["time"]):
-		return # Wait until this chart note arrives.
-
-	var lateness: float = song_time - float(test_note["time"])
-	if lateness > 0.16:
-		judgment_label.text = "MISS" # Show a missed apple.
-	elif catcher.get("lane") == int(test_note["lane"]):
-		# Read the catcher's lane: 1 means the middle.
-		if lateness <= 0.06:
-			judgment_label.text = "PERFECT" # Show an on-time catch.
-		else:
-			judgment_label.text = "GOOD" # Show a slightly late catch.
-	else:
-		return # There's still time to move into the middle.
-
-	test_judged = true # Prevent repeated catches or misses.
-	test_food.hide() # Remove the judged apple immediately.
-
+func _on_food_judgment(result: String) -> void:
+	judgment_label.text = result # Display the food's reported result.
+	
 func pitch_to_lane(midi: int) -> int:
 	if midi <= 76:
 		return 0 # Lower pitches go left.
