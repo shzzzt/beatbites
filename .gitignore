@@ -1,0 +1,13 @@
+# Godot 4+ specific ignores
+.godot/
+/android/
+
+# Exported game builds
+*.apk
+*.aab
+*.ipa
+export/
+
+# Android signing keys
+*.keystore
+*.jks
