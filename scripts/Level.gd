@@ -6,11 +6,10 @@ const BPM: float = 90.0 # Breakfast's exact tempo.
 var song_time: float = 0.0 # Seconds heard by the player.
 var last_beat: int = -1 # Remember which beat we already printed.	
 var breakfast_notes: Array[Dictionary] = [] # Our playable note list.
-var test_note: Dictionary = {} # Holds our chosen chart note.
+var active_food: Array[FallingFood] = [] # Remember our spawned foods.
 
 @onready var music: AudioStreamPlayer = $Music # Find our Music child.
 @onready var output_latency: float = AudioServer.get_output_latency()
-var test_food: FallingFood # We'll create this node ourselves.
 @onready var catcher: Node2D = $Catcher # Find the catcher in this level.
 @onready var judgment_label: Label = $HUD/Judgment # Find the HUD text.
 
@@ -21,30 +20,32 @@ func _ready() -> void:
 	)
 	# Convert JSON text into data we can access by name.
 	var chart: Dictionary = JSON.parse_string(text)
-	
-	# Examine each melody note in the chart.
+		# Build our playable list before spawning any food.
+		
 	for note in chart["lead_notes"]:
 		var beat: float = float(note["beat"])
-		# Keep whole beats, allowing tiny decimal rounding differences.
+		# Breakfast accepts notes starting on whole beats.
 		if is_equal_approx(beat, roundf(beat)):
 			breakfast_notes.append({
-				"time": beat * 60.0 / BPM, # Scheduled arrival time.
-				"midi": int(note["midi"]), # Original melody pitch.
-				"lane": pitch_to_lane(int(note["midi"])) # Chosen lane.
+				"time": beat * 60.0 / BPM, # Arrival time in seconds.
+				"midi": int(note["midi"]), # Original pitch.
+				"lane": pitch_to_lane(int(note["midi"])) # Catch lane.
 			})
 			
-	test_food = FOOD_SCENE.instantiate() as FallingFood # Create a food.
-	test_food.hide() # Keep it hidden until its falling time.
-	add_child(test_food) # Add it to the running level.
+	# Preview the chart after its opening three seconds.
+	for note in breakfast_notes:
+		if float(note["time"]) < 3.0:
+			continue # Skip opening notes until we add the countdown.
+		var food: FallingFood = FOOD_SCENE.instantiate() as FallingFood
+		food.arrival_time = float(note["time"]) # Each gets its own timing.
+		food.lane = int(note["lane"]) # Each gets its own lane.
+		food.hide() # Stay hidden until the fall begins.
+		food.judgment_made.connect(_on_food_judgment)
+		add_child(food) # Put this instance into the level.
+		active_food.append(food) # Remember it for updates.
+			
 	
-	test_note = breakfast_notes[6] # Index 6 is the seventh note.
-	test_food.arrival_time = float(test_note["time"]) # Copy its timing.
-	test_food.lane = int(test_note["lane"]) # Copy its lane.
-	
-	# Run our HUD function whenever this food reports a judgment.
-	test_food.judgment_made.connect(_on_food_judgment)
-	
-	print("Testing chart note: ", test_note)
+
 	print("Breakfast playable notes: ", breakfast_notes.size())
 	print("First playable note: ", breakfast_notes[0])
 	# Check that we loaded the expected song and notes.
@@ -67,9 +68,10 @@ func _process(_delta: float) -> void:
 	song_time = maxf(song_time, clock) # Prevent small backward jumps.
 	
 	# Ask the food to position itself using the music clock.
-	test_food.update_from_song(song_time, get_viewport_rect().size.x)
-	# Give this food the current audio time and catcher lane.
-	test_food.judge_catch(song_time, int(catcher.get("lane")))
+		# Give every food the same audio clock and player input.
+	for food in active_food:
+		food.update_from_song(song_time, get_viewport_rect().size.x)
+		food.judge_catch(song_time, int(catcher.get("lane")))
 	var beat: int = floori(song_time * BPM / 60.0)
 	
 
