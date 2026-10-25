@@ -6,6 +6,7 @@ var last_beat: int = -1 # Remember which beat we already printed.
 
 @onready var music: AudioStreamPlayer = $Music # Find our Music child.
 @onready var output_latency: float = AudioServer.get_output_latency()
+@onready var test_food: Node2D = $Food # Find our test apple.
 
 func _ready() -> void:
 	# Read the chart file as text.
@@ -32,6 +33,13 @@ func _process(_delta: float) -> void:
 		return # The first sound hasn't reached the speakers yet.
 
 	song_time = maxf(song_time, clock) # Prevent small backward jumps.
+	# Start falling at 1 second; reach the catch line at 4 seconds.
+	var progress: float = (song_time - 1.0) / 3.0
+	test_food.visible = progress >= 0.0 and progress <= 1.2
+	# Keep the apple in the middle lane.
+	test_food.position.x = get_viewport_rect().size.x / 2.0
+	# Move from above the screen to our temporary catch line.
+	test_food.position.y = lerpf(-96.0, 960.0, progress)
 	var beat: int = floori(song_time * BPM / 60.0)
 
 	if beat > last_beat:

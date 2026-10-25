@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://cmln44kna2xf0" path="res://scripts/Level.gd" id="1_2djvx"]
 [ext_resource type="PackedScene" uid="uid://kx4571higceq" path="res://scenes/actors/catcher.tscn" id="1_m802k"]
 [ext_resource type="AudioStream" uid="uid://dxqq55sbfthol" path="res://assets/audio/music_breakfast.ogg" id="2_i2aat"]
+[ext_resource type="PackedScene" uid="uid://d4muuhsci516r" path="res://scenes/actors/food.tscn" id="4_uvc87"]
 
 [node name="Level01" type="Node2D" unique_id=710803767]
 script = ExtResource("1_2djvx")
@@ -13,3 +14,6 @@ position = Vector2(360, 1080)
 [node name="Music" type="AudioStreamPlayer" parent="." unique_id=1697557649]
 stream = ExtResource("2_i2aat")
 autoplay = true
+
+[node name="Food" parent="." unique_id=949842495 instance=ExtResource("4_uvc87")]
+visible = false
