@@ -1,0 +1,35 @@
+[gd_scene format=3 uid="uid://d354aar67bsdc"]
+
+[node name="Result" type="Control" unique_id=2080969085]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Content" type="VBoxContainer" parent="." unique_id=249456022]
+custom_minimum_size = Vector2(672, 0)
+layout_mode = 0
+offset_left = 24.0
+offset_top = 160.0
+offset_right = 64.0
+offset_bottom = 200.0
+theme_override_constants/separation = 24
+
+[node name="Heading" type="Label" parent="Content" unique_id=1256320928]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.23137255, 0.16470589, 0.4, 1)
+theme_override_font_sizes/font_size = 40
+text = "RESULT"
+
+[node name="Details" type="Label" parent="Content" unique_id=866681477]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.23137255, 0.16470589, 0.4, 1)
+theme_override_font_sizes/font_size = 28
+text = "Your results will appear here."
+
+[node name="Retry" type="Button" parent="Content" unique_id=2061663467]
+custom_minimum_size = Vector2(0, 96)
+layout_mode = 2
+text = "RETRY"
