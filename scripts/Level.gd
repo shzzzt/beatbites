@@ -3,6 +3,9 @@ extends Node2D
 const FOOD_SCENE = preload("res://scenes/actors/food.tscn")
 const BPM: float = 90.0 # Breakfast's exact tempo.
 
+var score: int = 0 # Total points earned.
+var combo: int = 0 # Consecutive successful catches.
+var caught_count: int = 0 # Good foods caught toward the level goal.
 var song_time: float = 0.0 # Seconds heard by the player.
 var last_beat: int = -1 # Remember which beat we already printed.	
 var breakfast_notes: Array[Dictionary] = [] # Our playable note list.
@@ -80,7 +83,20 @@ func _process(_delta: float) -> void:
 		print("Beat ", beat + 1) # Show human-friendly numbering from 1.
 
 func _on_food_judgment(result: String) -> void:
-	judgment_label.text = result # Display the food's reported result.
+	if result == "MISS":
+		combo = 0 # A missed good food breaks the streak.
+	else:
+		combo += 1 # PERFECT and GOOD both continue the streak.
+		caught_count += 1 # Both count toward the catch goal.
+		if result == "PERFECT":
+			score += 100
+		else:
+			score += 50 # GOOD earns fewer points.
+
+	# Update the existing label with feedback and totals.
+	judgment_label.text = "%s\nScore: %d\nCombo: %d\nCaught: %d" % [
+		result, score, combo, caught_count
+	]
 	
 func pitch_to_lane(midi: int) -> int:
 	if midi <= 76:
