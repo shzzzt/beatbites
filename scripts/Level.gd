@@ -4,6 +4,7 @@ const BPM: float = 90.0 # Breakfast's exact tempo.
 var song_time: float = 0.0 # Seconds heard by the player.
 var last_beat: int = -1 # Remember which beat we already printed.
 var test_judged: bool = false # Judge this apple only once.
+var breakfast_notes: Array[Dictionary] = [] # Our playable note list.
 
 @onready var music: AudioStreamPlayer = $Music # Find our Music child.
 @onready var output_latency: float = AudioServer.get_output_latency()
@@ -18,6 +19,19 @@ func _ready() -> void:
 	)
 	# Convert JSON text into data we can access by name.
 	var chart: Dictionary = JSON.parse_string(text)
+	
+	# Examine each melody note in the chart.
+	for note in chart["lead_notes"]:
+		var beat: float = float(note["beat"])
+		# Keep whole beats, allowing tiny decimal rounding differences.
+		if is_equal_approx(beat, roundf(beat)):
+			breakfast_notes.append({
+				"time": beat * 60.0 / BPM, # Convert beats to seconds.
+				"midi": int(note["midi"]) # Keep pitch for lane selection.
+			})
+
+	print("Breakfast playable notes: ", breakfast_notes.size())
+	print("First playable note: ", breakfast_notes[0])
 	# Check that we loaded the expected song and notes.
 	print("Chart BPM: ", chart["bpm"])
 	print("Melody notes: ", chart["lead_notes"].size())
