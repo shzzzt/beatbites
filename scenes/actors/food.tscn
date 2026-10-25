@@ -1,0 +1,9 @@
+[gd_scene format=3 uid="uid://d4muuhsci516r"]
+
+[ext_resource type="Texture2D" uid="uid://ioy6pltrvhhc" path="res://assets/art/good_apple.png" id="1_baqyw"]
+
+[node name="Food" type="Node2D" unique_id=949842495]
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1042148292]
+scale = Vector2(6, 6)
+texture = ExtResource("1_baqyw")
