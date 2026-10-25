@@ -1,8 +1,13 @@
 [gd_scene format=3 uid="uid://bgpykcnnb3uhv"]
 
 [ext_resource type="PackedScene" uid="uid://kx4571higceq" path="res://scenes/actors/catcher.tscn" id="1_m802k"]
+[ext_resource type="AudioStream" uid="uid://dxqq55sbfthol" path="res://assets/audio/music_breakfast.ogg" id="2_i2aat"]
 
 [node name="Level01" type="Node2D" unique_id=710803767]
 
 [node name="Catcher" parent="." unique_id=464772695 instance=ExtResource("1_m802k")]
 position = Vector2(360, 1080)
+
+[node name="Music" type="AudioStreamPlayer" parent="." unique_id=1697557649]
+stream = ExtResource("2_i2aat")
+autoplay = true
