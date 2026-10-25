@@ -1,8 +1,10 @@
 [gd_scene format=3 uid="uid://kx4571higceq"]
 
 [ext_resource type="Texture2D" uid="uid://ucwdrw36m2i5" path="res://assets/art/catcher_idle.png" id="1_5mhv6"]
+[ext_resource type="Script" uid="uid://b53olbyrgx6w4" path="res://scripts/catcher.gd" id="1_lds70"]
 
 [node name="Catcher" type="Node2D" unique_id=464772695]
+script = ExtResource("1_lds70")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1109318715]
 scale = Vector2(6, 6)
