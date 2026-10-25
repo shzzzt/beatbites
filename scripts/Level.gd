@@ -26,8 +26,9 @@ func _ready() -> void:
 		# Keep whole beats, allowing tiny decimal rounding differences.
 		if is_equal_approx(beat, roundf(beat)):
 			breakfast_notes.append({
-				"time": beat * 60.0 / BPM, # Convert beats to seconds.
-				"midi": int(note["midi"]) # Keep pitch for lane selection.
+				"time": beat * 60.0 / BPM, # Scheduled arrival time.
+				"midi": int(note["midi"]), # Original melody pitch.
+				"lane": pitch_to_lane(int(note["midi"])) # Chosen lane.
 			})
 
 	print("Breakfast playable notes: ", breakfast_notes.size())
@@ -85,3 +86,10 @@ func judge_test_food() -> void:
 
 	test_judged = true # Prevent repeated catches or misses.
 	test_food.hide() # Remove the judged apple immediately.
+
+func pitch_to_lane(midi: int) -> int:
+	if midi <= 76:
+		return 0 # Lower pitches go left.
+	elif midi <= 81:
+		return 1 # Middle pitches go in the middle.
+	return 2 # Higher pitches go right.
