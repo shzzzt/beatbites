@@ -7,7 +7,9 @@ const TARGET_CATCHES: int = 40 # Successful catches needed to clear.
 var score: int = 0 # Total points earned.
 var combo: int = 0 # Consecutive successful catches.
 var caught_count: int = 0 # Good foods caught toward the level goal.
-var song_time: float = 0.0 # Seconds heard by the player.
+var song_time: float = -3.0 # Start three seconds before the song.
+var countdown_start_ms: int = 0 # When the countdown began.
+var music_started: bool = false # Distinguish countdown from song ending.
 var last_beat: int = -1 # Remember which beat we already printed.	
 var breakfast_notes: Array[Dictionary] = [] # Our playable note list.
 var active_food: Array[FallingFood] = [] # Remember our spawned foods.
@@ -41,8 +43,6 @@ func _ready() -> void:
 			
 	# Preview the chart after its opening three seconds.
 	for note in breakfast_notes:
-		if float(note["time"]) < 3.0:
-			continue # Skip opening notes until we add the countdown.
 		var food: FallingFood = FOOD_SCENE.instantiate() as FallingFood
 		food.arrival_time = float(note["time"]) # Each gets its own timing.
 		food.lane = int(note["lane"]) # Each gets its own lane.
@@ -65,21 +65,12 @@ func _ready() -> void:
 	print("First note: ", chart["lead_notes"][0])
 	
 func _process(_delta: float) -> void:
-	if finished or not music.playing:
-		return # Stop checking when the music isn't playing.
+	if finished:
+		return # Stop updating after the attempt ends.
 
-	# Read playback time and compensate for audio buffering.
-	var clock: float = music.get_playback_position()
-	clock += AudioServer.get_time_since_last_mix()
-	clock -= output_latency
-
-	if clock < 0.0:
-		return # The first sound hasn't reached the speakers yet.
-
-	song_time = maxf(song_time, clock) # Prevent small backward jumps.
+	song_time = read_song_time() # Works during countdown and playback.
 	
-	# Ask the food to position itself using the music clock.
-		# Give every food the same audio clock and player input.
+	# Give every food the same audio clock and player input.
 	for food in active_food:
 		food.update_from_song(song_time, get_viewport_rect().size.x)
 		food.judge_catch(song_time, int(catcher.get("lane")))
@@ -134,6 +125,7 @@ func _on_song_finished() -> void:
 	get_tree().change_scene_to_file("res://scenes/ui/Result.tscn")
 	
 func start_countdown() -> void:
+	countdown_start_ms = Time.get_ticks_msec() # Read the elapsed-time clock.
 	# Count backward: 3, 2, 1.
 	for number in range(3, 0, -1):
 		judgment_label.text = str(number)
@@ -141,4 +133,20 @@ func start_countdown() -> void:
 		await get_tree().create_timer(1.0, false).timeout
 
 	judgment_label.text = "Goal: catch %d bites!" % TARGET_CATCHES
+	music_started = true # The countdown has finished.
 	music.play() # Begin playback from the start.
+	
+func read_song_time() -> float:
+	if music.playing:
+		# Use the audio clock once playback starts.
+		var clock: float = music.get_playback_position()
+		clock += AudioServer.get_time_since_last_mix()
+		clock -= output_latency
+		return maxf(song_time, clock) # Prevent backward jumps.
+
+	if music_started:
+		return song_time # Hold the clock when playback ends.
+
+	# Before music starts, advance from -3 toward zero.
+	var elapsed: float = (Time.get_ticks_msec() - countdown_start_ms) / 1000.0
+	return minf(-0.001, elapsed - 3.0) # Let audio determine the zero crossing.
