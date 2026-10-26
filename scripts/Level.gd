@@ -113,14 +113,14 @@ func _on_song_finished() -> void:
 	if finished:
 		return # End this attempt only once.
 
-	finished = true # Stop updating food.
-	for food in active_food:
-		food.hide() # Clear the remaining food artwork.
-
-	var outcome: String = "TRY AGAIN"
-	if caught_count >= TARGET_CATCHES:
-		outcome = "LEVEL CLEARED!" # Check catches, not points or combo.
-
-	judgment_label.text = "%s\nScore: %d\nCaught: %d / %d" % [
-		outcome, score, caught_count, TARGET_CATCHES
-	]
+	finished = true
+	# Keep the results after the gameplay scene is removed.
+	GameState.last_result = {
+		"won": caught_count >= TARGET_CATCHES,
+		"score": score,
+		"caught": caught_count,
+		"goal": TARGET_CATCHES,
+		"level_path": scene_file_path # Remember this level for Retry.
+	}
+	# Open our separate Result screen.
+	get_tree().change_scene_to_file("res://scenes/ui/Result.tscn")
