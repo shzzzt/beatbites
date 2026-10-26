@@ -54,7 +54,9 @@ func _ready() -> void:
 	# End the attempt when the non-looping song finishes.
 	music.finished.connect(_on_song_finished)
 	judgment_label.text = "Goal: catch %d bites!" % TARGET_CATCHES
-
+	
+	await start_countdown() # Wait for the countdown to start the music.
+	
 	print("Breakfast playable notes: ", breakfast_notes.size())
 	print("First playable note: ", breakfast_notes[0])
 	# Check that we loaded the expected song and notes.
@@ -130,3 +132,13 @@ func _on_song_finished() -> void:
 	}
 	# Open our separate Result screen.
 	get_tree().change_scene_to_file("res://scenes/ui/Result.tscn")
+	
+func start_countdown() -> void:
+	# Count backward: 3, 2, 1.
+	for number in range(3, 0, -1):
+		judgment_label.text = str(number)
+		# Wait one second; this timer will respect a future pause.
+		await get_tree().create_timer(1.0, false).timeout
+
+	judgment_label.text = "Goal: catch %d bites!" % TARGET_CATCHES
+	music.play() # Begin playback from the start.

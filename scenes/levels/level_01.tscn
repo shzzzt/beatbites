@@ -12,7 +12,6 @@ position = Vector2(360, 1080)
 
 [node name="Music" type="AudioStreamPlayer" parent="." unique_id=1697557649]
 stream = ExtResource("2_i2aat")
-autoplay = true
 
 [node name="HUD" type="CanvasLayer" parent="." unique_id=1859559952]
 
