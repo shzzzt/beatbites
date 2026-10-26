@@ -1,5 +1,7 @@
 [gd_scene format=3 uid="uid://2awvyfy6kmfq"]
 
+[ext_resource type="Script" uid="uid://bgr4hkckl24ss" path="res://scenes/ui/LevelSelects.gd" id="1_2fnwa"]
+
 [node name="LevelSelect" type="Control" unique_id=1692727255]
 layout_mode = 3
 anchors_preset = 15
@@ -7,6 +9,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_2fnwa")
 
 [node name="Content" type="VBoxContainer" parent="." unique_id=2096381210]
 custom_minimum_size = Vector2(672, 0)
