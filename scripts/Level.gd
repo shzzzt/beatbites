@@ -111,6 +111,10 @@ func _on_song_finished() -> void:
 		return # End this attempt only once.
 
 	finished = true
+
+	if caught_count >= TARGET_CATCHES:
+		GameState.complete_level(1) # This scene is Breakfast, level 1.
+
 	# Keep the results after the gameplay scene is removed.
 	GameState.last_result = {
 		"won": caught_count >= TARGET_CATCHES,

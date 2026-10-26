@@ -1,0 +1,53 @@
+[gd_scene format=3 uid="uid://2awvyfy6kmfq"]
+
+[node name="LevelSelect" type="Control" unique_id=1692727255]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Content" type="VBoxContainer" parent="." unique_id=2096381210]
+custom_minimum_size = Vector2(672, 0)
+layout_mode = 0
+offset_left = 24.0
+offset_top = 120.0
+offset_right = 64.0
+offset_bottom = 160.0
+theme_override_constants/separation = 24
+
+[node name="Heading" type="Label" parent="Content" unique_id=370028427]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.23137255, 0.16470589, 0.4, 1)
+theme_override_font_sizes/font_size = 40
+text = "PICK A MEAL"
+
+[node name="Breakfast" type="Button" parent="Content" unique_id=1598295277]
+custom_minimum_size = Vector2(0, 96)
+layout_mode = 2
+text = "Breakfast · 90 BPM"
+
+[node name="Lunch" type="Button" parent="Content" unique_id=664931076]
+custom_minimum_size = Vector2(0, 96)
+layout_mode = 2
+disabled = true
+text = "Lunch · 100 BPM"
+
+[node name="Snack" type="Button" parent="Content" unique_id=1129967989]
+custom_minimum_size = Vector2(0, 96)
+layout_mode = 2
+disabled = true
+text = "Snack · 115 BPM"
+
+[node name="Dinner" type="Button" parent="Content" unique_id=316493496]
+custom_minimum_size = Vector2(0, 96)
+layout_mode = 2
+disabled = true
+text = "Dinner · 125 BPM"
+
+[node name="Dessert" type="Button" parent="Content" unique_id=1164818180]
+custom_minimum_size = Vector2(0, 96)
+layout_mode = 2
+disabled = true
+text = "Dessert · 140 BPM"
