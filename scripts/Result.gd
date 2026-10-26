@@ -3,13 +3,16 @@ extends Control
 @onready var heading: Label = $Content/Heading
 @onready var details: Label = $Content/Details
 @onready var retry_button: Button = $Content/Retry # Find the Retry button.
-
+@onready var meals_button: Button = $Content/Meals # Find the Meals button.
 
 func _ready() -> void:
 	var result: Dictionary = GameState.last_result # Read the last attempt.
 	# Enable Retry only when we know which level was played.
 	retry_button.disabled = result.is_empty()
 	retry_button.pressed.connect(_on_retry_pressed)
+	
+	meals_button.pressed.connect(_on_meals_pressed) # Listen for a press.
+	
 	if result.is_empty():
 		details.text = "Play a level to see your results."
 		return # Allows this scene to be previewed safely with F6.
@@ -33,3 +36,7 @@ func _on_retry_pressed() -> void:
 	var level_path: String = str(GameState.last_result["level_path"])
 	retry_button.disabled = true # Prevent repeated presses.
 	get_tree().change_scene_to_file(level_path) # Start a fresh level.
+
+func _on_meals_pressed() -> void:
+	meals_button.disabled = true # Prevent repeated presses.
+	get_tree().change_scene_to_file("res://scenes/ui/LevelSelect.tscn")

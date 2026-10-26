@@ -36,3 +36,9 @@ text = "Your results will appear here."
 custom_minimum_size = Vector2(0, 96)
 layout_mode = 2
 text = "RETRY"
+
+[node name="Meals" type="Button" parent="Content" unique_id=1105334628]
+custom_minimum_size = Vector2(0, 96)
+layout_mode = 2
+text = "MEALS
+"
