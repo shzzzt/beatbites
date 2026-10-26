@@ -22,6 +22,12 @@ func _ready() -> void:
 	details.text = "Score: %d\nCaught: %d / %d" % [
 		result["score"], result["caught"], result["goal"]
 	]
+	# Add the attempt's judgment totals and longest streak.
+	var counts: Dictionary = result["judgments"]
+	details.text += "\nPERFECT: %d\nGOOD: %d\nMISS: %d\nMax combo: %d" % [
+		counts["PERFECT"], counts["GOOD"], counts["MISS"], result["max_combo"]
+	]
+	
 func _on_retry_pressed() -> void:
 	# Read the scene path saved by the previous attempt.
 	var level_path: String = str(GameState.last_result["level_path"])

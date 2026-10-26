@@ -12,6 +12,8 @@ var last_beat: int = -1 # Remember which beat we already printed.
 var breakfast_notes: Array[Dictionary] = [] # Our playable note list.
 var active_food: Array[FallingFood] = [] # Remember our spawned foods.
 var finished: bool = false # Prevent gameplay updates after the ending.
+var judgment_counts: Dictionary = {"PERFECT": 0, "GOOD": 0, "MISS": 0}
+var max_combo: int = 0 # Longest streak during this attempt.
 
 @onready var music: AudioStreamPlayer = $Music # Find our Music child.
 @onready var output_latency: float = AudioServer.get_output_latency()
@@ -87,10 +89,12 @@ func _process(_delta: float) -> void:
 		print("Beat ", beat + 1) # Show human-friendly numbering from 1.
 
 func _on_food_judgment(result: String) -> void:
+	judgment_counts[result] += 1 # Count this food's judgment once.
 	if result == "MISS":
 		combo = 0 # A missed good food breaks the streak.
 	else:
 		combo += 1 # PERFECT and GOOD both continue the streak.
+		max_combo = maxi(max_combo, combo) # Keep the highest streak.
 		caught_count += 1 # Both count toward the catch goal.
 		if result == "PERFECT":
 			score += 100
@@ -120,6 +124,8 @@ func _on_song_finished() -> void:
 		"score": score,
 		"caught": caught_count,
 		"goal": TARGET_CATCHES,
+		"judgments": judgment_counts.duplicate(), # Copy the final counts.
+		"max_combo": max_combo,
 		"level_path": scene_file_path # Remember this level for Retry.
 	}
 	# Open our separate Result screen.
