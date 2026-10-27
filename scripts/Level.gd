@@ -26,6 +26,8 @@ var finished: bool = false # Prevent gameplay updates after the ending.
 var judgment_counts: Dictionary = {"PERFECT": 0, "GOOD": 0, "MISS": 0}
 var max_combo: int = 0 # Longest streak during this attempt.
 var lives: int = 3 # Every new attempt starts with three lives.
+var cpu_label: Label # Created only for VS CPU mode.
+
 
 @onready var music: AudioStreamPlayer = $Music # Find our Music child.
 @onready var output_latency: float = AudioServer.get_output_latency()
@@ -72,8 +74,8 @@ func _ready() -> void:
 	
 	if GameState.mode == "cpu":
 		cpu = CpuRival.new() # Create an independent rival.
-		cpu.setup(level_number) # Set this meal's accuracy.
-	
+		create_cpu_hud()
+		
 	await start_countdown() # Wait for the countdown to start the music.
 	
 	print("Breakfast playable notes: ", breakfast_notes.size())
@@ -89,6 +91,10 @@ func _process(_delta: float) -> void:
 
 	song_time = read_song_time() # Works during countdown and playback.
 	update_cpu() # Evaluate notes whose arrival time has passed.	
+	
+	if cpu != null:
+		cpu_label.text = "CPU score: %d" % cpu.score
+		
 	# Give every food the same audio clock and player input.
 	for food in active_food:
 		food.update_from_song(song_time, get_viewport_rect().size.x)
@@ -211,4 +217,11 @@ func update_cpu() -> void:
 		cpu_note_index += 1 # Never evaluate the same note twice.
 		if not food.is_bad:
 			cpu.judge_good_note() # Simulate one good-food judgment.
-			print("CPU score: ", cpu.score) # Temporary debug display.
+			
+
+func create_cpu_hud() -> void:
+	cpu_label = Label.new() # Create a text label.
+	cpu_label.position = Vector2(24, 420) # Below the player's counters.
+	cpu_label.add_theme_font_size_override("font_size", 32)
+	cpu_label.add_theme_color_override("font_color", Color("#2667B0"))
+	$HUD.add_child(cpu_label) # Put it on the interface layer.
