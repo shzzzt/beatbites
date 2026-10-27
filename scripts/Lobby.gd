@@ -4,6 +4,9 @@ extends Control
 func _ready() -> void:
 	$Content/Back.pressed.connect(_on_back_pressed)
 	$Content/Host.pressed.connect(_on_host_pressed)
+	$Content/Join.pressed.connect(_on_join_pressed)
+	multiplayer.connected_to_server.connect(_on_connected)
+	multiplayer.connection_failed.connect(_on_connection_failed)
 
 
 func _on_back_pressed() -> void:
@@ -36,3 +39,28 @@ func show_host_addresses() -> void:
 	$Content/HostIP.text = "Local IP addresses:\n" + "\n".join(addresses)
 	if addresses.is_empty():
 		$Content/HostIP.text = "No local IPv4 address found. Check Wi-Fi."
+
+func _on_join_pressed() -> void:
+	var address: String = $Content/Address.text.strip_edges()
+	if not address.is_valid_ip_address():
+		$Content/Status.text = "Enter a valid host IP address."
+		return # Reject empty or incorrectly formatted addresses.
+
+	var error: Error = Net.join_game(address)
+	if error != OK:
+		$Content/Status.text = "Could not join: " + error_string(error)
+		return
+
+	$Content/Host.disabled = true # Prevent overlapping connection attempts.
+	$Content/Join.disabled = true
+	$Content/Status.text = "Connecting..."
+
+func _on_connected() -> void:
+	$Content/Status.text = "Connected to host. Waiting for match..."
+
+
+func _on_connection_failed() -> void:
+	Net.leave_game() # Clean up the failed connection.
+	$Content/Host.disabled = false # Allow another attempt.
+	$Content/Join.disabled = false
+	$Content/Status.text = "Can't reach host. Check Wi-Fi and the IP address."

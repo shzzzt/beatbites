@@ -21,3 +21,13 @@ func leave_game() -> void:
 		multiplayer.multiplayer_peer.close() # Close the current connection.
 	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
 	is_host = false # Return to local-only operation.
+
+func join_game(address: String) -> Error:
+	leave_game() # Close any previous session.
+	var peer := ENetMultiplayerPeer.new()
+	var error: Error = peer.create_client(address, PORT)
+	if error != OK:
+		return error # Couldn't begin the connection attempt.
+
+	multiplayer.multiplayer_peer = peer # Activate the connecting client.
+	return OK # Started connecting; success is reported later.
