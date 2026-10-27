@@ -1,0 +1,27 @@
+[gd_scene format=3 uid="uid://br4vu863k2wo2"]
+
+[ext_resource type="Script" uid="uid://cmln44kna2xf0" path="res://scripts/Level.gd" id="1_wu80y"]
+[ext_resource type="PackedScene" uid="uid://kx4571higceq" path="res://scenes/actors/catcher.tscn" id="2_nanf4"]
+[ext_resource type="AudioStream" uid="uid://djbh8pdub3gs1" path="res://assets/audio/music_dinner.ogg" id="3_wu80y"]
+
+[node name="Level04" type="Node2D" unique_id=710803767]
+script = ExtResource("1_wu80y")
+level_number = 4
+chart_path = "res://assets/audio/music_dinner.json"
+
+[node name="Catcher" parent="." unique_id=464772695 instance=ExtResource("2_nanf4")]
+position = Vector2(360, 1080)
+
+[node name="Music" type="AudioStreamPlayer" parent="." unique_id=1697557649]
+stream = ExtResource("3_wu80y")
+
+[node name="HUD" type="CanvasLayer" parent="." unique_id=1859559952]
+
+[node name="Judgment" type="Label" parent="HUD" unique_id=1730401662]
+offset_left = 24.0
+offset_top = 180.0
+offset_right = 150.0
+offset_bottom = 203.0
+theme_override_colors/font_color = Color(0.23137255, 0.16470589, 0.4, 1)
+theme_override_font_sizes/font_size = 32
+text = "Catch the apple!"
