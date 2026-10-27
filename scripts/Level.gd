@@ -1,7 +1,12 @@
 extends Node2D
+
+@export var level_number: int = 1 # Breakfast = 1, Lunch = 2, etc.
+@export_file("*.json") var chart_path: String = \
+	"res://assets/audio/music_breakfast.json" # Chart used by this level.
+
 # Load the scene we'll use to create food.
 const FOOD_SCENE = preload("res://scenes/actors/food.tscn")
-const BPM: float = 90.0 # Breakfast's exact tempo.
+var bpm: float = 90.0 # Updated from the selected chart before building notes.
 const TARGET_CATCHES: int = 40 # Successful catches needed to clear.
 
 var score: int = 0 # Total points earned.
@@ -24,19 +29,18 @@ var max_combo: int = 0 # Longest streak during this attempt.
 
 func _ready() -> void:
 	# Read the chart file as text.
-	var text: String = FileAccess.get_file_as_string(
-		"res://assets/audio/music_breakfast.json"
-	)
+	var text: String = FileAccess.get_file_as_string(chart_path)
 	# Convert JSON text into data we can access by name.
 	var chart: Dictionary = JSON.parse_string(text)
 		# Build our playable list before spawning any food.
-		
+	bpm = float(chart["bpm"]) # Use this song's exact tempo.
+	
 	for note in chart["lead_notes"]:
 		var beat: float = float(note["beat"])
 		# Breakfast accepts notes starting on whole beats.
 		if is_equal_approx(beat, roundf(beat)):
 			breakfast_notes.append({
-				"time": beat * 60.0 / BPM, # Arrival time in seconds.
+				"time": beat * 60.0 / bpm, # Convert using this song's tempo.
 				"midi": int(note["midi"]), # Original pitch.
 				"lane": pitch_to_lane(int(note["midi"])) # Catch lane.
 			})
@@ -74,7 +78,7 @@ func _process(_delta: float) -> void:
 	for food in active_food:
 		food.update_from_song(song_time, get_viewport_rect().size.x)
 		food.judge_catch(song_time, int(catcher.get("lane")))
-	var beat: int = floori(song_time * BPM / 60.0)
+	var beat: int = floori(song_time * bpm / 60.0)
 	
 
 	if beat > last_beat:
@@ -113,7 +117,7 @@ func _on_song_finished() -> void:
 	finished = true
 
 	if caught_count >= TARGET_CATCHES:
-		GameState.complete_level(1) # This scene is Breakfast, level 1.
+				GameState.complete_level(level_number) # Unlock after this meal.
 
 	# Keep the results after the gameplay scene is removed.
 	GameState.last_result = {
