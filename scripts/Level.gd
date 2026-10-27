@@ -5,7 +5,7 @@ extends Node2D
 	"res://assets/audio/music_breakfast.json" # Chart used by this level.
 @export var low_pitch_max: int = 76 # Highest pitch sent left.
 @export var middle_pitch_max: int = 81 # Highest pitch sent to the middle.
-
+@export_range(1, 2, 1) var notes_per_beat: int = 1 # 1 = whole; 2 = half beats.
 
 # Load the scene we'll use to create food.
 const FOOD_SCENE = preload("res://scenes/actors/food.tscn")
@@ -42,7 +42,9 @@ func _ready() -> void:
 	for note in chart["lead_notes"]:
 		var beat: float = float(note["beat"])
 		# Breakfast accepts notes starting on whole beats.
-		if is_equal_approx(beat, roundf(beat)):
+		# A half-beat becomes a whole number when multiplied by two.
+		var grid_position: float = beat * notes_per_beat
+		if is_equal_approx(grid_position, roundf(grid_position)):
 			breakfast_notes.append({
 				"time": beat * 60.0 / bpm, # Convert using this song's tempo.
 				"midi": int(note["midi"]), # Original pitch.
