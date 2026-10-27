@@ -4,6 +4,7 @@ const SAVE_PATH: String = "user://save.cfg"
 var last_result: Dictionary = {} # Results stay available between scenes.
 var unlocked_level: int = 1 # New players start with Breakfast.
 var best_stars: Dictionary = {} # Level number → highest earned stars.
+var mode: String = "solo" # Current choice: "solo" or "cpu".
 
 func _ready() -> void:
 	var config := ConfigFile.new()
