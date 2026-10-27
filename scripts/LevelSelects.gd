@@ -27,7 +27,8 @@ func _ready() -> void:
 	meals[1].pressed.connect(_on_lunch_pressed) # Index 1 is Lunch.
 	meals[2].pressed.connect(_on_snack_pressed) # Index 2 is Snack.
 	meals[3].pressed.connect(_on_dinner_pressed) # Index 3 is Dinner.
-
+	meals[4].pressed.connect(_on_dessert_pressed) # Index 4 is Dessert.
+	
 func _on_breakfast_pressed() -> void:
 	# Open the playable Breakfast scene.
 	get_tree().change_scene_to_file("res://scenes/levels/level_01.tscn")
@@ -51,3 +52,10 @@ func _on_dinner_pressed() -> void:
 		return # Dinner requires clearing Snack first.
 
 	get_tree().change_scene_to_file("res://scenes/levels/level_04.tscn")
+
+
+func _on_dessert_pressed() -> void:
+	if GameState.unlocked_level < 5:
+		return # Dessert requires clearing Dinner first.
+
+	get_tree().change_scene_to_file("res://scenes/levels/level_05.tscn")
