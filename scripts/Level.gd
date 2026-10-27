@@ -3,6 +3,9 @@ extends Node2D
 @export var level_number: int = 1 # Breakfast = 1, Lunch = 2, etc.
 @export_file("*.json") var chart_path: String = \
 	"res://assets/audio/music_breakfast.json" # Chart used by this level.
+@export var low_pitch_max: int = 76 # Highest pitch sent left.
+@export var middle_pitch_max: int = 81 # Highest pitch sent to the middle.
+
 
 # Load the scene we'll use to create food.
 const FOOD_SCENE = preload("res://scenes/actors/food.tscn")
@@ -123,11 +126,11 @@ func _on_food_judgment(result: String) -> void:
 	]
 	
 func pitch_to_lane(midi: int) -> int:
-	if midi <= 76:
+	if midi <= low_pitch_max:
 		return 0 # Lower pitches go left.
-	elif midi <= 81:
+	elif midi <= middle_pitch_max:
 		return 1 # Middle pitches go in the middle.
-	return 2 # Higher pitches go right.
+	return 2 # Everything higher goes right.
 
 func _on_song_finished() -> void:
 	# Clearing requires enough catches and at least one remaining life.

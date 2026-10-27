@@ -8,6 +8,8 @@
 script = ExtResource("1_xv7r2")
 level_number = 5
 chart_path = "res://assets/audio/music_dessert.json"
+low_pitch_max = 83
+middle_pitch_max = 90
 
 [node name="Catcher" parent="." unique_id=464772695 instance=ExtResource("2_jejc5")]
 position = Vector2(360, 1080)
