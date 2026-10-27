@@ -11,7 +11,8 @@ extends Node2D
 const FOOD_SCENE = preload("res://scenes/actors/food.tscn")
 var bpm: float = 90.0 # Updated from the selected chart before building notes.
 const TARGET_CATCHES: int = 40 # Successful catches needed to clear.
-
+var cpu: CpuRival # Stays empty during Solo mode.
+var cpu_note_index: int = 0 # Next food the CPU must evaluate.
 var score: int = 0 # Total points earned.
 var combo: int = 0 # Consecutive successful catches.
 var caught_count: int = 0 # Good foods caught toward the level goal.
@@ -69,6 +70,10 @@ func _ready() -> void:
 	music.finished.connect(_on_song_finished)
 	judgment_label.text = "Goal: catch %d bites!" % TARGET_CATCHES
 	
+	if GameState.mode == "cpu":
+		cpu = CpuRival.new() # Create an independent rival.
+		cpu.setup(level_number) # Set this meal's accuracy.
+	
 	await start_countdown() # Wait for the countdown to start the music.
 	
 	print("Breakfast playable notes: ", breakfast_notes.size())
@@ -83,7 +88,7 @@ func _process(_delta: float) -> void:
 		return # Stop updating after the attempt ends.
 
 	song_time = read_song_time() # Works during countdown and playback.
-	
+	update_cpu() # Evaluate notes whose arrival time has passed.	
 	# Give every food the same audio clock and player input.
 	for food in active_food:
 		food.update_from_song(song_time, get_viewport_rect().size.x)
@@ -192,3 +197,18 @@ func read_song_time() -> float:
 	# Before music starts, advance from -3 toward zero.
 	var elapsed: float = (Time.get_ticks_msec() - countdown_start_ms) / 1000.0
 	return minf(-0.001, elapsed - 3.0) # Let audio determine the zero crossing.
+
+
+func update_cpu() -> void:
+	if cpu == null:
+		return # Solo mode has no rival.
+
+	while cpu_note_index < active_food.size():
+		var food: FallingFood = active_food[cpu_note_index]
+		if food.arrival_time > song_time:
+			break # This note hasn't arrived yet.
+
+		cpu_note_index += 1 # Never evaluate the same note twice.
+		if not food.is_bad:
+			cpu.judge_good_note() # Simulate one good-food judgment.
+			print("CPU score: ", cpu.score) # Temporary debug display.
