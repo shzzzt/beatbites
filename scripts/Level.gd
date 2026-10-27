@@ -95,9 +95,11 @@ func _on_food_judgment(result: String) -> void:
 		return # Ignore judgments after the attempt ends.
 
 	if result == "HIT_BAD":
-		lives = maxi(0, lives - 1) # Lose one life, never below zero.
+		lives = maxi(0, lives - 1) # Lose exactly one life.
 		judgment_label.text = "ROTTEN!\nLives: %d" % lives
-		return # Rotten food earns no points or catch progress.
+		if lives == 0:
+			end_attempt(false) # Lose immediately, regardless of score.
+		return
 
 	if result == "AVOIDED":
 		judgment_label.text = "DODGED!\nLives: %d" % lives
@@ -128,27 +130,33 @@ func pitch_to_lane(midi: int) -> int:
 	return 2 # Higher pitches go right.
 
 func _on_song_finished() -> void:
+	# Clearing requires enough catches and at least one remaining life.
+	end_attempt(caught_count >= TARGET_CATCHES and lives > 0)
+
+
+func end_attempt(won: bool) -> void:
 	if finished:
-		return # End this attempt only once.
+		return # End the attempt only once.
 
-	finished = true
+	finished = true # Block further gameplay results.
+	music.stop() # Stop music when losing before the song ends.
 
-	if caught_count >= TARGET_CATCHES:
-		GameState.complete_level(level_number) # Unlock after this meal.
+	if won:
+		GameState.complete_level(level_number) # Only wins unlock meals.
 
-	# Keep the results after the gameplay scene is removed.
+	# Preserve the final numbers before leaving gameplay.
 	GameState.last_result = {
-		"won": caught_count >= TARGET_CATCHES,
+		"won": won,
 		"score": score,
 		"caught": caught_count,
 		"goal": TARGET_CATCHES,
-		"judgments": judgment_counts.duplicate(), # Copy the final counts.
+		"lives": lives,
+		"judgments": judgment_counts.duplicate(),
 		"max_combo": max_combo,
-		"level_path": scene_file_path, # Remember this level for Retry.
-		"lives": lives, # Carry remaining lives to the Result screen.
+		"level_path": scene_file_path
 	}
-	# Open our separate Result screen.
-	get_tree().change_scene_to_file("res://scenes/ui/result.tscn")
+	# Switch after the current food callbacks finish.
+	get_tree().call_deferred("change_scene_to_file", "res://scenes/ui/result.tscn")
 	
 func start_countdown() -> void:
 	countdown_start_ms = Time.get_ticks_msec() # Read the elapsed-time clock.
