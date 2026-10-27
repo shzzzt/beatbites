@@ -144,7 +144,7 @@ func end_attempt(won: bool) -> void:
 	var stars: int = lives if won else 0
 	
 	if won:
-		GameState.complete_level(level_number) # Only wins unlock meals.
+		GameState.complete_level(level_number, stars) # Save this win's rating.
 
 	# Preserve the final numbers before leaving gameplay.
 	GameState.last_result = {
