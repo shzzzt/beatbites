@@ -13,6 +13,7 @@ func _ready() -> void:
 	join_timeout.timeout.connect(_on_connection_failed)
 	
 func _on_back_pressed() -> void:
+	join_timeout.stop() # Cancel the connection deadline.
 	Net.leave_game() # Release the connection and hosting port.
 	# Return to the Offline / Online choice.
 	get_tree().change_scene_to_file("res://scenes/ui/ModeSelect.tscn")
@@ -61,10 +62,12 @@ func _on_join_pressed() -> void:
 	join_timeout.start() # Begin the eight-second limit.
 
 func _on_connected() -> void:
+	join_timeout.stop() # Cancel the connection deadline.
 	$Content/Status.text = "Connected to host. Waiting for match..."
 
 
 func _on_connection_failed() -> void:
+	join_timeout.stop() # Cancel the connection deadline.
 	Net.leave_game() # Clean up the failed connection.
 	$Content/Host.disabled = false # Allow another attempt.
 	$Content/Join.disabled = false
