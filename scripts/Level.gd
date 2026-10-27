@@ -126,7 +126,7 @@ func _on_song_finished() -> void:
 		"level_path": scene_file_path # Remember this level for Retry.
 	}
 	# Open our separate Result screen.
-	get_tree().change_scene_to_file("res://scenes/ui/Result.tscn")
+	get_tree().change_scene_to_file("res://scenes/ui/result.tscn")
 	
 func start_countdown() -> void:
 	countdown_start_ms = Time.get_ticks_msec() # Read the elapsed-time clock.
