@@ -91,6 +91,18 @@ func _process(_delta: float) -> void:
 		print("Beat ", beat + 1) # Show human-friendly numbering from 1.
 
 func _on_food_judgment(result: String) -> void:
+	if finished:
+		return # Ignore judgments after the attempt ends.
+
+	if result == "HIT_BAD":
+		lives = maxi(0, lives - 1) # Lose one life, never below zero.
+		judgment_label.text = "ROTTEN!\nLives: %d" % lives
+		return # Rotten food earns no points or catch progress.
+
+	if result == "AVOIDED":
+		judgment_label.text = "DODGED!\nLives: %d" % lives
+		return # Avoiding rotten food isn't a MISS.
+	
 	judgment_counts[result] += 1 # Count this food's judgment once.
 	if result == "MISS":
 		combo = 0 # A missed good food breaks the streak.

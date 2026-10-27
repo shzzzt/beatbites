@@ -22,6 +22,19 @@ func judge_catch(time: float, catcher_lane: int) -> void:
 		return # Wait for arrival; never judge twice.
 
 	var lateness: float = time - arrival_time
+	
+	# Rotten food reports different outcomes from good food.
+	if is_bad:
+		if lateness > 0.16:
+			judged = true
+			hide()
+			judgment_made.emit("AVOIDED") # Safely passed the catcher.
+		elif catcher_lane == lane:
+			judged = true
+			hide()
+			judgment_made.emit("HIT_BAD") # Caught rotten food.
+		return # Skip the normal PERFECT / GOOD / MISS rules.
+	
 	var result: String = ""
 
 	if lateness > 0.16:
