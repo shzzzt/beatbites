@@ -8,7 +8,7 @@ func _ready() -> void:
 	$Content/Join.pressed.connect(_on_join_pressed)
 	multiplayer.connected_to_server.connect(_on_connected)
 	multiplayer.connection_failed.connect(_on_connection_failed)
-
+	Net.opponent_joined.connect(_on_opponent_joined)
 	# Reuse our existing failure handler when time runs out.
 	join_timeout.timeout.connect(_on_connection_failed)
 	
@@ -69,3 +69,8 @@ func _on_connection_failed() -> void:
 	$Content/Host.disabled = false # Allow another attempt.
 	$Content/Join.disabled = false
 	$Content/Status.text = "Can't reach host. Check Wi-Fi and the IP address."
+
+func _on_opponent_joined(_peer_id: int) -> void:
+	if Net.is_host:
+		# The client already receives its connected-to-host message.
+		$Content/Status.text = "Player 2 connected. Both players are ready."
