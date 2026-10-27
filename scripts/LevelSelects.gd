@@ -14,6 +14,13 @@ func _ready() -> void:
 	for index in range(meals.size()):
 		var level: int = index + 1 # Array index 0 means level 1.
 		meals[index].disabled = level > GameState.unlocked_level
+		
+		if meals[index].disabled:
+			meals[index].text += "\nLOCKED" # Explain the disabled button.
+		else:
+			# Read this meal's best rating, defaulting to zero.
+			var stars: int = int(GameState.best_stars.get(level, 0))
+			meals[index].text += "\nBest stars: %d / 3" % stars
 
 	# Connect Breakfast now; we'll connect other meals as we build them.
 	meals[0].pressed.connect(_on_breakfast_pressed)
