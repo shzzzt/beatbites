@@ -161,8 +161,9 @@ func end_attempt(won: bool) -> void:
 	# A win earns one star per remaining life; a loss earns none.
 	var stars: int = lives if won else 0
 	
-	if won:
-		GameState.complete_level(level_number, stars) # Save this win's rating.
+	if won and GameState.mode == "solo":
+		# Only Solo clears update campaign unlocks and best stars.
+		GameState.complete_level(level_number, stars)
 
 	# Preserve the final numbers before leaving gameplay.
 	GameState.last_result = {
@@ -174,7 +175,10 @@ func end_attempt(won: bool) -> void:
 		"lives": lives,
 		"judgments": judgment_counts.duplicate(),
 		"max_combo": max_combo,
-		"level_path": scene_file_path
+		"level_path": scene_file_path,
+		"mode": GameState.mode, # Remember which mode produced this result.
+		"cpu_score": cpu.score if cpu != null else 0,
+		"cpu_lives": cpu.lives if cpu != null else 0,
 	}
 	# Switch after the current food callbacks finish.
 	get_tree().call_deferred("change_scene_to_file", "res://scenes/ui/result.tscn")

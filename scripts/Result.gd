@@ -35,6 +35,12 @@ func _ready() -> void:
 	
 	details.text += "\nStars: %d / 3" % result["stars"]
 	
+	if result.get("mode", "solo") == "cpu":
+		# Show rival statistics only for CPU matches.
+		details.text += "\nCPU score: %d\nCPU lives: %d" % [
+			result["cpu_score"], result["cpu_lives"]
+		]
+			
 func _on_retry_pressed() -> void:
 	# Read the scene path saved by the previous attempt.
 	var level_path: String = str(GameState.last_result["level_path"])
