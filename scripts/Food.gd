@@ -5,7 +5,8 @@ signal judgment_made(result: String) # Tell the level what happened.
 var arrival_time: float = 0.0 # When this food should reach the catcher.
 var lane: int = 0 # Which of the three lanes it belongs to.
 var judged: bool = false # This food remembers its own judgment state.
-
+const BAD_TEXTURE = preload("res://assets/art/bad_apple.png")
+var is_bad: bool = false # Whether this particular food is rotten.
 
 func update_from_song(time: float, width: float) -> void:
 	# Every food takes three seconds to reach the catch line.
@@ -35,3 +36,8 @@ func judge_catch(time: float, catcher_lane: int) -> void:
 	judged = true # Remember this food's result.
 	hide() # Remove its artwork immediately.
 	judgment_made.emit(result) # Send the result to the level.
+	
+func _ready() -> void:
+	if is_bad:
+		# Change only this instance's sprite.
+		$Sprite2D.texture = BAD_TEXTURE

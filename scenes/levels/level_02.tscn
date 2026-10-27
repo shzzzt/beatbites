@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cmln44kna2xf0" path="res://scripts/Level.gd" id="1_c5o3r"]
 [ext_resource type="PackedScene" uid="uid://kx4571higceq" path="res://scenes/actors/catcher.tscn" id="2_3acmf"]
-[ext_resource type="AudioStream" uid="uid://djbh8pdub3gs1" path="res://assets/audio/music_dinner.ogg" id="3_c5o3r"]
+[ext_resource type="AudioStream" uid="uid://b16w1cmfj1sj0" path="res://assets/audio/music_lunch.ogg" id="3_c5o3r"]
 
 [node name="Level02" type="Node2D" unique_id=710803767]
 script = ExtResource("1_c5o3r")

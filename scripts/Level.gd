@@ -45,10 +45,14 @@ func _ready() -> void:
 				"midi": int(note["midi"]), # Original pitch.
 				"lane": pitch_to_lane(int(note["midi"])) # Catch lane.
 			})
-			
+	
+	var food_index: int = 0 # Count foods as we create them.
 	# Preview the chart after its opening three seconds.
 	for note in breakfast_notes:
 		var food: FallingFood = FOOD_SCENE.instantiate() as FallingFood
+		# Snack onward: every tenth food is rotten.
+		food.is_bad = level_number >= 3 and food_index % 10 == 9
+		food_index += 1 # Advance to the next food number.
 		food.arrival_time = float(note["time"]) # Each gets its own timing.
 		food.lane = int(note["lane"]) # Each gets its own lane.
 		food.hide() # Stay hidden until the fall begins.
