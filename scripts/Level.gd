@@ -140,13 +140,16 @@ func end_attempt(won: bool) -> void:
 
 	finished = true # Block further gameplay results.
 	music.stop() # Stop music when losing before the song ends.
-
+	# A win earns one star per remaining life; a loss earns none.
+	var stars: int = lives if won else 0
+	
 	if won:
 		GameState.complete_level(level_number) # Only wins unlock meals.
 
 	# Preserve the final numbers before leaving gameplay.
 	GameState.last_result = {
 		"won": won,
+		"stars": stars, # Send this attempt's rating to Result.
 		"score": score,
 		"caught": caught_count,
 		"goal": TARGET_CATCHES,

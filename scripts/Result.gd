@@ -33,6 +33,8 @@ func _ready() -> void:
 	
 	details.text += "\nLives left: %d" % result["lives"]
 	
+	details.text += "\nStars: %d / 3" % result["stars"]
+	
 func _on_retry_pressed() -> void:
 	# Read the scene path saved by the previous attempt.
 	var level_path: String = str(GameState.last_result["level_path"])
