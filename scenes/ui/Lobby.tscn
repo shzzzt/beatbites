@@ -1,5 +1,7 @@
 [gd_scene format=3 uid="uid://cw880g617js3a"]
 
+[ext_resource type="Script" uid="uid://ch1k1x34e0epv" path="res://scripts/Lobby.gd" id="1_j7rk1"]
+
 [node name="Lobby" type="Control" unique_id=1221934773]
 layout_mode = 3
 anchors_preset = 15
@@ -7,6 +9,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_j7rk1")
 
 [node name="Content" type="VBoxContainer" parent="." unique_id=459995418]
 custom_minimum_size = Vector2(672, 0)
