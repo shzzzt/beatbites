@@ -31,6 +31,8 @@ func _ready() -> void:
 		counts["PERFECT"], counts["GOOD"], counts["MISS"], result["max_combo"]
 	]
 	
+	details.text += "\nLives left: %d" % result["lives"]
+	
 func _on_retry_pressed() -> void:
 	# Read the scene path saved by the previous attempt.
 	var level_path: String = str(GameState.last_result["level_path"])

@@ -21,6 +21,7 @@ var active_food: Array[FallingFood] = [] # Remember our spawned foods.
 var finished: bool = false # Prevent gameplay updates after the ending.
 var judgment_counts: Dictionary = {"PERFECT": 0, "GOOD": 0, "MISS": 0}
 var max_combo: int = 0 # Longest streak during this attempt.
+var lives: int = 3 # Every new attempt starts with three lives.
 
 @onready var music: AudioStreamPlayer = $Music # Find our Music child.
 @onready var output_latency: float = AudioServer.get_output_latency()
@@ -98,9 +99,9 @@ func _on_food_judgment(result: String) -> void:
 		else:
 			score += 50 # GOOD earns fewer points.
 
-	# Update the existing label with feedback and totals.
-	judgment_label.text = "%s\nScore: %d\nCombo: %d\nCaught: %d" % [
-		result, score, combo, caught_count
+	# Show the current attempt's counters.
+	judgment_label.text = "%s\nScore: %d\nCombo: %d\nCaught: %d\nLives: %d" % [
+		result, score, combo, caught_count, lives
 	]
 	
 func pitch_to_lane(midi: int) -> int:
@@ -127,7 +128,8 @@ func _on_song_finished() -> void:
 		"goal": TARGET_CATCHES,
 		"judgments": judgment_counts.duplicate(), # Copy the final counts.
 		"max_combo": max_combo,
-		"level_path": scene_file_path # Remember this level for Retry.
+		"level_path": scene_file_path, # Remember this level for Retry.
+		"lives": lives, # Carry remaining lives to the Result screen.
 	}
 	# Open our separate Result screen.
 	get_tree().change_scene_to_file("res://scenes/ui/result.tscn")
