@@ -117,7 +117,7 @@ func _on_song_finished() -> void:
 	finished = true
 
 	if caught_count >= TARGET_CATCHES:
-				GameState.complete_level(level_number) # Unlock after this meal.
+		GameState.complete_level(level_number) # Unlock after this meal.
 
 	# Keep the results after the gameplay scene is removed.
 	GameState.last_result = {
