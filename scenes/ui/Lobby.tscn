@@ -59,3 +59,7 @@ autowrap_mode = 3
 custom_minimum_size = Vector2(0, 96)
 layout_mode = 2
 text = "BACK TO MODES"
+
+[node name="JoinTimeout" type="Timer" parent="." unique_id=856114656]
+wait_time = 8.0
+one_shot = true

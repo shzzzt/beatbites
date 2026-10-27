@@ -1,4 +1,5 @@
 extends Control
+@onready var join_timeout: Timer = $JoinTimeout # Limits connection waiting.
 
 
 func _ready() -> void:
@@ -8,7 +9,9 @@ func _ready() -> void:
 	multiplayer.connected_to_server.connect(_on_connected)
 	multiplayer.connection_failed.connect(_on_connection_failed)
 
-
+	# Reuse our existing failure handler when time runs out.
+	join_timeout.timeout.connect(_on_connection_failed)
+	
 func _on_back_pressed() -> void:
 	Net.leave_game() # Release the connection and hosting port.
 	# Return to the Offline / Online choice.
@@ -54,6 +57,8 @@ func _on_join_pressed() -> void:
 	$Content/Host.disabled = true # Prevent overlapping connection attempts.
 	$Content/Join.disabled = true
 	$Content/Status.text = "Connecting..."
+	
+	join_timeout.start() # Begin the eight-second limit.
 
 func _on_connected() -> void:
 	$Content/Status.text = "Connected to host. Waiting for match..."
