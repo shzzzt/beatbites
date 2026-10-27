@@ -1,5 +1,7 @@
 [gd_scene format=3 uid="uid://cg0ls8ny6fcmr"]
 
+[ext_resource type="Script" uid="uid://7lpxou6ho6tp" path="res://scripts/ModeSelect.gd" id="1_gqnsl"]
+
 [node name="ModeSelect" type="Control" unique_id=817698300]
 layout_mode = 3
 anchors_preset = 15
@@ -7,6 +9,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_gqnsl")
 
 [node name="Content" type="VBoxContainer" parent="." unique_id=2043592746]
 custom_minimum_size = Vector2(672, 0)
