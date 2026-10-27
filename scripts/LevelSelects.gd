@@ -11,6 +11,9 @@ extends Control
 
 
 func _ready() -> void:
+	# Make the current mode visible before choosing a meal.
+	var mode_title: String = "VS CPU" if GameState.mode == "cpu" else "SOLO"
+	$Content/Heading.text = mode_title + "\nPICK A MEAL"
 	for index in range(meals.size()):
 		var level: int = index + 1 # Array index 0 means level 1.
 		meals[index].disabled = level > GameState.unlocked_level
@@ -28,7 +31,8 @@ func _ready() -> void:
 	meals[2].pressed.connect(_on_snack_pressed) # Index 2 is Snack.
 	meals[3].pressed.connect(_on_dinner_pressed) # Index 3 is Dinner.
 	meals[4].pressed.connect(_on_dessert_pressed) # Index 4 is Dessert.
-	
+	$Content/ChangeMode.pressed.connect(_on_change_mode_pressed)
+		
 func _on_breakfast_pressed() -> void:
 	# Open the playable Breakfast scene.
 	get_tree().change_scene_to_file("res://scenes/levels/level_01.tscn")
@@ -59,3 +63,7 @@ func _on_dessert_pressed() -> void:
 		return # Dessert requires clearing Dinner first.
 
 	get_tree().change_scene_to_file("res://scenes/levels/level_05.tscn")
+	
+func _on_change_mode_pressed() -> void:
+	# Return to the offline mode picker.
+	get_tree().change_scene_to_file("res://scenes/ui/OfflineSelect.tscn")
