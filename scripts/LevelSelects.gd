@@ -17,8 +17,16 @@ func _ready() -> void:
 
 	# Connect Breakfast now; we'll connect other meals as we build them.
 	meals[0].pressed.connect(_on_breakfast_pressed)
+	meals[1].pressed.connect(_on_lunch_pressed) # Index 1 is Lunch.
 
 
 func _on_breakfast_pressed() -> void:
 	# Open the playable Breakfast scene.
 	get_tree().change_scene_to_file("res://scenes/levels/level_01.tscn")
+
+func _on_lunch_pressed() -> void:
+	if GameState.unlocked_level < 2:
+		return # Only allow Lunch after it has been unlocked.
+
+	# Open the Lunch scene using its exact file path.
+	get_tree().change_scene_to_file("res://scenes/levels/level_02.tscn")
