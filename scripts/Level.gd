@@ -27,7 +27,7 @@ var judgment_counts: Dictionary = {"PERFECT": 0, "GOOD": 0, "MISS": 0}
 var max_combo: int = 0 # Longest streak during this attempt.
 var lives: int = 3 # Every new attempt starts with three lives.
 var cpu_label: Label # Created only for VS CPU mode.
-
+var cpu_outcome: String = "" # Final CPU match message.
 
 @onready var music: AudioStreamPlayer = $Music # Find our Music child.
 @onready var output_latency: float = AudioServer.get_output_latency()
@@ -102,20 +102,24 @@ func _process(_delta: float) -> void:
 		food.update_from_song(song_time, get_viewport_rect().size.x)
 		food.judge_catch(song_time, int(catcher.get("lane")))
 	var beat: int = floori(song_time * bpm / 60.0)
-	
+
+	# Both sides have now evaluated the current song time.
+	if cpu != null and (lives <= 0 or cpu.lives <= 0):
+		end_cpu_match()
+		return	
 
 	if beat > last_beat:
 		last_beat = beat # Print only when we reach a new beat.
 		print("Beat ", beat + 1) # Show human-friendly numbering from 1.
 
 func _on_food_judgment(result: String) -> void:
-	if finished:
-		return # Ignore judgments after the attempt ends.
+	if finished or lives <= 0:
+		return # An eliminated player cannot earn further points.
 
 	if result == "HIT_BAD":
 		lives = maxi(0, lives - 1) # Lose exactly one life.
 		judgment_label.text = "ROTTEN!\nLives: %d" % lives
-		if lives == 0:
+		if lives == 0 and cpu == null:
 			end_attempt(false) # Lose immediately, regardless of score.
 		return
 
@@ -148,8 +152,10 @@ func pitch_to_lane(midi: int) -> int:
 	return 2 # Everything higher goes right.
 
 func _on_song_finished() -> void:
-	# Clearing requires enough catches and at least one remaining life.
-	end_attempt(caught_count >= TARGET_CATCHES and lives > 0)
+	if cpu != null:
+		end_cpu_match() # Compare surviving players' scores.
+	else:
+		end_attempt(caught_count >= TARGET_CATCHES and lives > 0)
 
 
 func end_attempt(won: bool) -> void:
@@ -179,6 +185,7 @@ func end_attempt(won: bool) -> void:
 		"mode": GameState.mode, # Remember which mode produced this result.
 		"cpu_score": cpu.score if cpu != null else 0,
 		"cpu_lives": cpu.lives if cpu != null else 0,
+		"cpu_outcome": cpu_outcome,
 	}
 	# Switch after the current food callbacks finish.
 	get_tree().call_deferred("change_scene_to_file", "res://scenes/ui/result.tscn")
@@ -234,3 +241,20 @@ func create_cpu_hud() -> void:
 	cpu_label.add_theme_font_size_override("font_size", 32)
 	cpu_label.add_theme_color_override("font_color", Color("#2667B0"))
 	$HUD.add_child(cpu_label) # Put it on the interface layer.
+
+
+func end_cpu_match() -> void:
+	if finished:
+		return # Resolve this match only once.
+
+	cpu_outcome = "DRAW"
+	if lives > 0 and cpu.lives <= 0:
+		cpu_outcome = "YOU WIN" # Only you survived.
+	elif lives <= 0 and cpu.lives > 0:
+		cpu_outcome = "CPU WINS" # Only the CPU survived.
+	elif score > cpu.score:
+		cpu_outcome = "YOU WIN"
+	elif score < cpu.score:
+		cpu_outcome = "CPU WINS"
+
+	end_attempt(cpu_outcome == "YOU WIN") # Open Result.
