@@ -12,6 +12,14 @@ func _ready() -> void:
 	# Reuse our existing failure handler when time runs out.
 	join_timeout.timeout.connect(_on_connection_failed)
 	
+		# Handle departures after Godot finishes its current network events.
+	multiplayer.peer_disconnected.connect(
+		_on_peer_left, CONNECT_DEFERRED
+	)
+	multiplayer.server_disconnected.connect(
+		_on_opponent_left, CONNECT_DEFERRED
+	)
+	
 func _on_back_pressed() -> void:
 	join_timeout.stop() # Cancel the connection deadline.
 	Net.leave_game() # Release the connection and hosting port.
@@ -77,3 +85,17 @@ func _on_opponent_joined(_peer_id: int) -> void:
 	if Net.is_host:
 		# The client already receives its connected-to-host message.
 		$Content/Status.text = "Player 2 connected. Both players are ready."
+
+func _on_peer_left(_peer_id: int) -> void:
+	_on_opponent_left() # Either player's departure uses the same cleanup.
+
+
+func _on_opponent_left() -> void:
+	if Net.opponent_id == 0:
+		return # Ignore duplicate notifications or our own cleanup.
+
+	join_timeout.stop() # Cancel any remaining connection deadline.
+	Net.leave_game() # Close the old session and clear the opponent.
+	$Content/Host.disabled = false # Allow another hosting attempt.
+	$Content/Join.disabled = false # Allow another joining attempt.
+	$Content/Status.text = "Opponent left. You can host or join again."
