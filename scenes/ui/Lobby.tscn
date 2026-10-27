@@ -1,0 +1,58 @@
+[gd_scene format=3 uid="uid://cw880g617js3a"]
+
+[node name="Lobby" type="Control" unique_id=1221934773]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Content" type="VBoxContainer" parent="." unique_id=459995418]
+custom_minimum_size = Vector2(672, 0)
+layout_mode = 0
+offset_left = 24.0
+offset_top = 80.0
+offset_right = 696.0
+offset_bottom = 120.0
+theme_override_constants/separation = 16
+
+[node name="Heading" type="Label" parent="Content" unique_id=208298464]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.23137255, 0.16470589, 0.4, 1)
+theme_override_font_sizes/font_size = 40
+text = "FOOD FIGHT"
+
+[node name="Host" type="Button" parent="Content" unique_id=1390061564]
+custom_minimum_size = Vector2(0, 96)
+layout_mode = 2
+text = "HOST A MATCH"
+
+[node name="HostIP" type="Label" parent="Content" unique_id=1104653039]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.23137255, 0.16470589, 0.4, 1)
+theme_override_font_sizes/font_size = 28
+text = "Host IP will appear here"
+
+[node name="Address" type="LineEdit" parent="Content" unique_id=1000236927]
+custom_minimum_size = Vector2(0, 80)
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+placeholder_text = "Enter host IP address"
+
+[node name="Join" type="Button" parent="Content" unique_id=1342821135]
+custom_minimum_size = Vector2(0, 96)
+layout_mode = 2
+text = "JOIN MATCH"
+
+[node name="Status" type="Label" parent="Content" unique_id=1180847489]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.23137255, 0.16470589, 0.4, 1)
+theme_override_font_sizes/font_size = 28
+text = "Connect both devices to the same Wi-Fi."
+autowrap_mode = 3
+
+[node name="Back" type="Button" parent="Content" unique_id=1049105692]
+custom_minimum_size = Vector2(0, 96)
+layout_mode = 2
+text = "BACK TO MODES"
