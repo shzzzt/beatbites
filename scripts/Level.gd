@@ -93,7 +93,9 @@ func _process(_delta: float) -> void:
 	update_cpu() # Evaluate notes whose arrival time has passed.	
 	
 	if cpu != null:
-		cpu_label.text = "CPU score: %d" % cpu.score
+		cpu_label.text = "CPU score: %d\nCPU lives: %d" % [
+		cpu.score, cpu.lives
+		]
 		
 	# Give every food the same audio clock and player input.
 	for food in active_food:
@@ -215,8 +217,11 @@ func update_cpu() -> void:
 			break # This note hasn't arrived yet.
 
 		cpu_note_index += 1 # Never evaluate the same note twice.
-		if not food.is_bad:
-			cpu.judge_good_note() # Simulate one good-food judgment.
+		
+		if food.is_bad:
+			cpu.judge_bad_note() # Simulate avoiding this rotten food.
+		else:
+			cpu.judge_good_note() # Simulate catching this good food.
 			
 
 func create_cpu_hud() -> void:
