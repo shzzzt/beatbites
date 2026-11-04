@@ -9,6 +9,10 @@ var opponent_id: int = 0 # Zero means no opponent is connected.
 signal both_players_loaded # Both levels are ready.
 var loaded_players: Dictionary = {} # Track each player's report once.
 
+signal clock_sampled # A clock measurement has arrived.
+var clock_roundtrip_ms: int = 0 # Time for the message's journey and reply.
+var host_clock_offset_ms: float = 0.0 # Add this to client time to estimate host time.
+
 func _ready() -> void:
 	# Listen throughout the app, including across scene changes.
 	multiplayer.peer_connected.connect(_on_peer_connected)
@@ -76,3 +80,27 @@ func report_level_loaded() -> void:
 @rpc("authority", "call_local", "reliable")
 func confirm_both_loaded() -> void:
 	both_players_loaded.emit() # Let this phone's level update its HUD.
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func request_clock(client_sent_ms: int) -> void:
+	if not is_host:
+		return # Only the host answers clock requests.
+
+	var sender: int = multiplayer.get_remote_sender_id()
+	if sender != opponent_id:
+		return # Answer only our connected opponent.
+
+	# Return the original timestamp and the host's current time.
+	receive_clock.rpc_id(sender, client_sent_ms, Time.get_ticks_msec())
+
+
+@rpc("authority", "call_remote", "reliable")
+func receive_clock(client_sent_ms: int, host_ms: int) -> void:
+	var received_ms: int = Time.get_ticks_msec()
+	clock_roundtrip_ms = received_ms - client_sent_ms
+
+	# Estimate the client's time when the host answered: halfway through.
+	var midpoint_ms: float = (float(client_sent_ms) + received_ms) / 2.0
+	host_clock_offset_ms = float(host_ms) - midpoint_ms
+	clock_sampled.emit() # Show the measurement in gameplay.

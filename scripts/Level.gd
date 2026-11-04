@@ -266,4 +266,15 @@ func end_cpu_match() -> void:
 	end_attempt(cpu_outcome == "YOU WIN") # Open Result.
 
 func _on_both_players_loaded() -> void:
-	judgment_label.text = "Both players loaded!\nReady for synchronized start."
+	if Net.is_host:
+		judgment_label.text = "Both players loaded!\nWaiting for clock check..."
+	else:
+		judgment_label.text = "Checking host clock..."
+		Net.clock_sampled.connect(_on_clock_sampled)
+		# Remember when this phone sent the request.
+		Net.request_clock.rpc_id(1, Time.get_ticks_msec())
+
+func _on_clock_sampled() -> void:
+	judgment_label.text = "Clock check complete!\nRound trip: %d ms\nOffset: %.1f ms" % [
+		Net.clock_roundtrip_ms, Net.host_clock_offset_ms
+	]
