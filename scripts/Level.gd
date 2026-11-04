@@ -30,6 +30,7 @@ var lives: int = 3 # Every new attempt starts with three lives.
 var cpu_label: Label # Created only for VS CPU mode.
 var cpu_outcome: String = "" # Final CPU match message.
 
+
 @onready var music: AudioStreamPlayer = $Music # Find our Music child.
 @onready var output_latency: float = AudioServer.get_output_latency()
 @onready var catcher: Node2D = $Catcher # Find the catcher in this level.
@@ -267,14 +268,20 @@ func end_cpu_match() -> void:
 
 func _on_both_players_loaded() -> void:
 	if Net.is_host:
+		Net.client_clock_ready.connect(_on_client_clock_ready)
 		judgment_label.text = "Both players loaded!\nWaiting for clock check..."
 	else:
 		judgment_label.text = "Checking host clock..."
 		Net.clock_sampled.connect(_on_clock_sampled)
-		# Remember when this phone sent the request.
-		Net.request_clock.rpc_id(1, Time.get_ticks_msec())
-
+		Net.begin_clock_check()
+		
 func _on_clock_sampled() -> void:
-	judgment_label.text = "Clock check complete!\nRound trip: %d ms\nOffset: %.1f ms" % [
-		Net.clock_roundtrip_ms, Net.host_clock_offset_ms
+	judgment_label.text = "Clock check complete! (%d samples)\nBest round trip: %d ms\nOffset: %.1f ms" % [
+		Net.clock_samples_received,
+		Net.clock_roundtrip_ms,
+		Net.host_clock_offset_ms
 	]
+	Net.report_clock_ready.rpc_id(1) # Tell the host we're ready.
+
+func _on_client_clock_ready() -> void:
+	judgment_label.text = "Both players ready!\nClock check complete."

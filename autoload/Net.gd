@@ -13,6 +13,11 @@ signal clock_sampled # A clock measurement has arrived.
 var clock_roundtrip_ms: int = 0 # Time for the message's journey and reply.
 var host_clock_offset_ms: float = 0.0 # Add this to client time to estimate host time.
 
+var clock_samples_received: int = 0
+var best_clock_roundtrip_ms: int = -1 # No sample chosen yet.
+
+signal client_clock_ready # The joining phone finished its clock check.
+
 func _ready() -> void:
 	# Listen throughout the app, including across scene changes.
 	multiplayer.peer_connected.connect(_on_peer_connected)
@@ -98,9 +103,39 @@ func request_clock(client_sent_ms: int) -> void:
 @rpc("authority", "call_remote", "reliable")
 func receive_clock(client_sent_ms: int, host_ms: int) -> void:
 	var received_ms: int = Time.get_ticks_msec()
-	clock_roundtrip_ms = received_ms - client_sent_ms
-
-	# Estimate the client's time when the host answered: halfway through.
+	var roundtrip_ms: int = received_ms - client_sent_ms
 	var midpoint_ms: float = (float(client_sent_ms) + received_ms) / 2.0
-	host_clock_offset_ms = float(host_ms) - midpoint_ms
-	clock_sampled.emit() # Show the measurement in gameplay.
+	var offset_ms: float = float(host_ms) - midpoint_ms
+
+	# Keep the offset belonging to the fastest reply.
+	if best_clock_roundtrip_ms == -1 or roundtrip_ms < best_clock_roundtrip_ms:
+		best_clock_roundtrip_ms = roundtrip_ms
+		clock_roundtrip_ms = roundtrip_ms
+		host_clock_offset_ms = offset_ms
+
+	clock_samples_received += 1
+
+	if clock_samples_received < 5:
+		request_clock.rpc_id(1, Time.get_ticks_msec())
+	else:
+		clock_sampled.emit() # Notify the level after all five replies.
+		
+func begin_clock_check() -> void:
+	if is_host:
+		return # Only the joining phone needs to measure the difference.
+
+	clock_samples_received = 0
+	best_clock_roundtrip_ms = -1
+	host_clock_offset_ms = 0.0
+	clock_roundtrip_ms = 0
+	request_clock.rpc_id(1, Time.get_ticks_msec())
+
+@rpc("any_peer", "call_remote", "reliable")
+func report_clock_ready() -> void:
+	if not is_host:
+		return # Only the host handles this report.
+
+	if multiplayer.get_remote_sender_id() != opponent_id:
+		return # Accept only our connected opponent.
+
+	client_clock_ready.emit()
