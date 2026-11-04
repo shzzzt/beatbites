@@ -83,8 +83,8 @@ func _on_connection_failed() -> void:
 
 func _on_opponent_joined(_peer_id: int) -> void:
 	if Net.is_host:
-		# The client already receives its connected-to-host message.
 		$Content/Status.text = "Player 2 connected. Both players are ready."
+		$Content/Start.disabled = false # Only the host can start.
 
 func _on_peer_left(_peer_id: int) -> void:
 	_on_opponent_left() # Either player's departure uses the same cleanup.
@@ -94,7 +94,8 @@ func _on_opponent_left() -> void:
 	if Net.opponent_id == 0:
 		return # Ignore duplicate notifications or our own cleanup.
 
-	join_timeout.stop() # Cancel any remaining connection deadline.
+	$Content/Start.disabled = true # An opponent is required to start.
+	join_timeout.stop() # Cancel any remaining connection deadline."text"
 	Net.leave_game() # Close the old session and clear the opponent.
 	$Content/Host.disabled = false # Allow another hosting attempt.
 	$Content/Join.disabled = false # Allow another joining attempt.
