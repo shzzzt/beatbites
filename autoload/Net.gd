@@ -17,6 +17,7 @@ var clock_samples_received: int = 0
 var best_clock_roundtrip_ms: int = -1 # No sample chosen yet.
 
 signal client_clock_ready # The joining phone finished its clock check.
+signal start_scheduled(host_music_start_ms: int)
 
 func _ready() -> void:
 	# Listen throughout the app, including across scene changes.
@@ -139,3 +140,7 @@ func report_clock_ready() -> void:
 		return # Accept only our connected opponent.
 
 	client_clock_ready.emit()
+
+@rpc("authority", "call_local", "reliable")
+func schedule_start(host_music_start_ms: int) -> void:
+	start_scheduled.emit(host_music_start_ms)

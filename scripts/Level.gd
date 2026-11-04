@@ -7,6 +7,7 @@ extends Node2D
 @export var middle_pitch_max: int = 81 # Highest pitch sent to the middle.
 @export_range(1, 2, 1) var notes_per_beat: int = 1 # 1 = whole; 2 = half beats.
 
+var online_music_start_ms: float = -1.0 # Deadline on this phone's clock.
 var waiting_for_online: bool = false # Freeze gameplay until both phones are ready.
 # Load the scene we'll use to create food.
 const FOOD_SCENE = preload("res://scenes/actors/food.tscn")
@@ -82,6 +83,7 @@ func _ready() -> void:
 		waiting_for_online = true # Hold food and the song clock.
 		judgment_label.text = "Online Breakfast\nWaiting for both players..."
 		Net.both_players_loaded.connect(_on_both_players_loaded)
+		Net.start_scheduled.connect(_on_start_scheduled)
 		Net.report_level_loaded.rpc_id(1) # Report readiness to the host.
 	else:
 		await start_countdown() # Start offline modes normally.
@@ -94,8 +96,15 @@ func _ready() -> void:
 	print("First note: ", chart["lead_notes"][0])
 	
 func _process(_delta: float) -> void:
-	if finished or waiting_for_online:
-		return # Keep food and the song clock still while waiting.
+	if finished:
+		return
+
+	if GameState.mode == "online" and not music_started:
+		update_online_countdown()
+
+	if waiting_for_online:
+		return # Stay frozen until the scheduled countdown begins.
+		
 	song_time = read_song_time() # Works during countdown and playback.
 	update_cpu() # Evaluate notes whose arrival time has passed.	
 	
@@ -284,4 +293,38 @@ func _on_clock_sampled() -> void:
 	Net.report_clock_ready.rpc_id(1) # Tell the host we're ready.
 
 func _on_client_clock_ready() -> void:
-	judgment_label.text = "Both players ready!\nClock check complete."
+	if not Net.is_host or online_music_start_ms >= 0.0:
+		return # Only the host schedules, once per level.
+
+	# Allow one second for delivery, then three seconds of countdown.
+	Net.schedule_start.rpc(Time.get_ticks_msec() + 4000)
+	
+func _on_start_scheduled(host_music_start_ms: int) -> void:
+	if online_music_start_ms >= 0.0:
+		return # Ignore duplicate schedules.
+
+	online_music_start_ms = float(host_music_start_ms)
+	if not Net.is_host:
+		# Host time = client time + offset, so subtract to convert back.
+		online_music_start_ms -= Net.host_clock_offset_ms
+
+	countdown_start_ms = roundi(online_music_start_ms - 3000.0)
+	judgment_label.text = "Get ready!"
+	
+func update_online_countdown() -> void:
+	if online_music_start_ms < 0.0:
+		return # No schedule received yet.
+
+	var remaining_ms: float = online_music_start_ms - Time.get_ticks_msec()
+	if remaining_ms > 3000.0:
+		return # Keep gameplay frozen until the countdown begins.
+
+	waiting_for_online = false # Let food move during the countdown.
+
+	if remaining_ms > 0.0:
+		judgment_label.text = str(ceili(remaining_ms / 1000.0))
+	else:
+		judgment_label.text = "Goal: catch %d bites!" % TARGET_CATCHES
+		music_started = true
+		# If this frame is slightly late, begin at the matching song position.
+		music.play(maxf(0.0, -remaining_ms / 1000.0))
