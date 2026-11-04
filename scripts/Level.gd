@@ -7,6 +7,9 @@ extends Node2D
 @export var middle_pitch_max: int = 81 # Highest pitch sent to the middle.
 @export_range(1, 2, 1) var notes_per_beat: int = 1 # 1 = whole; 2 = half beats.
 
+var opponent_label: Label
+var last_sent_score: int = -1
+var last_sent_lives: int = -1
 var online_music_start_ms: float = -1.0 # Deadline on this phone's clock.
 var waiting_for_online: bool = false # Freeze gameplay until both phones are ready.
 # Load the scene we'll use to create food.
@@ -84,6 +87,8 @@ func _ready() -> void:
 		judgment_label.text = "Online Breakfast\nWaiting for both players..."
 		Net.both_players_loaded.connect(_on_both_players_loaded)
 		Net.start_scheduled.connect(_on_start_scheduled)
+		create_online_hud()
+		Net.opponent_stats_updated.connect(_on_opponent_stats_updated)
 		Net.report_level_loaded.rpc_id(1) # Report readiness to the host.
 	else:
 		await start_countdown() # Start offline modes normally.
@@ -113,10 +118,12 @@ func _process(_delta: float) -> void:
 		cpu.score, cpu.lives
 		]
 		
-	# Give every food the same audio clock and player input.
 	for food in active_food:
 		food.update_from_song(song_time, get_viewport_rect().size.x)
 		food.judge_catch(song_time, int(catcher.get("lane")))
+
+	send_online_stats() # Share any changes made by those judgments.
+
 	var beat: int = floori(song_time * bpm / 60.0)
 
 	# Both sides have now evaluated the current song time.
@@ -328,3 +335,29 @@ func update_online_countdown() -> void:
 		music_started = true
 		# If this frame is slightly late, begin at the matching song position.
 		music.play(maxf(0.0, -remaining_ms / 1000.0))
+
+func create_online_hud() -> void:
+	opponent_label = Label.new()
+	opponent_label.position = Vector2(24, 420)
+	opponent_label.add_theme_font_size_override("font_size", 32)
+	opponent_label.add_theme_color_override("font_color", Color("#2667B0"))
+	opponent_label.text = "Opponent score: 0\nOpponent lives: 3"
+	$HUD.add_child(opponent_label)
+
+
+func _on_opponent_stats_updated(new_score: int, new_lives: int) -> void:
+	opponent_label.text = "Opponent score: %d\nOpponent lives: %d" % [
+		new_score, new_lives
+	]
+
+
+func send_online_stats() -> void:
+	if GameState.mode != "online" or Net.opponent_id == 0:
+		return
+
+	if score == last_sent_score and lives == last_sent_lives:
+		return # Nothing changed, so no message is needed.
+
+	last_sent_score = score
+	last_sent_lives = lives
+	Net.receive_stats.rpc_id(Net.opponent_id, score, lives)

@@ -1,6 +1,7 @@
 extends Node
 signal opponent_joined(peer_id: int) # Notify the lobby of a new opponent.
 
+signal opponent_stats_updated(new_score: int, new_lives: int)
 signal match_prepared # Tell the lobby that match settings arrived.
 var match_seed: int = 0 # Both phones will store the same number.
 const PORT: int = 24567 # Both devices must use the same network port.
@@ -144,3 +145,13 @@ func report_clock_ready() -> void:
 @rpc("authority", "call_local", "reliable")
 func schedule_start(host_music_start_ms: int) -> void:
 	start_scheduled.emit(host_music_start_ms)
+
+@rpc("any_peer", "call_remote", "reliable")
+func receive_stats(new_score: int, new_lives: int) -> void:
+	if multiplayer.get_remote_sender_id() != opponent_id:
+		return # Accept updates only from our opponent.
+
+	if new_score < 0 or new_lives < 0 or new_lives > 3:
+		return # Ignore invalid values.
+
+	opponent_stats_updated.emit(new_score, new_lives)
