@@ -20,6 +20,9 @@ func _ready() -> void:
 		_on_opponent_left, CONNECT_DEFERRED
 	)
 	
+	$Content/Start.pressed.connect(_on_start_pressed)
+	Net.match_prepared.connect(_on_match_prepared)
+	
 func _on_back_pressed() -> void:
 	join_timeout.stop() # Cancel the connection deadline.
 	Net.leave_game() # Release the connection and hosting port.
@@ -100,3 +103,14 @@ func _on_opponent_left() -> void:
 	$Content/Host.disabled = false # Allow another hosting attempt.
 	$Content/Join.disabled = false # Allow another joining attempt.
 	$Content/Status.text = "Opponent left. You can host or join again."
+
+func _on_start_pressed() -> void:
+	if not Net.is_host or Net.opponent_id == 0:
+		return # Starting requires the host and a connected opponent.
+
+	$Content/Start.disabled = true # Prevent repeated presses.
+	Net.prepare_match.rpc(randi()) # Send one chosen number to both phones.
+
+
+func _on_match_prepared() -> void:
+	$Content/Status.text = "Match seed: %d" % Net.match_seed

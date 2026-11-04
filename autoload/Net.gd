@@ -1,6 +1,8 @@
 extends Node
 signal opponent_joined(peer_id: int) # Notify the lobby of a new opponent.
 
+signal match_prepared # Tell the lobby that match settings arrived.
+var match_seed: int = 0 # Both phones will store the same number.
 const PORT: int = 24567 # Both devices must use the same network port.
 var is_host: bool = false # Whether this device created the match.
 var opponent_id: int = 0 # Zero means no opponent is connected.
@@ -42,3 +44,8 @@ func join_game(address: String) -> Error:
 
 	multiplayer.multiplayer_peer = peer # Activate the connecting client.
 	return OK # Started connecting; success is reported later.
+
+@rpc("authority", "call_local", "reliable")
+func prepare_match(new_seed: int) -> void:
+	match_seed = new_seed # Store the host's chosen seed.
+	match_prepared.emit() # Ask this phone's lobby to update.
