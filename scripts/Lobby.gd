@@ -113,4 +113,8 @@ func _on_start_pressed() -> void:
 
 
 func _on_match_prepared() -> void:
-	$Content/Status.text = "Match seed: %d" % Net.match_seed
+	GameState.mode = "online" # Tell the level to wait for a network start.
+	# Load after the current network callback finishes.
+	get_tree().call_deferred(
+		"change_scene_to_file", "res://scenes/levels/level_01.tscn"
+	)

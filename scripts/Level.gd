@@ -7,6 +7,7 @@ extends Node2D
 @export var middle_pitch_max: int = 81 # Highest pitch sent to the middle.
 @export_range(1, 2, 1) var notes_per_beat: int = 1 # 1 = whole; 2 = half beats.
 
+var waiting_for_online: bool = false # Freeze gameplay until both phones are ready.
 # Load the scene we'll use to create food.
 const FOOD_SCENE = preload("res://scenes/actors/food.tscn")
 var bpm: float = 90.0 # Updated from the selected chart before building notes.
@@ -76,7 +77,11 @@ func _ready() -> void:
 		cpu = CpuRival.new() # Create an independent rival.
 		create_cpu_hud()
 		
-	await start_countdown() # Wait for the countdown to start the music.
+	if GameState.mode == "online":
+		waiting_for_online = true # Load the level without starting it.
+		judgment_label.text = "Online Breakfast\nWaiting for both players..."
+	else:
+		await start_countdown() # Offline modes start as before.
 	
 	print("Breakfast playable notes: ", breakfast_notes.size())
 	print("First playable note: ", breakfast_notes[0])
@@ -86,9 +91,8 @@ func _ready() -> void:
 	print("First note: ", chart["lead_notes"][0])
 	
 func _process(_delta: float) -> void:
-	if finished:
-		return # Stop updating after the attempt ends.
-
+	if finished or waiting_for_online:
+		return # Keep food and the song clock still while waiting.
 	song_time = read_song_time() # Works during countdown and playback.
 	update_cpu() # Evaluate notes whose arrival time has passed.	
 	
