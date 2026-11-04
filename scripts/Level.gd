@@ -78,11 +78,13 @@ func _ready() -> void:
 		create_cpu_hud()
 		
 	if GameState.mode == "online":
-		waiting_for_online = true # Load the level without starting it.
+		waiting_for_online = true # Hold food and the song clock.
 		judgment_label.text = "Online Breakfast\nWaiting for both players..."
+		Net.both_players_loaded.connect(_on_both_players_loaded)
+		Net.report_level_loaded.rpc_id(1) # Report readiness to the host.
 	else:
-		await start_countdown() # Offline modes start as before.
-	
+		await start_countdown() # Start offline modes normally.
+		
 	print("Breakfast playable notes: ", breakfast_notes.size())
 	print("First playable note: ", breakfast_notes[0])
 	# Check that we loaded the expected song and notes.
@@ -262,3 +264,6 @@ func end_cpu_match() -> void:
 		cpu_outcome = "CPU WINS"
 
 	end_attempt(cpu_outcome == "YOU WIN") # Open Result.
+
+func _on_both_players_loaded() -> void:
+	judgment_label.text = "Both players loaded!\nReady for synchronized start."

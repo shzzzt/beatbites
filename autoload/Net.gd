@@ -6,6 +6,8 @@ var match_seed: int = 0 # Both phones will store the same number.
 const PORT: int = 24567 # Both devices must use the same network port.
 var is_host: bool = false # Whether this device created the match.
 var opponent_id: int = 0 # Zero means no opponent is connected.
+signal both_players_loaded # Both levels are ready.
+var loaded_players: Dictionary = {} # Track each player's report once.
 
 func _ready() -> void:
 	# Listen throughout the app, including across scene changes.
@@ -48,4 +50,29 @@ func join_game(address: String) -> Error:
 @rpc("authority", "call_local", "reliable")
 func prepare_match(new_seed: int) -> void:
 	match_seed = new_seed # Store the host's chosen seed.
+	loaded_players.clear() # Start this match with no loading reports.
 	match_prepared.emit() # Ask this phone's lobby to update.
+
+
+@rpc("any_peer", "call_local", "reliable")
+func report_level_loaded() -> void:
+	if not is_host:
+		return # Only the host collects loading reports.
+
+	var sender: int = multiplayer.get_remote_sender_id()
+	if sender == 0:
+		sender = multiplayer.get_unique_id() # The host reported locally.
+
+	if sender != 1 and sender != opponent_id:
+		return # Accept only the host or its connected opponent.
+	if loaded_players.has(sender):
+		return # Count each phone once.
+
+	loaded_players[sender] = true
+	if loaded_players.has(1) and loaded_players.has(opponent_id):
+		confirm_both_loaded.rpc() # Notify both phones.
+
+
+@rpc("authority", "call_local", "reliable")
+func confirm_both_loaded() -> void:
+	both_players_loaded.emit() # Let this phone's level update its HUD.
