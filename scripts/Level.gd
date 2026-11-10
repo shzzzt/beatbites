@@ -89,6 +89,7 @@ func _ready() -> void:
 		Net.start_scheduled.connect(_on_start_scheduled)
 		create_online_hud()
 		Net.opponent_stats_updated.connect(_on_opponent_stats_updated)
+		Net.online_match_finished.connect(_on_online_match_finished)
 		Net.report_level_loaded.rpc_id(1) # Report readiness to the host.
 	else:
 		await start_countdown() # Start offline modes normally.
@@ -187,6 +188,13 @@ func end_attempt(won: bool) -> void:
 
 	finished = true # Block further gameplay results.
 	music.stop() # Stop music when losing before the song ends.
+
+	if GameState.mode == "online":
+		judgment_label.text = "You finished!\nWaiting for opponent..."
+		send_online_stats() # Make sure the rival sees our last numbers.
+		Net.report_match_finished.rpc_id(1, score, lives) # Tell the host.
+		return # Stay on this screen for now; results come in a later step.
+
 	# A win earns one star per remaining life; a loss earns none.
 	var stars: int = lives if won else 0
 	
@@ -361,3 +369,6 @@ func send_online_stats() -> void:
 	last_sent_score = score
 	last_sent_lives = lives
 	Net.receive_stats.rpc_id(Net.opponent_id, score, lives)
+
+func _on_online_match_finished() -> void:
+	judgment_label.text = "Both players finished!\nFinal scores received."

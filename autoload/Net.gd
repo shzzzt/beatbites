@@ -13,7 +13,8 @@ var loaded_players: Dictionary = {} # Track each player's report once.
 signal clock_sampled # A clock measurement has arrived.
 var clock_roundtrip_ms: int = 0 # Time for the message's journey and reply.
 var host_clock_offset_ms: float = 0.0 # Add this to client time to estimate host time.
-
+signal online_match_finished
+var finished_players: Dictionary = {} # Final reports received by the host.
 var clock_samples_received: int = 0
 var best_clock_roundtrip_ms: int = -1 # No sample chosen yet.
 
@@ -47,7 +48,8 @@ func leave_game() -> void:
 		multiplayer.multiplayer_peer.close() # Close the current connection.
 	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
 	is_host = false # Return to local-only operation.
-
+	finished_players.clear()
+	
 func join_game(address: String) -> Error:
 	leave_game() # Close any previous session.
 	var peer := ENetMultiplayerPeer.new()
@@ -62,6 +64,7 @@ func join_game(address: String) -> Error:
 func prepare_match(new_seed: int) -> void:
 	match_seed = new_seed # Store the host's chosen seed.
 	loaded_players.clear() # Start this match with no loading reports.
+	finished_players.clear() # Forget the previous match's reports.
 	match_prepared.emit() # Ask this phone's lobby to update.
 
 
@@ -155,3 +158,32 @@ func receive_stats(new_score: int, new_lives: int) -> void:
 		return # Ignore invalid values.
 
 	opponent_stats_updated.emit(new_score, new_lives)
+
+# Each phone sends its final numbers to the host (peer 1).
+@rpc("any_peer", "call_local", "reliable")
+func report_match_finished(final_score: int, final_lives: int) -> void:
+	if not is_host or opponent_id == 0:
+		return # Only the host collects reports, during a match.
+
+	var sender: int = multiplayer.get_remote_sender_id()
+	if sender == 0:
+		sender = multiplayer.get_unique_id() # The host reporting to itself.
+
+	if sender != 1 and sender != opponent_id:
+		return # Ignore anyone who isn't in this match.
+	if finished_players.has(sender):
+		return # Accept only one report per player.
+	if final_score < 0 or final_lives < 0 or final_lives > 3:
+		return # Reject impossible numbers.
+
+	finished_players[sender] = {"score": final_score, "lives": final_lives}
+
+	# When both reports are in, tell both phones.
+	if finished_players.has(1) and finished_players.has(opponent_id):
+		confirm_match_finished.rpc()
+
+
+# Host tells everyone (including itself) that both players finished.
+@rpc("authority", "call_local", "reliable")
+func confirm_match_finished() -> void:
+	online_match_finished.emit()
