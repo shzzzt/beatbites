@@ -370,5 +370,5 @@ func send_online_stats() -> void:
 	last_sent_lives = lives
 	Net.receive_stats.rpc_id(Net.opponent_id, score, lives)
 
-func _on_online_match_finished() -> void:
-	judgment_label.text = "Both players finished!\nFinal scores received."
+func _on_online_match_finished(my_score: int, my_lives: int, opp_score: int, opp_lives: int, outcome: String) -> void:
+	judgment_label.text = "%s\nYou: %d  Rival: %d" % [outcome, my_score, opp_score]

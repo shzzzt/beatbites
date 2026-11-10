@@ -13,7 +13,7 @@ var loaded_players: Dictionary = {} # Track each player's report once.
 signal clock_sampled # A clock measurement has arrived.
 var clock_roundtrip_ms: int = 0 # Time for the message's journey and reply.
 var host_clock_offset_ms: float = 0.0 # Add this to client time to estimate host time.
-signal online_match_finished
+signal online_match_finished(my_score: int, my_lives: int, opp_score: int, opp_lives: int, outcome: String)
 var finished_players: Dictionary = {} # Final reports received by the host.
 var clock_samples_received: int = 0
 var best_clock_roundtrip_ms: int = -1 # No sample chosen yet.
@@ -180,10 +180,38 @@ func report_match_finished(final_score: int, final_lives: int) -> void:
 
 	# When both reports are in, tell both phones.
 	if finished_players.has(1) and finished_players.has(opponent_id):
-		confirm_match_finished.rpc()
+		var host_report: Dictionary = finished_players[1]
+		var client_report: Dictionary = finished_players[opponent_id]
+		confirm_match_finished.rpc(
+			host_report["score"], host_report["lives"],
+			client_report["score"], client_report["lives"]
+		)
 
 
-# Host tells everyone (including itself) that both players finished.
+# Host tells both phones the final numbers.
 @rpc("authority", "call_local", "reliable")
-func confirm_match_finished() -> void:
-	online_match_finished.emit()
+func confirm_match_finished(host_score: int, host_lives: int, client_score: int, client_lives: int) -> void:
+	# Each phone decides which numbers are "mine" and which are the opponent's.
+	var my_score: int = host_score if is_host else client_score
+	var my_lives: int = host_lives if is_host else client_lives
+	var opp_score: int = client_score if is_host else host_score
+	var opp_lives: int = client_lives if is_host else host_lives
+
+	var outcome: String = get_online_outcome(my_score, my_lives, opp_score, opp_lives)
+	online_match_finished.emit(my_score, my_lives, opp_score, opp_lives, outcome)
+
+
+# Same rule as VS CPU: surviving beats being eliminated, then higher score wins.
+func get_online_outcome(my_score: int, my_lives: int, opp_score: int, opp_lives: int) -> String:
+	var i_survived: bool = my_lives > 0
+	var opp_survived: bool = opp_lives > 0
+
+	if i_survived and not opp_survived:
+		return "YOU WIN!"
+	if opp_survived and not i_survived:
+		return "YOU LOSE"
+	if my_score > opp_score:
+		return "YOU WIN!"
+	if my_score < opp_score:
+		return "YOU LOSE"
+	return "DRAW"
