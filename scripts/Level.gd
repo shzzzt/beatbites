@@ -12,6 +12,7 @@ var last_sent_score: int = -1
 var last_sent_lives: int = -1
 var online_music_start_ms: float = -1.0 # Deadline on this phone's clock.
 var waiting_for_online: bool = false # Freeze gameplay until both phones are ready.
+var online_result_shown: bool = false # The final online outcome arrived.
 # Load the scene we'll use to create food.
 const FOOD_SCENE = preload("res://scenes/actors/food.tscn")
 var bpm: float = 90.0 # Updated from the selected chart before building notes.
@@ -371,4 +372,29 @@ func send_online_stats() -> void:
 	Net.receive_stats.rpc_id(Net.opponent_id, score, lives)
 
 func _on_online_match_finished(my_score: int, my_lives: int, opp_score: int, opp_lives: int, outcome: String) -> void:
+	if online_result_shown:
+		return # Handle the host's final message only once.
+	online_result_shown = true
+
 	judgment_label.text = "%s\nYou: %d  Rival: %d" % [outcome, my_score, opp_score]
+
+	# Save the host-confirmed numbers so Result can show them.
+	GameState.last_result = {
+		"won": outcome == "YOU WIN!",
+		"stars": 0, # Stars are a Solo-only reward.
+		"score": my_score,
+		"caught": caught_count,
+		"goal": TARGET_CATCHES,
+		"lives": my_lives,
+		"judgments": judgment_counts.duplicate(),
+		"max_combo": max_combo,
+		"level_path": scene_file_path,
+		"mode": "online",
+		"online_outcome": outcome,
+		"opp_score": opp_score,
+		"opp_lives": opp_lives,
+	}
+
+	# Let both players read the outcome briefly before switching screens.
+	await get_tree().create_timer(2.0).timeout
+	get_tree().change_scene_to_file("res://scenes/ui/result.tscn")

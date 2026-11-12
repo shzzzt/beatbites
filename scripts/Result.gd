@@ -32,9 +32,17 @@ func _ready() -> void:
 	]
 	
 	details.text += "\nLives left: %d" % result["lives"]
-	
+
+	if result.get("mode", "solo") == "online":
+		# Online has no stars; show the rival's final numbers instead.
+		details.text += "\nRival score: %d\nRival lives: %d" % [
+			result["opp_score"], result["opp_lives"]
+		]
+		heading.text = result["online_outcome"] # YOU WIN!, YOU LOSE or DRAW.
+		return
+
 	details.text += "\nStars: %d / 3" % result["stars"]
-	
+
 	if result.get("mode", "solo") == "cpu":
 		heading.text = result["cpu_outcome"] # Win, loss, or draw.
 	else:
