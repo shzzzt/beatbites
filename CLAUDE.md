@@ -137,10 +137,16 @@ launch the Godot exe; `_console.exe` is missing). Waiting for one combined phone
 - Theme: `assets/ui_theme.tres` set as project theme (gui/theme/custom): pink/purple/blue
   buttons with 8 px border + shadow, Press Start 2P buttons (24) and `TitleLabel` headings,
   Pixelify Sans body (28), white panels. Pastel sparkles background not done yet.
+- Fix: `cpu.setup(level_number)` was never called, so CPU accuracy stayed 55% on all levels;
+  now 55/63/71/79/87%.
+- R3: Result has NEXT MEAL (Solo/CPU, when the next meal is unlocked); `last_result.level_number`.
+- Docs written (2026-11-14): README.md, docs/GDD.md, docs/CREDITS.md. Placeholders `[...]` for my
+  name, music/art sources and licenses, APK link, screenshots, playtest table.
+  Chart fact: Lunch has 62 playable foods vs Breakfast 92 (table above says "busier chart"; it isn't).
 
 ## Remaining work (in order; batch related tasks together)
 
-1. Phone-test the batch above. Fill in the Credits placeholders.
+1. Phone-test the batch above. Fill in the Credits / docs placeholders.
 2. Regression pass: all 5 levels, unlocks after app restart, airplane mode, R8 error message,
-   readable layout on phone. Then README, docs/GDD.md, docs/CREDITS.md.
+   readable layout on phone. Record results in GDD §11 playtesting.
    Ask me whether VS CPU satisfies the rubric's offline mode (it says "AI or pass-and-play").
