@@ -12,20 +12,17 @@ const SOUND_OFF_ICON = preload("res://assets/art/icon_sound_off.png")
 func _ready() -> void:
 	%Offline.pressed.connect(_on_offline_pressed)
 	%Online.pressed.connect(_on_online_pressed)
-	%Back.pressed.connect(_on_back_pressed)
+	%Settings.pressed.connect(_on_settings_pressed)
 	%Credits.pressed.connect(_on_credits_pressed)
 	sound_button.pressed.connect(_on_sound_pressed)
 	update_sound_icon()
 
 	# Total of the best stars saved for each Solo meal (max 3 × 5 = 15).
-	var total: int = 0
-	for stars in GameState.best_stars.values():
-		total += int(stars)
-	stars_label.text = "%d / 15 stars collected" % total
+	stars_label.text = "%d / 15 stars collected" % GameState.total_stars()
 
 
-func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file("res://scenes/ui/Title.tscn")
+func _on_settings_pressed() -> void:
+	get_tree().change_scene_to_file("res://scenes/ui/Settings.tscn")
 
 
 func _on_credits_pressed() -> void:

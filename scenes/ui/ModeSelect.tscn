@@ -169,13 +169,13 @@ autowrap_mode = 3
 layout_mode = 2
 theme_override_constants/separation = 32
 
-[node name="Back" type="Button" parent="Margin/Content/SmallRow" unique_id=1302447719]
+[node name="Settings" type="Button" parent="Margin/Content/SmallRow" unique_id=1302447719]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 104)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_type_variation = &"PurpleButton"
-text = "BACK"
+text = "SETTINGS"
 
 [node name="Credits" type="Button" parent="Margin/Content/SmallRow" unique_id=1671149302]
 unique_name_in_owner = true

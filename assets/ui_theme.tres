@@ -2,6 +2,7 @@
 
 [ext_resource type="FontFile" path="res://assets/fonts/PixelifySans-VariableFont_wght.ttf" id="1_body"]
 [ext_resource type="FontFile" path="res://assets/fonts/PressStart2P-Regular.ttf" id="2_title"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_slider_grabber.png" id="3_grabber"]
 
 [sub_resource type="FontVariation" id="BodySemiBold"]
 base_font = ExtResource("1_body")
@@ -499,6 +500,30 @@ border_width_right = 4
 border_width_bottom = 4
 border_color = Color(0.356863, 0.266667, 0.580392, 1)
 
+[sub_resource type="StyleBoxFlat" id="SliderTrack"]
+content_margin_left = 0.0
+content_margin_top = 10.0
+content_margin_right = 0.0
+content_margin_bottom = 10.0
+bg_color = Color(0.937255, 0.894118, 1, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.356863, 0.266667, 0.580392, 1)
+
+[sub_resource type="StyleBoxFlat" id="SliderFill"]
+content_margin_left = 0.0
+content_margin_top = 10.0
+content_margin_right = 0.0
+content_margin_bottom = 10.0
+bg_color = Color(0.54902, 0.796078, 1, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.356863, 0.266667, 0.580392, 1)
+
 [sub_resource type="StyleBoxFlat" id="Field"]
 content_margin_left = 24.0
 content_margin_top = 8.0
@@ -547,6 +572,11 @@ ChipPanel/base_type = &"PanelContainer"
 ChipPanel/styles/panel = SubResource("ChipPanelStyle")
 ErrorPanel/base_type = &"PanelContainer"
 ErrorPanel/styles/panel = SubResource("ErrorPanelStyle")
+HSlider/icons/grabber = ExtResource("3_grabber")
+HSlider/icons/grabber_highlight = ExtResource("3_grabber")
+HSlider/styles/grabber_area = SubResource("SliderFill")
+HSlider/styles/grabber_area_highlight = SubResource("SliderFill")
+HSlider/styles/slider = SubResource("SliderTrack")
 HeroLabel/base_type = &"Label"
 HeroLabel/colors/font_color = Color(0.85098, 0.27451, 0.560784, 1)
 HeroLabel/colors/font_shadow_color = Color(0.780392, 0.901961, 1, 1)

@@ -112,23 +112,25 @@ All five levels use the same scene script (`Level.gd`). Each level scene sets it
 ## 7. Screens and UI flow
 
 ```
-Title ──► Mode Select ──► Offline Select ──► Level Select ──► Level ──► Result
-  │            │               (Solo / VS CPU)        ▲          │          │
-  │            └──► Lobby (Online) ──────────────────────────────┘          │
-  │                   ▲                                          (pause)    │
-  └──► Credits        └──────────── BACK TO LOBBY ◄──────────────────────────┘
+Title (tap) ──► Mode Select ──► Offline Select ──► Level Select ──► Level ──► Result
+                  │  │  │          (Solo / VS CPU)         ▲         │          │
+                  │  │  └──► Lobby (Online) ───────────────┼─────────┘          │
+                  │  │         ▲                           └──── NEXT / MENU ◄──┤
+                  │  └──► Settings                         (pause)              │
+                  └─────► Credits      └────────── BACK TO LOBBY ◄──────────────┘
 ```
 
 | Screen | Contents |
 | --- | --- |
-| Title | Logo, PLAY, SOUND on/off, CREDITS, menu music |
-| Mode Select | Play Offline / Play Online / Back |
-| Offline Select | Solo Campaign / VS CPU / Back |
-| Level Select | 5 meal buttons with best stars or LOCKED, change mode |
-| Lobby | Host (shows local IP, level picker, Start), Join (IP field), status/error text, Back |
-| Gameplay HUD | Goal and judgment text, score/combo/caught/lives, rival or CPU stats, throw meter, INCOMING! warning, pause button |
-| Pause | Resume, Restart (offline), Sound, Quit to Meals / Leave Match |
-| Result | Outcome heading, stats (score, caught, judgments, max combo, lives), stars or rival stats, Retry / Meals or Back to Lobby |
+| Title | Animated logo, food and axolotl (hops on the beat), "TAP TO START", menu music |
+| Mode Select | Sound icon, Play Offline / Play Online cards, Settings, Credits, total stars |
+| Offline Select | Solo / VS CPU cards, Back |
+| Level Select | 5 meal cards (number, BPM, stars) or dashed LOCKED cards, star total, hint, Back |
+| Lobby | Host panel (local IP, level picker, Start), Join panel (IP field), pink error panel, Back |
+| Gameplay HUD | Pause, level + score, hearts, goal bar (Solo) or YOU vs RIVAL/CPU panel + tug bar; online throw meter + INCOMING! banner; judgment and combo pop-ups; ◀ ▶ tap zones |
+| Pause | Level + bites caught, Resume, Restart (offline), Sound ON/OFF, Quit to Menu / Leave Match |
+| Result | Outcome, stars (Solo) or rival score, score card with PERFECT/GOOD/MISS/MAX COMBO, unlock banner, Retry / Next / Menu or Back to Lobby |
+| Settings | Sound ON/OFF, volume slider, audio delay (−200…+200 ms), progress summary + Reset progress (tap twice) |
 | Credits | Fonts, music, art, engine |
 
 **Visual style:** soft, light pixel art.

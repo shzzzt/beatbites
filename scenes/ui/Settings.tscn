@@ -1,0 +1,216 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/Settings.gd" id="1_settings"]
+[ext_resource type="Script" path="res://scripts/Sparkles.gd" id="2_spark"]
+[ext_resource type="Texture2D" path="res://assets/art/icon_back.png" id="3_back"]
+
+[node name="Settings" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_settings")
+
+[node name="Sparkles" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("2_spark")
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 56
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 48
+
+[node name="Content" type="VBoxContainer" parent="Margin"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 24
+
+[node name="TopBar" type="HBoxContainer" parent="Margin/Content"]
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="Back" type="Button" parent="Margin/Content/TopBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(80, 80)
+layout_mode = 2
+theme_type_variation = &"IconButton"
+icon = ExtResource("3_back")
+icon_alignment = 1
+expand_icon = true
+
+[node name="Heading" type="Label" parent="Margin/Content/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"LogoLabel"
+text = "SETTINGS"
+vertical_alignment = 1
+
+[node name="AudioPanel" type="PanelContainer" parent="Margin/Content"]
+layout_mode = 2
+
+[node name="AudioBox" type="VBoxContainer" parent="Margin/Content/AudioPanel"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="AudioTitle" type="Label" parent="Margin/Content/AudioPanel/AudioBox"]
+layout_mode = 2
+theme_type_variation = &"SectionLabel"
+theme_override_colors/font_color = Color(0.14901961, 0.40392157, 0.6901961, 1)
+text = "AUDIO"
+
+[node name="Sound" type="Button" parent="Margin/Content/AudioPanel/AudioBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 104)
+layout_mode = 2
+theme_type_variation = &"PurpleButton"
+text = "  SOUND"
+alignment = 0
+
+[node name="Chip" type="PanelContainer" parent="Margin/Content/AudioPanel/AudioBox/Sound"]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -144.0
+offset_top = -32.0
+offset_right = -40.0
+offset_bottom = 32.0
+grow_horizontal = 0
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"ChipPanel"
+
+[node name="ChipText" type="Label" parent="Margin/Content/AudioPanel/AudioBox/Sound/Chip"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"CardTitle"
+theme_override_colors/font_color = Color(0.24313726, 0.47843137, 0.07058824, 1)
+theme_override_font_sizes/font_size = 24
+text = "ON"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="VolumeRow" type="HBoxContainer" parent="Margin/Content/AudioPanel/AudioBox"]
+layout_mode = 2
+
+[node name="VolumeCaption" type="Label" parent="Margin/Content/AudioPanel/AudioBox/VolumeRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+text = "Volume"
+
+[node name="VolumeValue" type="Label" parent="Margin/Content/AudioPanel/AudioBox/VolumeRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"CardBody"
+theme_override_colors/font_color = Color(0.14901961, 0.40392157, 0.6901961, 1)
+text = "100%"
+
+[node name="Volume" type="HSlider" parent="Margin/Content/AudioPanel/AudioBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+step = 5.0
+value = 100.0
+
+[node name="TimingPanel" type="PanelContainer" parent="Margin/Content"]
+layout_mode = 2
+
+[node name="TimingBox" type="VBoxContainer" parent="Margin/Content/TimingPanel"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="TimingTitle" type="Label" parent="Margin/Content/TimingPanel/TimingBox"]
+layout_mode = 2
+theme_type_variation = &"SectionLabel"
+theme_override_colors/font_color = Color(0.7607843, 0.23137255, 0.5019608, 1)
+text = "AUDIO DELAY"
+
+[node name="OffsetRow" type="HBoxContainer" parent="Margin/Content/TimingPanel/TimingBox"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Minus" type="Button" parent="Margin/Content/TimingPanel/TimingBox/OffsetRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(104, 96)
+layout_mode = 2
+theme_type_variation = &"BlueButton"
+theme_override_font_sizes/font_size = 32
+text = "-"
+
+[node name="OffsetValue" type="Label" parent="Margin/Content/TimingPanel/TimingBox/OffsetRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"CardTitle"
+text = "0 ms"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Plus" type="Button" parent="Margin/Content/TimingPanel/TimingBox/OffsetRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(104, 96)
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "+"
+
+[node name="OffsetHint" type="Label" parent="Margin/Content/TimingPanel/TimingBox"]
+layout_mode = 2
+theme_type_variation = &"SmallMuted"
+text = "Raise it if PERFECTs feel late, e.g. with Bluetooth headphones."
+autowrap_mode = 3
+
+[node name="ProgressPanel" type="PanelContainer" parent="Margin/Content"]
+layout_mode = 2
+
+[node name="ProgressBox" type="VBoxContainer" parent="Margin/Content/ProgressPanel"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="ProgressTitle" type="Label" parent="Margin/Content/ProgressPanel/ProgressBox"]
+layout_mode = 2
+theme_type_variation = &"SectionLabel"
+text = "PROGRESS"
+
+[node name="ProgressInfo" type="Label" parent="Margin/Content/ProgressPanel/ProgressBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "0 / 15 stars · 1 / 5 meals unlocked"
+autowrap_mode = 3
+
+[node name="Reset" type="Button" parent="Margin/Content/ProgressPanel/ProgressBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 96)
+layout_mode = 2
+theme_type_variation = &"PaleButton"
+text = "RESET PROGRESS"
+
+[node name="Filler" type="Control" parent="Margin/Content"]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="Version" type="Label" parent="Margin/Content"]
+layout_mode = 2
+theme_type_variation = &"SmallMuted"
+text = "v0.1 · ITSD 85"
+horizontal_alignment = 1

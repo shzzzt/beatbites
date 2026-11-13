@@ -264,11 +264,16 @@ func start_countdown() -> void:
 	music.play() # Begin playback from the start.
 
 func read_song_time() -> float:
+	# Settings > Audio delay: shift the whole clock back if the player hears
+	# the music late (0 by default, so nothing changes unless they set it).
+	var offset: float = GameState.timing_offset_ms / 1000.0
+
 	if music.playing:
 		# Use the audio clock once playback starts.
 		var clock: float = music.get_playback_position()
 		clock += AudioServer.get_time_since_last_mix()
 		clock -= output_latency
+		clock -= offset
 		return maxf(song_time, clock) # Prevent backward jumps.
 
 	if music_started:
@@ -276,7 +281,8 @@ func read_song_time() -> float:
 
 	# Before music starts, advance from -3 toward zero.
 	var elapsed: float = (Time.get_ticks_msec() - countdown_start_ms) / 1000.0
-	return minf(-0.001, elapsed - 3.0) # Let audio determine the zero crossing.
+	# Let audio determine the zero crossing; the same offset keeps it continuous.
+	return minf(-0.001, elapsed - 3.0) - offset
 
 
 func update_cpu() -> void:
