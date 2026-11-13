@@ -21,6 +21,7 @@ var clock_samples_received: int = 0
 var best_clock_roundtrip_ms: int = -1 # No sample chosen yet.
 
 signal client_clock_ready # The joining phone finished its clock check.
+signal attack_received # The rival threw a rotten food at us.
 signal start_scheduled(host_music_start_ms: int)
 
 func _ready() -> void:
@@ -170,6 +171,14 @@ func receive_stats(new_score: int, new_lives: int) -> void:
 		return # Ignore invalid values.
 
 	opponent_stats_updated.emit(new_score, new_lives)
+
+# Attack race: a 10-catch combo throws one rotten food at the rival.
+@rpc("any_peer", "call_remote", "reliable")
+func send_attack() -> void:
+	if multiplayer.get_remote_sender_id() != opponent_id:
+		return # Only our opponent may attack us.
+	attack_received.emit()
+
 
 # Each phone sends its final numbers to the host (peer 1).
 @rpc("any_peer", "call_local", "reliable")

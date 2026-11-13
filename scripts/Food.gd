@@ -50,6 +50,12 @@ func judge_catch(time: float, catcher_lane: int) -> void:
 	hide() # Remove its artwork immediately.
 	judgment_made.emit(result) # Send the result to the level.
 	
+func make_rotten() -> void:
+	# Used by the online attack: a good food turns rotten mid-song.
+	is_bad = true
+	$Sprite2D.texture = BAD_TEXTURE
+
+
 func _ready() -> void:
 	if is_bad:
 		# Change only this instance's sprite.

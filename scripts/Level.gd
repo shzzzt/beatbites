@@ -17,6 +17,11 @@ var opp_last_score: int = 0 # Rival's latest numbers, kept in case they disconne
 var opp_last_lives: int = 3
 const MEAL_NAMES: Array[String] = ["Breakfast", "Lunch", "Snack", "Dinner", "Dessert"]
 const RESULT_WAIT_EXTRA: float = 15.0 # Seconds to wait past the song's end for the rival.
+const THROW_COMBO: int = 10 # Every 10-catch combo throws a rotten food at the rival.
+const ATTACK_LEAD_TIME: float = 2.0 # Turn food rotten at least this long before it lands.
+var throw_label: Label # Online throw meter.
+var incoming_label: Label # Big "INCOMING!" warning.
+var incoming_tween: Tween # Hides the warning after a short time.
 # Load the scene we'll use to create food.
 const FOOD_SCENE = preload("res://scenes/actors/food.tscn")
 var bpm: float = 90.0 # Updated from the selected chart before building notes.
@@ -99,6 +104,7 @@ func _ready() -> void:
 		create_online_hud()
 		Net.opponent_stats_updated.connect(_on_opponent_stats_updated)
 		Net.online_match_finished.connect(_on_online_match_finished)
+		Net.attack_received.connect(_on_attack_received)
 		Net.report_level_loaded.rpc_id(1) # Report readiness to the host.
 	else:
 		await start_countdown() # Start offline modes normally.
@@ -171,6 +177,10 @@ func _on_food_judgment(result: String) -> void:
 			score += 100
 		else:
 			score += 50 # GOOD earns fewer points.
+		if GameState.mode == "online" and combo % THROW_COMBO == 0:
+			throw_attack() # Combo of 10, 20, 30... sends rotten food.
+
+	update_throw_meter()
 
 	# Show the current attempt's counters.
 	judgment_label.text = "%s\nScore: %d\nCombo: %d\nCaught: %d\nLives: %d" % [
@@ -365,6 +375,69 @@ func create_online_hud() -> void:
 	opponent_label.add_theme_color_override("font_color", Color("#2667B0"))
 	opponent_label.text = "Opponent score: 0\nOpponent lives: 3"
 	$HUD.add_child(opponent_label)
+
+	throw_label = Label.new()
+	throw_label.position = Vector2(24, 520) # Below the opponent's numbers.
+	throw_label.add_theme_font_size_override("font_size", 32)
+	throw_label.add_theme_color_override("font_color", Color("#D9468F"))
+	$HUD.add_child(throw_label)
+	update_throw_meter()
+
+	incoming_label = Label.new()
+	incoming_label.text = "INCOMING!"
+	incoming_label.position = Vector2(0, 620)
+	incoming_label.size = Vector2(720, 80) # Full width so the text is centered.
+	incoming_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	incoming_label.add_theme_font_size_override("font_size", 64)
+	incoming_label.add_theme_color_override("font_color", Color("#D9468F"))
+	incoming_label.hide()
+	$HUD.add_child(incoming_label)
+
+
+# Shows how close the combo is to the next throw, e.g. "Throw [###-------] 3/10".
+func update_throw_meter() -> void:
+	if throw_label == null:
+		return # Only online matches have a throw meter.
+	var filled: int = combo % THROW_COMBO
+	if filled == 0 and combo > 0:
+		throw_label.text = "THROW! Rotten food sent!"
+		return
+	throw_label.text = "Throw [%s%s] %d/%d" % [
+		"#".repeat(filled), "-".repeat(THROW_COMBO - filled), filled, THROW_COMBO
+	]
+
+
+func throw_attack() -> void:
+	if Net.opponent_id == 0:
+		return # Nobody to throw at.
+	Net.send_attack.rpc_id(Net.opponent_id)
+
+
+func _on_attack_received() -> void:
+	if finished:
+		return # Our match is already over.
+
+	# Turn the next good food that's still far enough away rotten,
+	# so the player has time to see it and dodge.
+	for food in active_food:
+		if food.judged or food.is_bad:
+			continue
+		if food.arrival_time < song_time + ATTACK_LEAD_TIME:
+			continue
+		food.make_rotten()
+		show_incoming_warning()
+		return
+	# No food left in the song: the throw simply misses.
+
+
+func show_incoming_warning() -> void:
+	incoming_label.show()
+	if incoming_tween != null:
+		incoming_tween.kill() # A newer attack restarts the 1.5 s display.
+	# A Tween belongs to the label, so it stops by itself if the scene closes.
+	incoming_tween = incoming_label.create_tween()
+	incoming_tween.tween_interval(1.5)
+	incoming_tween.tween_callback(incoming_label.hide)
 
 
 func _on_opponent_stats_updated(new_score: int, new_lives: int) -> void:

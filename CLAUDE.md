@@ -121,12 +121,15 @@ launch the Godot exe; `_console.exe` is missing). Waiting for one combined phone
 - Online level (decided: host picks): Lobby `LevelPick` OptionButton (host only) →
   `prepare_match(seed, level)` → `Net.match_level` → loads `level_0N.tscn`. All 5 levels are
   playable online, even if they're still locked in Solo. The seed is still unused.
+- Attack race: every 10-catch combo (10, 20, 30…) → `Net.send_attack` RPC → rival's
+  `_on_attack_received()` turns their next good food landing ≥2 s ahead rotten
+  (`FallingFood.make_rotten()`) and shows INCOMING! for 1.5 s. Throw meter label
+  "Throw [###-------] 3/10" under the opponent numbers. MISS resets it (combo breaks).
 
 ## Remaining work (in order; batch related tasks together)
 
 1. Phone-test the batch above.
-2. Online attack race (designed, not built): 10-catch combo sends a rotten food to the rival.
-3. Pause menu, sound on/off, title screen, credits screen (R10); apply the UI theme to all screens.
-4. Regression pass: all 5 levels, unlocks after app restart, airplane mode, R8 error message,
+2. Pause menu, sound on/off, title screen, credits screen (R10); apply the UI theme to all screens.
+3. Regression pass: all 5 levels, unlocks after app restart, airplane mode, R8 error message,
    readable layout on phone. Then README, docs/GDD.md, docs/CREDITS.md.
    Ask me whether VS CPU satisfies the rubric's offline mode (it says "AI or pass-and-play").
