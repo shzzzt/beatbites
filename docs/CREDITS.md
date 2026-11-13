@@ -2,18 +2,18 @@
 
 ## Game
 
-**Beat Bites**: design, programming and charts by _[Your name]_, for ITSD 85.
+**Beat Bites**: design, programming and charts by _[Shauntie Velasco]_, for ITSD 85.
 
 ## Music
 
 | Track | Used for | BPM | Composer / source | License |
 | --- | --- | --- | --- | --- |
-| A Table Under the Stars | Title / menu | 80 | _[fill in]_ | _[fill in]_ |
-| Sunrise Bento | Breakfast | 90 | _[fill in]_ | _[fill in]_ |
-| Lunchbox Letters | Lunch | 100 | _[fill in]_ | _[fill in]_ |
-| Soda Pop Sidequest | Snack | 115 | _[fill in]_ | _[fill in]_ |
-| Neon Noodle Rush | Dinner | 125 | _[fill in]_ | _[fill in]_ |
-| Sugar Star Sprint | Dessert | 140 | _[fill in]_ | _[fill in]_ |
+| A Table Under the Stars | Title / menu | 80 | _[CLAUDE]_ | _[fill in]_ |
+| Sunrise Bento | Breakfast | 90 | _[CLAUDE]_ | _[ fillin]_ |
+| Lunchbox Letters | Lunch | 100 | _[CLAUDE]_ | _[fill in]_ |
+| Soda Pop Sidequest | Snack | 115 | _[CLAUDE]_ | _[fill in]_ |
+| Neon Noodle Rush | Dinner | 125 | _[CLAUDE]_ | _[fill in]_ |
+| Sugar Star Sprint | Dessert | 140 | _[CLAUDE]_ | _[fill in]_ |
 
 Charts (`assets/audio/music_*.json`) come from each song's lead melody (`music_*_lead.mid`).
 
@@ -21,9 +21,9 @@ Charts (`assets/audio/music_*.json`) come from each song's lead melody (`music_*
 
 | Asset | Files | Artist / source | License |
 | --- | --- | --- | --- |
-| Axolotl catcher and rival | `catcher_*.png`, `rival_*.png` | _[fill in]_ | _[fill in]_ |
-| Food (good and rotten) | `good_*.png`, `bad_*.png` | _[fill in]_ | _[fill in]_ |
-| UI icons (pause, sound, arrows, heart, star, lock) | `icon_*.png`, `ui_*.png` | _[fill in]_ | _[fill in]_ |
+| Axolotl catcher and rival | `catcher_*.png`, `rival_*.png` | _[Shauntie Velasco]_ | _[fill in]_ |
+| Food (good and rotten) | `good_*.png`, `bad_*.png` | _[Shauntie Velasco]_ | _[fill in]_ |
+| UI icons (pause, sound, arrows, heart, star, lock) | `icon_*.png`, `ui_*.png` | _[Shauntie Velasco]_ | _[fill in]_ |
 
 ## Fonts
 
@@ -39,4 +39,4 @@ Charts (`assets/audio/music_*.json`) come from each song's lead melody (`music_*
 
 ## Playtesters
 
-_[Names of people who tested the game]_
+_[Jan Eduard Sanchez]_

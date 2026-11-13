@@ -201,7 +201,7 @@ launch the Godot exe; `_console.exe` is missing). Waiting for one combined phone
   keeps settings). Slider uses a pixel grabber `assets/art/ui_slider_grabber.png`.
 - Online lobby discovery + usernames (2026-11-14; tested with two copies on one PC, NOT on phones):
   - `GameState.username` (max 10, `clean_username()`, `set_username()`, saved; default "ChefNNN").
-    Edited in the Lobby's YOUR NAME field (locked while hosting/joining).
+	Edited in the Lobby's YOUR NAME field (locked while hosting/joining).
   - `Net.share_name` RPC on connect → `Net.opponent_name` + `opponent_named` signal; cleared in
     `leave_game()`. Shown in Lobby status, versus HUD (`%YouName`/`%RivalName`, ellipsis) and
     Result (`last_result.opp_name`).
