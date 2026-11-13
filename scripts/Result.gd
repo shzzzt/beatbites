@@ -4,6 +4,7 @@ extends Control
 @onready var details: Label = $Content/Details
 @onready var retry_button: Button = $Content/Retry # Find the Retry button.
 @onready var meals_button: Button = $Content/Meals # Find the Meals button.
+@onready var next_button: Button = $Content/Next # Opens the following meal.
 
 func _ready() -> void:
 	var result: Dictionary = GameState.last_result # Read the last attempt.
@@ -46,6 +47,12 @@ func _ready() -> void:
 
 	details.text += "\nStars: %d / 3" % result["stars"]
 
+	# NEXT only when there is a next meal and it's already unlocked.
+	var level: int = int(result.get("level_number", 0))
+	if level >= 1 and level < 5 and GameState.unlocked_level > level:
+		next_button.show()
+		next_button.pressed.connect(_on_next_pressed)
+
 	if result.get("mode", "solo") == "cpu":
 		heading.text = result["cpu_outcome"] # Win, loss, or draw.
 	else:
@@ -58,6 +65,11 @@ func _on_retry_pressed() -> void:
 	var level_path: String = str(GameState.last_result["level_path"])
 	retry_button.disabled = true # Prevent repeated presses.
 	get_tree().change_scene_to_file(level_path) # Start a fresh level.
+
+func _on_next_pressed() -> void:
+	next_button.disabled = true # Prevent repeated presses.
+	var next_level: int = int(GameState.last_result["level_number"]) + 1
+	get_tree().change_scene_to_file("res://scenes/levels/level_%02d.tscn" % next_level)
 
 func _on_meals_pressed() -> void:
 	meals_button.disabled = true # Prevent repeated presses.

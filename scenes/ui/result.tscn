@@ -38,8 +38,13 @@ custom_minimum_size = Vector2(0, 96)
 layout_mode = 2
 text = "RETRY"
 
+[node name="Next" type="Button" parent="Content" unique_id=1847302265]
+visible = false
+custom_minimum_size = Vector2(0, 96)
+layout_mode = 2
+text = "NEXT MEAL"
+
 [node name="Meals" type="Button" parent="Content" unique_id=1105334628]
 custom_minimum_size = Vector2(0, 96)
 layout_mode = 2
-text = "MEALS
-"
+text = "MEALS"

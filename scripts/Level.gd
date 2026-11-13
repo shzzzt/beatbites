@@ -244,6 +244,7 @@ func end_attempt(won: bool) -> void:
 		"judgments": judgment_counts.duplicate(),
 		"max_combo": max_combo,
 		"level_path": scene_file_path,
+		"level_number": level_number, # Lets Result offer NEXT MEAL.
 		"mode": GameState.mode, # Remember which mode produced this result.
 		"cpu_score": cpu.score if cpu != null else 0,
 		"cpu_lives": cpu.lives if cpu != null else 0,
