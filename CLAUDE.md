@@ -89,6 +89,9 @@ buttons pink #FFCCE5, blue #BFE2FF, purple #DCCCFF · stars #F2B230 · accent te
 Buttons: StyleBoxFlat, 0 radius, 8 px #5B4494 border, shadow #D9C8F5 offset (0,12); min height 96.
 Fonts: Press Start 2P (titles/buttons, multiples of 8 px), Pixelify Sans (body, ≥28 px).
 Pixel art: texture filter Nearest, whole-number scales only (food 16×16 ×6, catcher 32×24 ×6).
+Sprite sheets (32×24 frames side by side): `catcher_catch`/`rival_catch` = 3 frames (96×24),
+`catcher_hurt`/`rival_hurt` = 2 frames (64×24); `*_idle` = 1 frame. Never use a sheet as a
+whole texture: cut frames with AtlasTexture, or Sprite2D `hframes`.
 Screens: Title, Mode select, Level select (cards with stars/locks), Lobby (host IP / join field /
 error panel), Gameplay HUD (pause, score, hearts, goal bar, tap zones), Pause (resume, restart,
 sound, quit), Result (outcome, stats grid, stars, Retry/Next/Menu), Online HUD (you vs rival bar,

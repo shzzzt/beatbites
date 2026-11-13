@@ -9,8 +9,13 @@ extends Control
 #   4. Exit:  the screen fades out when you tap.
 
 const MENU_BPM: float = 80.0 # Tempo of music_menu.ogg ("A Table Under the Stars").
-const CATCH_TEXTURE = preload("res://assets/art/catcher_catch.png")
+# catcher_catch.png is a sprite sheet: 3 frames of 32×24 side by side (96×24).
+# catcher_idle.png is a single 32×24 frame.
+const CATCH_SHEET = preload("res://assets/art/catcher_catch.png")
 const IDLE_TEXTURE = preload("res://assets/art/catcher_idle.png")
+const FRAME_SIZE := Vector2(32, 24)
+const CATCH_FRAME_COUNT: int = 3
+var catch_frames: Array[AtlasTexture] = [] # One texture per sheet frame.
 
 @onready var beat_word: Array[Label] = [$Margin/Content/Beat/Front, $Margin/Content/Beat/Back]
 @onready var bites_word: Array[Label] = [$Margin/Content/Bites/Front, $Margin/Content/Bites/Back]
@@ -36,6 +41,13 @@ func _ready() -> void:
 	gui_input.connect(_on_gui_input)
 	start_ms = Time.get_ticks_msec()
 	catcher_base_y = catcher.position.y
+	# An AtlasTexture shows only one rectangle (region) of a bigger image,
+	# so each one is a single frame cut out of the sheet.
+	for i in CATCH_FRAME_COUNT:
+		var frame := AtlasTexture.new()
+		frame.atlas = CATCH_SHEET
+		frame.region = Rect2(Vector2(i * FRAME_SIZE.x, 0), FRAME_SIZE)
+		catch_frames.append(frame)
 	play_intro()
 
 
@@ -130,13 +142,19 @@ func song_time() -> float:
 
 
 func hop() -> void:
-	catcher.texture = CATCH_TEXTURE
-	var tween: Tween = create_tween()
-	tween.tween_property(catcher, "position:y", catcher_base_y - 24.0, 0.12) \
+	# Jump up and land (0.32 s in total).
+	var jump: Tween = create_tween()
+	jump.tween_property(catcher, "position:y", catcher_base_y - 24.0, 0.12) \
 		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	tween.tween_property(catcher, "position:y", catcher_base_y, 0.2) \
+	jump.tween_property(catcher, "position:y", catcher_base_y, 0.2) \
 		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
-	tween.tween_callback(func() -> void: catcher.texture = IDLE_TEXTURE)
+
+	# Meanwhile, play the 3 catch frames, then go back to the idle frame.
+	var frames: Tween = create_tween()
+	for frame in catch_frames:
+		frames.tween_callback(func() -> void: catcher.texture = frame)
+		frames.tween_interval(0.1)
+	frames.tween_callback(func() -> void: catcher.texture = IDLE_TEXTURE)
 
 
 # --- 4. Tap to start --------------------------------------------------------
