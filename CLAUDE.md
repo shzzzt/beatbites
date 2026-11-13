@@ -31,8 +31,10 @@ Godot 4, GDScript 4, Android, portrait 720×1280. I'm a beginner: build efficien
 ## Local setup
 
 - Windows. Project: `D:\BSIT\4TH YR\Special Topics\Lab 5\beat-bites`
-- Godot executable: [D:\BSIT\4TH YR\Special Topics\Lab 5\Godot_v4.7.2-stable_win64_console.exe]
-  (use the `_console.exe` version so output shows in the terminal).
+- Godot executable: [D:\BSIT\4TH YR\Special Topics\Lab 5\Godot_v4.7.2-stable_win64.exe]
+  (the `_console.exe` version isn't in that folder; put it next to this one so output shows in
+  the terminal. Claude's shell has so far been blocked from launching Godot, so I check scripts
+  in the editor.)
 - Online testing needs two Android phones on a phone hotspot.
 
 ## The game
@@ -134,9 +136,22 @@ launch the Godot exe; `_console.exe` is missing). Waiting for one combined phone
   RESUME / RESTART / SOUND / QUIT TO MEALS. Online: menu doesn't pause ("The match keeps going!"),
   no Restart, LEAVE MATCH → `Net.leave_game()` → Lobby. Android back button opens/closes it; going
   to the home screen pauses offline levels.
-- Theme: `assets/ui_theme.tres` set as project theme (gui/theme/custom): pink/purple/blue
-  buttons with 8 px border + shadow, Press Start 2P buttons (24) and `TitleLabel` headings,
-  Pixelify Sans body (28), white panels. Pastel sparkles background not done yet.
+- Theme: `assets/ui_theme.tres` set as project theme (gui/theme/custom). Mockups live in
+  `docs/ui-design/` (png + html, 390 wide → multiply sizes by ~1.85). Theme type variations:
+  - Buttons: `Button` (pink, default), `BlueButton`, `PurpleButton`, `IconButton` (lilac square,
+    use with `expand_icon` for 12 px icons ×4). 8 px #5B4494 border, shadow (0,12) #D9C8F5.
+  - Labels: default body (Pixelify 28), `TitleLabel` (Press Start 40), `LogoLabel` (pink 32 +
+    shadow), `SectionLabel` (Press Start 24 #6B58A0), `CardTitle` (Press Start 32),
+    `CardBody` (Pixelify semibold 32), `MutedLabel` (Pixelify 32 #6B58A0).
+  - `PanelContainer`: white card. Inset button highlights from the mockup aren't possible with
+    StyleBoxFlat, so they're left out.
+  - Press Start 2P imported without antialiasing (crisp pixels).
+- `scripts/Sparkles.gd` (class `Sparkles`): full-screen Control that draws the mockup's pastel
+  sparkles; add it as the first child of a UI scene.
+- ModeSelect restyled to `02_mode_select.png` (2026-11-14): containers, logo + sound icon
+  toggle, Offline (blue) / Online (pink) cards with apple/fish icons, BACK + CREDITS row (mockup
+  says SETTINGS, but there's no settings screen yet), catcher, "N / 15 stars collected".
+  Nodes use unique names (`%Offline`, `%Sound`…).
 - Fix: `cpu.setup(level_number)` was never called, so CPU accuracy stayed 55% on all levels;
   now 55/63/71/79/87%.
 - R3: Result has NEXT MEAL (Solo/CPU, when the next meal is unlocked); `last_result.level_number`.
@@ -147,6 +162,9 @@ launch the Godot exe; `_console.exe` is missing). Waiting for one combined phone
 ## Remaining work (in order; batch related tasks together)
 
 1. Phone-test the batch above. Fill in the Credits / docs placeholders.
-2. Regression pass: all 5 levels, unlocks after app restart, airplane mode, R8 error message,
+2. Restyle the other screens to their mockups using the shared theme: 01 Title (tap to start),
+   03 Level select, 04 Lobby, 05 Gameplay HUD, 06 Pause, 07 Result, 08 Online HUD.
+   Decide with me: SETTINGS button (real screen or keep BACK).
+3. Regression pass: all 5 levels, unlocks after app restart, airplane mode, R8 error message,
    readable layout on phone. Record results in GDD §11 playtesting.
    Ask me whether VS CPU satisfies the rubric's offline mode (it says "AI or pass-and-play").
