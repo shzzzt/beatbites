@@ -157,6 +157,9 @@ launch the Godot exe; `_console.exe` is missing). Waiting for one combined phone
   shadow offset 8 px), tagline, apple/blueberry/donut, axolotl on a pink dashed line
   (`scripts/DashedLine.gd`, reusable `@tool` Control), blinking "TAP TO START" with pink arrow
   icons, "v0.1 · ITSD 85". Sound + Credits now only on ModeSelect; Credits BACK → ModeSelect.
+- Title animations (Tweens in Title.gd): intro (logo bounces in, rest fades in ~1.6 s), idle
+  float (logo words + food), axolotl hops on every beat of the menu song (80 BPM, audio clock,
+  handles looping), 0.25 s fade-out on tap. `Sparkles.twinkle` export (on for Title only).
 - Fix: `cpu.setup(level_number)` was never called, so CPU accuracy stayed 55% on all levels;
   now 55/63/71/79/87%.
 - R3: Result has NEXT MEAL (Solo/CPU, when the next meal is unlocked); `last_result.level_number`.

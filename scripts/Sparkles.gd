@@ -20,14 +20,28 @@ const DOTS: Array = [
 	[330.0 / 390, 600.0 / 844, LILAC],
 ]
 
+@export var twinkle: bool = false # Fade each sparkle in and out (title screen).
+var time: float = 0.0
+
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE # Never block taps.
 	resized.connect(queue_redraw) # Redraw if the screen size changes.
+	set_process(twinkle) # Only redraw every frame when twinkling.
+
+
+func _process(delta: float) -> void:
+	time += delta
+	queue_redraw() # Ask Godot to call _draw() again this frame.
 
 
 func _draw() -> void:
-	for dot in DOTS:
+	for i in DOTS.size():
+		var dot: Array = DOTS[i]
+		var color: Color = dot[2]
+		if twinkle:
+			# Each sparkle gets its own phase so they don't blink together.
+			color.a = 0.25 + 0.75 * (0.5 + 0.5 * sin(time * 2.0 + i * 1.7))
 		# Round to whole pixels so the squares stay sharp.
 		var pos := Vector2(roundf(dot[0] * size.x), roundf(dot[1] * size.y))
-		draw_rect(Rect2(pos, Vector2(SIZE, SIZE)), dot[2])
+		draw_rect(Rect2(pos, Vector2(SIZE, SIZE)), color)
