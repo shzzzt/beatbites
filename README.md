@@ -29,11 +29,12 @@ Food falls in three lanes on the beat of the music. Move the axolotl catcher bet
 ## Playing online
 
 1. Connect both phones to the same Wi-Fi or phone hotspot. Some school/public Wi-Fi blocks phone-to-phone connections; a phone hotspot works best.
-2. Phone A: **PLAY → PLAY ONLINE → HOST A MATCH**. Its local IP address is shown on screen.
-3. Phone B: **PLAY → PLAY ONLINE**, type phone A's IP address, then **JOIN MATCH**.
-4. Phone A picks a meal and presses **START MATCH**.
+2. Both players: **TAP TO START → PLAY ONLINE**, then type a name in **YOUR NAME** (up to 10 characters, saved on the phone).
+3. Phone A: press **HOST**.
+4. Phone B: phone A's match appears under **JOIN A MATCH** (e.g. "Ana's match · Snack"). Tap it to join. If it doesn't appear (some networks block broadcasts), use **JOIN BY IP INSTEAD** and type the IP shown on phone A.
+5. Phone A picks a meal and presses **START MATCH**. Both players see each other's names in the match.
 
-The game uses ENet on UDP port **24567**. If the connection fails, the lobby shows an error instead of crashing. If a player leaves mid-match, the other phone shows **OPPONENT LEFT**.
+The game uses ENet on UDP port **24567**. Hosts announce themselves with a small UDP broadcast on port **24568**, which stays on the local network. If the connection fails, the lobby shows an error instead of crashing. If a player leaves mid-match, the other phone shows **OPPONENT LEFT**.
 
 ## Install (Android)
 

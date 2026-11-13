@@ -47,6 +47,11 @@ func setup(mode: String, level: int, meal: String) -> void:
 	%VersusTop.visible = mode != "solo"
 	%ThrowPanel.visible = mode == "online"
 	%RivalName.text = "CPU" if mode == "cpu" else "RIVAL"
+	if mode == "online":
+		# Show both usernames (shared when the phones connected).
+		%YouName.text = GameState.username
+		if Net.opponent_name != "":
+			%RivalName.text = Net.opponent_name
 
 
 # --- Numbers ----------------------------------------------------------------

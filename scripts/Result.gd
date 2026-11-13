@@ -43,7 +43,9 @@ func _ready() -> void:
 			# Online matches end by leaving the connection and going back to the lobby.
 			%Heading.text = result["online_outcome"] # YOU WIN!, YOU LOSE, DRAW...
 			%Stars.hide() # Stars are a Solo-only reward.
-			show_rival("RIVAL", result["opp_score"], result["opp_lives"])
+			var rival_name: String = str(result.get("opp_name", ""))
+			show_rival(rival_name.to_upper() if rival_name != "" else "RIVAL",
+				result["opp_score"], result["opp_lives"])
 			retry_button.hide()
 			meals_button.text = "BACK TO LOBBY"
 		"cpu":

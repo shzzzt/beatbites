@@ -82,7 +82,11 @@ All five levels use the same scene script (`Level.gd`). Each level scene sets it
 ## 6. Online design
 
 ### 6.1 Match flow
-1. **Lobby:** host/join, connection timeout (8 s) with a clear error message, and opponent join/leave notices.
+1. **Lobby:**
+   - Each player sets a username, which is saved on the phone.
+   - The host announces its match once a second with a UDP broadcast on the local network (port 24568). Joiners see a live list of matches ("Ana's match · Snack") and tap one to join. Typing the host's IP is the fallback for networks that block broadcasts.
+   - The connection times out after 8 s with a clear error message, and the lobby shows when the opponent joins or leaves.
+   - On connecting, both phones exchange names (`share_name`), which then appear in the lobby, the match HUD and the result screen.
 2. **Prepare:** the host sends a match seed and the chosen level to both phones (`prepare_match`).
 3. **Load check:** each phone tells the host when its level has loaded. The host continues only when both have.
 4. **Clock sync:** the joining phone measures the host's clock 5 times and keeps the sample with the shortest round trip. That gives the offset between the two phones' clocks.

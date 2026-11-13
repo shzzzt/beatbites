@@ -150,8 +150,12 @@ mouse_filter = 2
 theme_override_constants/separation = 8
 
 [node name="YouName" type="Label" parent="VersusTop/VersusPanel/Row/You/YouTop"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(140, 0)
 layout_mode = 2
 theme_type_variation = &"CardBody"
+theme_override_font_sizes/font_size = 28
+text_overrun_behavior = 3
 theme_override_colors/font_color = Color(0.14901961, 0.40392157, 0.6901961, 1)
 text = "YOU"
 
@@ -196,10 +200,14 @@ theme_override_constants/separation = 4
 
 [node name="RivalName" type="Label" parent="VersusTop/VersusPanel/Row/Rival/RivalTop"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(140, 0)
 layout_mode = 2
 theme_type_variation = &"CardBody"
+theme_override_font_sizes/font_size = 28
+text_overrun_behavior = 3
 theme_override_colors/font_color = Color(0.6901961, 0.17254902, 0.42352942, 1)
 text = "RIVAL"
+horizontal_alignment = 2
 
 [node name="RivalScore" type="Label" parent="VersusTop/VersusPanel/Row/Rival"]
 unique_name_in_owner = true

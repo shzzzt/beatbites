@@ -11,6 +11,10 @@ var volume: float = 1.0 # Saved master volume, 0.0 (silent) to 1.0 (full).
 # Bluetooth headphones), so the game clock is shifted back by this much.
 var timing_offset_ms: int = 0
 const TIMING_OFFSET_LIMIT: int = 200
+# Saved online name, shown to the rival. A random default until the player
+# types their own in the online lobby.
+var username: String = ""
+const USERNAME_MAX: int = 10
 
 # Shared meal info for menus and the HUD (index 0 = level 1).
 const MEALS: Array[Dictionary] = [
@@ -46,6 +50,11 @@ func _ready() -> void:
 		timing_offset_ms = clampi(int(config.get_value("settings", "timing_offset_ms", 0)),
 			-TIMING_OFFSET_LIMIT, TIMING_OFFSET_LIMIT)
 
+		username = clean_username(str(config.get_value("settings", "username", "")))
+
+	if username == "":
+		username = "Chef%03d" % (randi() % 1000) # e.g. "Chef042"
+		save_game() # Keep the same default name next time.
 	apply_sound() # Mute or unmute before any music plays.
 	print("Saved best stars: ", best_stars) # Check restored ratings.
 	print("Highest unlocked meal: ", unlocked_level)
@@ -85,6 +94,23 @@ func set_timing_offset(ms: int) -> void:
 	save_game()
 
 
+# Keep names short, on one line and printable. Returns "" if nothing usable.
+static func clean_username(text: String) -> String:
+	var cleaned: String = ""
+	for character in text.strip_edges():
+		if character.unicode_at(0) >= 32: # Skip newlines, tabs and other control characters.
+			cleaned += character
+	return cleaned.strip_edges().left(USERNAME_MAX)
+
+
+func set_username(text: String) -> void:
+	var cleaned: String = clean_username(text)
+	if cleaned == "":
+		return # Keep the old name rather than saving an empty one.
+	username = cleaned
+	save_game()
+
+
 # Start the campaign over: only Breakfast unlocked, no stars. Settings stay.
 func reset_progress() -> void:
 	unlocked_level = 1
@@ -99,5 +125,6 @@ func save_game() -> void:
 	config.set_value("settings", "sound_on", sound_on)
 	config.set_value("settings", "volume", volume)
 	config.set_value("settings", "timing_offset_ms", timing_offset_ms)
+	config.set_value("settings", "username", username)
 	if config.save(SAVE_PATH) != OK:
 		push_error("Could not save game data.") # Report save failures.

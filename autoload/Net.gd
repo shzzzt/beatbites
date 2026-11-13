@@ -9,6 +9,8 @@ var lobby_message: String = "" # Shown by the lobby after a match ends badly.
 const PORT: int = 24567 # Both devices must use the same network port.
 var is_host: bool = false # Whether this device created the match.
 var opponent_id: int = 0 # Zero means no opponent is connected.
+var opponent_name: String = "" # The rival's username (from share_name).
+signal opponent_named(player_name: String) # Their name arrived.
 signal both_players_loaded # Both levels are ready.
 var loaded_players: Dictionary = {} # Track each player's report once.
 
@@ -31,7 +33,19 @@ func _ready() -> void:
 
 func _on_peer_connected(peer_id: int) -> void:
 	opponent_id = peer_id # Remember the other device's network ID.
+	opponent_name = "RIVAL" # Placeholder until their name arrives.
 	opponent_joined.emit(peer_id) # Tell interested screens.
+	share_name.rpc_id(peer_id, GameState.username) # Introduce ourselves.
+
+
+# Each phone sends its username to the other right after connecting.
+@rpc("any_peer", "call_remote", "reliable")
+func share_name(player_name: String) -> void:
+	if multiplayer.get_remote_sender_id() != opponent_id:
+		return # Only our opponent can name themselves.
+	var cleaned: String = GameState.clean_username(player_name)
+	opponent_name = cleaned if cleaned != "" else "RIVAL"
+	opponent_named.emit(opponent_name)
 
 func host_game() -> Error:
 	leave_game() # Close any previous connection before hosting.
@@ -47,6 +61,7 @@ func host_game() -> Error:
 
 func leave_game() -> void:
 	opponent_id = 0 # Clear the previous opponent when leaving.
+	opponent_name = ""
 	if multiplayer.multiplayer_peer != null:
 		multiplayer.multiplayer_peer.close() # Close the current connection.
 	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()

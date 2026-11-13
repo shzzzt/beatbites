@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://cw880g617js3a"]
 
 [ext_resource type="Script" uid="uid://ch1k1x34e0epv" path="res://scripts/Lobby.gd" id="1_j7rk1"]
-[ext_resource type="Script" path="res://scripts/Sparkles.gd" id="2_spark"]
-[ext_resource type="Texture2D" path="res://assets/art/icon_back.png" id="3_back"]
+[ext_resource type="Script" uid="uid://0ajjp7ygn2af" path="res://scripts/Sparkles.gd" id="2_spark"]
+[ext_resource type="Texture2D" uid="uid://03x5pxtu5mqi" path="res://assets/art/icon_back.png" id="3_back"]
 
 [node name="Lobby" type="Control" unique_id=1221934773]
 layout_mode = 3
@@ -39,7 +39,7 @@ theme_override_constants/margin_bottom = 48
 [node name="Content" type="VBoxContainer" parent="Margin" unique_id=459995418]
 layout_mode = 2
 mouse_filter = 2
-theme_override_constants/separation = 36
+theme_override_constants/separation = 28
 
 [node name="TopBar" type="HBoxContainer" parent="Margin/Content" unique_id=1630741983]
 layout_mode = 2
@@ -60,6 +60,28 @@ size_flags_horizontal = 3
 theme_type_variation = &"LogoLabel"
 text = "FOOD FIGHT"
 vertical_alignment = 1
+
+[node name="NamePanel" type="PanelContainer" parent="Margin/Content" unique_id=1418820547]
+layout_mode = 2
+theme_type_variation = &"InfoPanel"
+
+[node name="NameRow" type="HBoxContainer" parent="Margin/Content/NamePanel" unique_id=1726109934]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="NameCaption" type="Label" parent="Margin/Content/NamePanel/NameRow" unique_id=1360582211]
+layout_mode = 2
+theme_type_variation = &"SectionLabel"
+text = "YOUR NAME"
+vertical_alignment = 1
+
+[node name="NameField" type="LineEdit" parent="Margin/Content/NamePanel/NameRow" unique_id=1904436875]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 88)
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Chef042"
+max_length = 10
 
 [node name="HostPanel" type="PanelContainer" parent="Margin/Content" unique_id=1735409566]
 unique_name_in_owner = true
@@ -95,7 +117,7 @@ theme_override_constants/separation = 12
 [node name="IPCaption" type="Label" parent="Margin/Content/HostPanel/HostBox/HostInfo/InfoBox" unique_id=1474563120]
 layout_mode = 2
 theme_type_variation = &"MutedLabel"
-text = "Your IP — tell your friend"
+text = "Players on this Wi-Fi can see your match."
 
 [node name="HostIP" type="Label" parent="Margin/Content/HostPanel/HostBox/HostInfo/InfoBox" unique_id=1912380650]
 unique_name_in_owner = true
@@ -140,28 +162,17 @@ theme_type_variation = &"SectionLabel"
 theme_override_colors/font_color = Color(0.7607843, 0.23137255, 0.5019608, 1)
 text = "JOIN A MATCH"
 
-[node name="AddressCaption" type="Label" parent="Margin/Content/JoinPanel/JoinBox" unique_id=1067321587]
+[node name="Searching" type="Label" parent="Margin/Content/JoinPanel/JoinBox" unique_id=1067321587]
+unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 32
-text = "Host's IP address"
+theme_type_variation = &"SmallMuted"
+text = "Looking for matches on this Wi-Fi..."
+autowrap_mode = 3
 
-[node name="JoinRow" type="HBoxContainer" parent="Margin/Content/JoinPanel/JoinBox" unique_id=1442167306]
+[node name="MatchList" type="VBoxContainer" parent="Margin/Content/JoinPanel/JoinBox" unique_id=1442167306]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 20
-
-[node name="Address" type="LineEdit" parent="Margin/Content/JoinPanel/JoinBox/JoinRow" unique_id=1000236927]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 104)
-layout_mode = 2
-size_flags_horizontal = 3
-placeholder_text = "e.g. 192.168.1.23"
-virtual_keyboard_type = 3
-
-[node name="Join" type="Button" parent="Margin/Content/JoinPanel/JoinBox/JoinRow" unique_id=1342821135]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(152, 104)
-layout_mode = 2
-text = "JOIN"
 
 [node name="JoinStatus" type="Label" parent="Margin/Content/JoinPanel/JoinBox" unique_id=1219866745]
 unique_name_in_owner = true
@@ -170,6 +181,34 @@ layout_mode = 2
 theme_type_variation = &"SmallMuted"
 text = "Connecting..."
 autowrap_mode = 3
+
+[node name="ManualToggle" type="Button" parent="Margin/Content/JoinPanel/JoinBox" unique_id=1615378240]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 80)
+layout_mode = 2
+theme_type_variation = &"PaleButton"
+theme_override_font_sizes/font_size = 16
+text = "JOIN BY IP INSTEAD"
+
+[node name="ManualRow" type="HBoxContainer" parent="Margin/Content/JoinPanel/JoinBox" unique_id=1093617428]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Address" type="LineEdit" parent="Margin/Content/JoinPanel/JoinBox/ManualRow" unique_id=1000236927]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 96)
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "e.g. 192.168.1.23"
+virtual_keyboard_type = 3
+
+[node name="Join" type="Button" parent="Margin/Content/JoinPanel/JoinBox/ManualRow" unique_id=1342821135]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(152, 96)
+layout_mode = 2
+text = "JOIN"
 
 [node name="Filler" type="Control" parent="Margin/Content" unique_id=1688263017]
 layout_mode = 2

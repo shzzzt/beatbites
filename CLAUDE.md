@@ -199,6 +199,19 @@ launch the Godot exe; `_console.exe` is missing). Waiting for one combined phone
   (`GameState.timing_offset_ms`, saved; `Level.read_song_time()` subtracts it from the clock,
   default 0), progress summary + RESET PROGRESS (tap twice within 3 s → `GameState.reset_progress()`,
   keeps settings). Slider uses a pixel grabber `assets/art/ui_slider_grabber.png`.
+- Online lobby discovery + usernames (2026-11-14; tested with two copies on one PC, NOT on phones):
+  - `GameState.username` (max 10, `clean_username()`, `set_username()`, saved; default "ChefNNN").
+    Edited in the Lobby's YOUR NAME field (locked while hosting/joining).
+  - `Net.share_name` RPC on connect → `Net.opponent_name` + `opponent_named` signal; cleared in
+    `leave_game()`. Shown in Lobby status, versus HUD (`%YouName`/`%RivalName`, ellipsis) and
+    Result (`last_result.opp_name`).
+  - `scripts/LanDiscovery.gd` (class LanDiscovery, child of Lobby): host `advertise({name, meal})`
+    broadcasts JSON (magic "beatbites-v1", random session id) every 1 s on UDP 24568 to
+    255.255.255.255 and each x.y.z.255; joiners `listen()` and get `hosts_changed` (grouped by
+    session id, best IP = same /24 as ours, gone after 4 s). Host stops advertising when full.
+  - Lobby: match cards (tap = join), "JOIN BY IP INSTEAD" fallback row, HostIP shown small.
+  - Android export: enabled change_wifi_multicast_state, access_wifi_state, access_network_state
+    (needed to receive broadcasts). Needs a fresh APK export.
 - Fix: `cpu.setup(level_number)` was never called, so CPU accuracy stayed 55% on all levels;
   now 55/63/71/79/87%.
 - R3: Result has NEXT MEAL (Solo/CPU, when the next meal is unlocked); `last_result.level_number`.

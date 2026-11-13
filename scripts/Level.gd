@@ -463,6 +463,7 @@ func _on_online_match_finished(my_score: int, my_lives: int, opp_score: int, opp
 		"online_outcome": outcome,
 		"opp_score": opp_score,
 		"opp_lives": opp_lives,
+		"opp_name": Net.opponent_name,
 	}
 
 	# Let both players read the outcome briefly before switching screens.
@@ -491,6 +492,7 @@ func end_online_early(outcome: String, message: String) -> void:
 	waiting_for_online = false
 	pause_menu.disable()
 	music.stop()
+	var rival_name: String = Net.opponent_name # leave_game() clears it.
 	Net.leave_game() # Close the broken connection right away.
 	hud.show_message(outcome, message)
 
@@ -518,6 +520,7 @@ func end_online_early(outcome: String, message: String) -> void:
 		"online_outcome": outcome,
 		"opp_score": opp_last_score,
 		"opp_lives": opp_last_lives,
+		"opp_name": rival_name,
 	}
 	get_tree().change_scene_to_file("res://scenes/ui/result.tscn")
 
