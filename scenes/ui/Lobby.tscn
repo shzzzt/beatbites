@@ -21,6 +21,7 @@ offset_bottom = 120.0
 theme_override_constants/separation = 16
 
 [node name="Heading" type="Label" parent="Content" unique_id=208298464]
+theme_type_variation = &"TitleLabel"
 layout_mode = 2
 theme_override_colors/font_color = Color(0.23137255, 0.16470589, 0.4, 1)
 theme_override_font_sizes/font_size = 40

@@ -125,11 +125,22 @@ launch the Godot exe; `_console.exe` is missing). Waiting for one combined phone
   `_on_attack_received()` turns their next good food landing ≥2 s ahead rotten
   (`FallingFood.make_rotten()`) and shows INCOMING! for 1.5 s. Throw meter label
   "Throw [###-------] 3/10" under the opponent numbers. MISS resets it (combo breaks).
+- R10 screens: `Title.tscn` is now the main scene (PLAY / SOUND / CREDITS, menu music);
+  `Credits.tscn` has [PLACEHOLDERS] for my name, music and art sources. BACK buttons on
+  ModeSelect → Title and OfflineSelect → ModeSelect.
+- Sound: `GameState.sound_on` saved in save.cfg [settings]; `toggle_sound()` mutes the Master bus.
+- Pause: `PauseMenu.tscn`/`PauseMenu.gd` (class `PauseMenu`, process_mode Always) added by
+  `Level.setup_pause_menu()`. Offline: pauses the tree + music, countdown skips paused time,
+  RESUME / RESTART / SOUND / QUIT TO MEALS. Online: menu doesn't pause ("The match keeps going!"),
+  no Restart, LEAVE MATCH → `Net.leave_game()` → Lobby. Android back button opens/closes it; going
+  to the home screen pauses offline levels.
+- Theme: `assets/ui_theme.tres` set as project theme (gui/theme/custom): pink/purple/blue
+  buttons with 8 px border + shadow, Press Start 2P buttons (24) and `TitleLabel` headings,
+  Pixelify Sans body (28), white panels. Pastel sparkles background not done yet.
 
 ## Remaining work (in order; batch related tasks together)
 
-1. Phone-test the batch above.
-2. Pause menu, sound on/off, title screen, credits screen (R10); apply the UI theme to all screens.
-3. Regression pass: all 5 levels, unlocks after app restart, airplane mode, R8 error message,
+1. Phone-test the batch above. Fill in the Credits placeholders.
+2. Regression pass: all 5 levels, unlocks after app restart, airplane mode, R8 error message,
    readable layout on phone. Then README, docs/GDD.md, docs/CREDITS.md.
    Ask me whether VS CPU satisfies the rubric's offline mode (it says "AI or pass-and-play").

@@ -6,6 +6,11 @@ func _ready() -> void:
 	$Content/Offline.pressed.connect(_on_offline_pressed)
 	
 	$Content/Online.pressed.connect(_on_online_pressed)
+	$Content/Back.pressed.connect(_on_back_pressed)
+
+
+func _on_back_pressed() -> void:
+	get_tree().change_scene_to_file("res://scenes/ui/Title.tscn")
 
 
 func _on_offline_pressed() -> void:

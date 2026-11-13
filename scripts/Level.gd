@@ -22,6 +22,9 @@ const ATTACK_LEAD_TIME: float = 2.0 # Turn food rotten at least this long before
 var throw_label: Label # Online throw meter.
 var incoming_label: Label # Big "INCOMING!" warning.
 var incoming_tween: Tween # Hides the warning after a short time.
+const PAUSE_SCENE = preload("res://scenes/ui/PauseMenu.tscn")
+var pause_menu: PauseMenu
+var pause_started_ms: int = 0 # When the current pause began.
 # Load the scene we'll use to create food.
 const FOOD_SCENE = preload("res://scenes/actors/food.tscn")
 var bpm: float = 90.0 # Updated from the selected chart before building notes.
@@ -87,7 +90,8 @@ func _ready() -> void:
 	# End the attempt when the non-looping song finishes.
 	music.finished.connect(_on_song_finished)
 	judgment_label.text = "Goal: catch %d bites!" % TARGET_CATCHES
-	
+	setup_pause_menu()
+
 	if GameState.mode == "cpu":
 		cpu = CpuRival.new() # Create an independent rival.
 		create_cpu_hud()
@@ -207,6 +211,8 @@ func end_attempt(won: bool) -> void:
 
 	finished = true # Block further gameplay results.
 	music.stop() # Stop music when losing before the song ends.
+	if GameState.mode != "online":
+		pause_menu.disable() # Online keeps the menu so a waiting player can leave.
 
 	if GameState.mode == "online":
 		judgment_label.text = "You finished!\nWaiting for opponent..."
@@ -463,6 +469,7 @@ func _on_online_match_finished(my_score: int, my_lives: int, opp_score: int, opp
 	if online_result_shown:
 		return # Handle the host's final message only once.
 	online_result_shown = true
+	pause_menu.disable()
 
 	judgment_label.text = "%s\nYou: %d  Rival: %d" % [outcome, my_score, opp_score]
 
@@ -507,6 +514,7 @@ func end_online_early(outcome: String, message: String) -> void:
 	online_result_shown = true
 	finished = true # Freeze gameplay.
 	waiting_for_online = false
+	pause_menu.disable()
 	music.stop()
 	Net.leave_game() # Close the broken connection right away.
 	judgment_label.text = "%s\n%s" % [outcome, message]
@@ -536,3 +544,50 @@ func end_online_early(outcome: String, message: String) -> void:
 		"opp_lives": opp_last_lives,
 	}
 	get_tree().change_scene_to_file("res://scenes/ui/result.tscn")
+
+
+func setup_pause_menu() -> void:
+	pause_menu = PAUSE_SCENE.instantiate() as PauseMenu
+	pause_menu.online = GameState.mode == "online" # Set before _ready runs.
+	add_child(pause_menu)
+	pause_menu.opened.connect(_on_pause_opened)
+	pause_menu.resumed.connect(_on_pause_resumed)
+	pause_menu.restart_requested.connect(_on_pause_restart)
+	pause_menu.quit_requested.connect(_on_pause_quit)
+
+
+func _on_pause_opened() -> void:
+	if GameState.mode == "online":
+		return # We can't freeze the other phone, so the match keeps going.
+	pause_started_ms = Time.get_ticks_msec()
+	music.stream_paused = true # Hold the song at its current position.
+	# Stops _process, food, the catcher and countdown timers. The pause menu
+	# keeps working because its process_mode is "Always".
+	get_tree().paused = true
+
+
+func _on_pause_resumed() -> void:
+	if GameState.mode == "online":
+		return
+	get_tree().paused = false
+	music.stream_paused = false
+	if not music_started:
+		# The countdown clock uses real time, so skip the time spent paused.
+		countdown_start_ms += Time.get_ticks_msec() - pause_started_ms
+
+
+func _on_pause_restart() -> void:
+	get_tree().paused = false # Pausing would otherwise carry into the new scene.
+	get_tree().reload_current_scene()
+
+
+func _on_pause_quit() -> void:
+	get_tree().paused = false
+	if GameState.mode == "online":
+		online_result_shown = true # Ignore the disconnect we're about to cause.
+		finished = true
+		Net.leave_game() # The rival sees "OPPONENT LEFT".
+		Net.lobby_message = "You left the match."
+		get_tree().change_scene_to_file("res://scenes/ui/Lobby.tscn")
+		return
+	get_tree().change_scene_to_file("res://scenes/ui/LevelSelect.tscn")

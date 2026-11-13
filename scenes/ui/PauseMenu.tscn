@@ -1,0 +1,78 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/PauseMenu.gd" id="1_pause"]
+[ext_resource type="Texture2D" path="res://assets/art/icon_pause.png" id="2_icon"]
+
+[node name="PauseMenu" type="CanvasLayer"]
+process_mode = 3
+layer = 10
+script = ExtResource("1_pause")
+
+[node name="PauseButton" type="TextureButton" parent="."]
+offset_left = 616.0
+offset_top = 24.0
+offset_right = 696.0
+offset_bottom = 104.0
+texture_normal = ExtResource("2_icon")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="Overlay" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Dim" type="ColorRect" parent="Overlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.23137255, 0.16470589, 0.4, 0.6)
+
+[node name="Panel" type="PanelContainer" parent="Overlay"]
+layout_mode = 0
+offset_left = 60.0
+offset_top = 300.0
+offset_right = 660.0
+offset_bottom = 980.0
+
+[node name="Content" type="VBoxContainer" parent="Overlay/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="Heading" type="Label" parent="Overlay/Panel/Content"]
+layout_mode = 2
+theme_type_variation = &"TitleLabel"
+theme_override_font_sizes/font_size = 40
+text = "PAUSED"
+horizontal_alignment = 1
+
+[node name="Note" type="Label" parent="Overlay/Panel/Content"]
+layout_mode = 2
+text = "The match keeps going!"
+horizontal_alignment = 1
+
+[node name="Resume" type="Button" parent="Overlay/Panel/Content"]
+custom_minimum_size = Vector2(0, 96)
+layout_mode = 2
+text = "RESUME"
+
+[node name="Restart" type="Button" parent="Overlay/Panel/Content"]
+custom_minimum_size = Vector2(0, 96)
+layout_mode = 2
+text = "RESTART"
+
+[node name="Sound" type="Button" parent="Overlay/Panel/Content"]
+custom_minimum_size = Vector2(0, 96)
+layout_mode = 2
+text = "SOUND: ON"
+
+[node name="Quit" type="Button" parent="Overlay/Panel/Content"]
+custom_minimum_size = Vector2(0, 96)
+layout_mode = 2
+text = "QUIT TO MEALS"

@@ -1,0 +1,59 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/Title.gd" id="1_title"]
+[ext_resource type="AudioStream" path="res://assets/audio/music_menu.ogg" id="2_menu"]
+
+[node name="Title" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_title")
+
+[node name="Content" type="VBoxContainer" parent="."]
+custom_minimum_size = Vector2(672, 0)
+layout_mode = 0
+offset_left = 24.0
+offset_top = 240.0
+offset_right = 696.0
+offset_bottom = 280.0
+theme_override_constants/separation = 32
+
+[node name="Logo" type="Label" parent="Content"]
+layout_mode = 2
+theme_type_variation = &"TitleLabel"
+theme_override_colors/font_color = Color(0.8509804, 0.27450982, 0.56078434, 1)
+theme_override_font_sizes/font_size = 72
+text = "BEAT
+BITES"
+horizontal_alignment = 1
+
+[node name="Tagline" type="Label" parent="Content"]
+layout_mode = 2
+text = "Catch the food on the beat!"
+horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="Content"]
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+
+[node name="Play" type="Button" parent="Content"]
+custom_minimum_size = Vector2(0, 96)
+layout_mode = 2
+text = "PLAY"
+
+[node name="Sound" type="Button" parent="Content"]
+custom_minimum_size = Vector2(0, 96)
+layout_mode = 2
+text = "SOUND: ON"
+
+[node name="Credits" type="Button" parent="Content"]
+custom_minimum_size = Vector2(0, 96)
+layout_mode = 2
+text = "CREDITS"
+
+[node name="MenuMusic" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("2_menu")
+autoplay = true

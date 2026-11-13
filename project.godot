@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Beat Bites"
-run/main_scene="uid://cg0ls8ny6fcmr"
+run/main_scene="res://scenes/ui/Title.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"
 
@@ -46,3 +46,7 @@ renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
 textures/vram_compression/import_etc2_astc=true
 environment/defaults/default_clear_color=Color(0.9843137, 0.95686275, 1, 1)
+
+[gui]
+
+theme/custom="res://assets/ui_theme.tres"

@@ -1,0 +1,54 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/Credits.gd" id="1_credits"]
+
+[node name="Credits" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_credits")
+
+[node name="Content" type="VBoxContainer" parent="."]
+custom_minimum_size = Vector2(672, 0)
+layout_mode = 0
+offset_left = 24.0
+offset_top = 120.0
+offset_right = 696.0
+offset_bottom = 160.0
+theme_override_constants/separation = 24
+
+[node name="Heading" type="Label" parent="Content"]
+layout_mode = 2
+theme_type_variation = &"TitleLabel"
+theme_override_font_sizes/font_size = 40
+text = "CREDITS"
+
+[node name="Body" type="Label" parent="Content"]
+custom_minimum_size = Vector2(672, 0)
+layout_mode = 2
+text = "Beat Bites
+ITSD 85 Mobile Game Project
+
+Game design & code:
+[YOUR NAME]
+
+Music (Sunrise Bento, Lunchbox Letters, Soda Pop Sidequest, Neon Noodle Rush, Sugar Star Sprint, A Table Under the Stars):
+[COMPOSER / SOURCE]
+
+Pixel art:
+[ARTIST / SOURCE]
+
+Fonts (SIL Open Font License):
+Press Start 2P by CodeMan38
+Pixelify Sans by Stefie Justprince
+
+Made with Godot Engine (MIT License)"
+autowrap_mode = 3
+
+[node name="Back" type="Button" parent="Content"]
+custom_minimum_size = Vector2(0, 96)
+layout_mode = 2
+text = "BACK"
