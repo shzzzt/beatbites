@@ -1,8 +1,21 @@
 extends Control
 @onready var join_timeout: Timer = $JoinTimeout # Limits connection waiting.
+@onready var level_pick: OptionButton = $Content/LevelPick # Host's level choice.
+
+const MEAL_NAMES: Array[String] = ["Breakfast", "Lunch", "Snack", "Dinner", "Dessert"]
 
 
 func _ready() -> void:
+	# Fill the picker; item id = level number (1-5).
+	for i in MEAL_NAMES.size():
+		level_pick.add_item("%d  %s" % [i + 1, MEAL_NAMES[i]], i + 1)
+	level_pick.select(0) # Breakfast by default.
+
+	# Explain why we came back here (e.g. the opponent left mid-match).
+	if Net.lobby_message != "":
+		$Content/Status.text = Net.lobby_message
+		Net.lobby_message = ""
+
 	$Content/Back.pressed.connect(_on_back_pressed)
 	$Content/Host.pressed.connect(_on_host_pressed)
 	$Content/Join.pressed.connect(_on_join_pressed)
@@ -38,6 +51,7 @@ func _on_host_pressed() -> void:
 	$Content/Host.disabled = true # Already hosting.
 	$Content/Join.disabled = true # Hosting and joining are separate roles.
 	$Content/Status.text = "Waiting for player 2..."
+	level_pick.show() # Only the host chooses the meal.
 	show_host_addresses()
 	
 	
@@ -100,6 +114,7 @@ func _on_opponent_left() -> void:
 	$Content/Start.disabled = true # An opponent is required to start.
 	join_timeout.stop() # Cancel any remaining connection deadline."text"
 	Net.leave_game() # Close the old session and clear the opponent.
+	level_pick.hide() # No longer hosting.
 	$Content/Host.disabled = false # Allow another hosting attempt.
 	$Content/Join.disabled = false # Allow another joining attempt.
 	$Content/Status.text = "Opponent left. You can host or join again."
@@ -109,12 +124,12 @@ func _on_start_pressed() -> void:
 		return # Starting requires the host and a connected opponent.
 
 	$Content/Start.disabled = true # Prevent repeated presses.
-	Net.prepare_match.rpc(randi()) # Send one chosen number to both phones.
+	# Send one seed and the chosen level to both phones.
+	Net.prepare_match.rpc(randi(), level_pick.get_selected_id())
 
 
 func _on_match_prepared() -> void:
 	GameState.mode = "online" # Tell the level to wait for a network start.
+	var level_path: String = "res://scenes/levels/level_%02d.tscn" % Net.match_level
 	# Load after the current network callback finishes.
-	get_tree().call_deferred(
-		"change_scene_to_file", "res://scenes/levels/level_01.tscn"
-	)
+	get_tree().call_deferred("change_scene_to_file", level_path)

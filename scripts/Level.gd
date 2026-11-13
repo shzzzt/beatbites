@@ -12,7 +12,11 @@ var last_sent_score: int = -1
 var last_sent_lives: int = -1
 var online_music_start_ms: float = -1.0 # Deadline on this phone's clock.
 var waiting_for_online: bool = false # Freeze gameplay until both phones are ready.
-var online_result_shown: bool = false # The final online outcome arrived.
+var online_result_shown: bool = false # The online match has ended (result or disconnect).
+var opp_last_score: int = 0 # Rival's latest numbers, kept in case they disconnect.
+var opp_last_lives: int = 3
+const MEAL_NAMES: Array[String] = ["Breakfast", "Lunch", "Snack", "Dinner", "Dessert"]
+const RESULT_WAIT_EXTRA: float = 15.0 # Seconds to wait past the song's end for the rival.
 # Load the scene we'll use to create food.
 const FOOD_SCENE = preload("res://scenes/actors/food.tscn")
 var bpm: float = 90.0 # Updated from the selected chart before building notes.
@@ -85,7 +89,11 @@ func _ready() -> void:
 		
 	if GameState.mode == "online":
 		waiting_for_online = true # Hold food and the song clock.
-		judgment_label.text = "Online Breakfast\nWaiting for both players..."
+		judgment_label.text = "Online %s\nWaiting for both players..." % MEAL_NAMES[level_number - 1]
+		# If the other phone drops, we hear about it here (deferred so the
+		# network finishes its current work before we change scenes).
+		multiplayer.peer_disconnected.connect(_on_online_peer_left, CONNECT_DEFERRED)
+		multiplayer.server_disconnected.connect(_on_online_server_left, CONNECT_DEFERRED)
 		Net.both_players_loaded.connect(_on_both_players_loaded)
 		Net.start_scheduled.connect(_on_start_scheduled)
 		create_online_hud()
@@ -194,7 +202,12 @@ func end_attempt(won: bool) -> void:
 		judgment_label.text = "You finished!\nWaiting for opponent..."
 		send_online_stats() # Make sure the rival sees our last numbers.
 		Net.report_match_finished.rpc_id(1, score, lives) # Tell the host.
-		return # Stay on this screen for now; results come in a later step.
+		# Don't wait forever: give up a little after the rival's song must have ended.
+		var song_left: float = music.stream.get_length() - maxf(song_time, 0.0)
+		get_tree().create_timer(song_left + RESULT_WAIT_EXTRA).timeout.connect(
+			_on_result_wait_timeout
+		)
+		return # The host's answer arrives in _on_online_match_finished().
 
 	# A win earns one star per remaining life; a loss earns none.
 	var stars: int = lives if won else 0
@@ -355,6 +368,8 @@ func create_online_hud() -> void:
 
 
 func _on_opponent_stats_updated(new_score: int, new_lives: int) -> void:
+	opp_last_score = new_score
+	opp_last_lives = new_lives
 	opponent_label.text = "Opponent score: %d\nOpponent lives: %d" % [
 		new_score, new_lives
 	]
@@ -397,4 +412,54 @@ func _on_online_match_finished(my_score: int, my_lives: int, opp_score: int, opp
 
 	# Let both players read the outcome briefly before switching screens.
 	await get_tree().create_timer(2.0).timeout
+	get_tree().change_scene_to_file("res://scenes/ui/result.tscn")
+
+
+func _on_online_peer_left(_peer_id: int) -> void:
+	end_online_early("OPPONENT LEFT", "Opponent left the match.")
+
+
+func _on_online_server_left() -> void:
+	end_online_early("OPPONENT LEFT", "Host left the match.")
+
+
+func _on_result_wait_timeout() -> void:
+	end_online_early("NO RESULT", "Opponent never sent a final score.")
+
+
+# Ends an online match without the host's normal final result.
+func end_online_early(outcome: String, message: String) -> void:
+	if online_result_shown:
+		return # The match already ended (normal result or earlier disconnect).
+	online_result_shown = true
+	finished = true # Freeze gameplay.
+	waiting_for_online = false
+	music.stop()
+	Net.leave_game() # Close the broken connection right away.
+	judgment_label.text = "%s\n%s" % [outcome, message]
+
+	await get_tree().create_timer(2.0).timeout
+
+	if not music_started:
+		# Nothing was played yet, so go straight back to the lobby.
+		Net.lobby_message = message
+		get_tree().change_scene_to_file("res://scenes/ui/Lobby.tscn")
+		return
+
+	# Show what we had when the match stopped; no winner is decided.
+	GameState.last_result = {
+		"won": false,
+		"stars": 0,
+		"score": score,
+		"caught": caught_count,
+		"goal": TARGET_CATCHES,
+		"lives": lives,
+		"judgments": judgment_counts.duplicate(),
+		"max_combo": max_combo,
+		"level_path": scene_file_path,
+		"mode": "online",
+		"online_outcome": outcome,
+		"opp_score": opp_last_score,
+		"opp_lives": opp_last_lives,
+	}
 	get_tree().change_scene_to_file("res://scenes/ui/result.tscn")

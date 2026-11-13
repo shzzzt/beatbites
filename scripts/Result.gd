@@ -34,6 +34,9 @@ func _ready() -> void:
 	details.text += "\nLives left: %d" % result["lives"]
 
 	if result.get("mode", "solo") == "online":
+		# Online matches end by leaving the connection and going back to the lobby.
+		retry_button.hide()
+		meals_button.text = "BACK TO LOBBY"
 		# Online has no stars; show the rival's final numbers instead.
 		details.text += "\nRival score: %d\nRival lives: %d" % [
 			result["opp_score"], result["opp_lives"]
@@ -58,4 +61,8 @@ func _on_retry_pressed() -> void:
 
 func _on_meals_pressed() -> void:
 	meals_button.disabled = true # Prevent repeated presses.
+	if GameState.last_result.get("mode", "solo") == "online":
+		Net.leave_game() # Close the connection so the next match starts clean.
+		get_tree().change_scene_to_file("res://scenes/ui/Lobby.tscn")
+		return
 	get_tree().change_scene_to_file("res://scenes/ui/LevelSelect.tscn")

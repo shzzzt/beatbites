@@ -4,6 +4,8 @@ signal opponent_joined(peer_id: int) # Notify the lobby of a new opponent.
 signal opponent_stats_updated(new_score: int, new_lives: int)
 signal match_prepared # Tell the lobby that match settings arrived.
 var match_seed: int = 0 # Both phones will store the same number.
+var match_level: int = 1 # Level the host picked (1 = Breakfast ... 5 = Dessert).
+var lobby_message: String = "" # Shown by the lobby after a match ends badly.
 const PORT: int = 24567 # Both devices must use the same network port.
 var is_host: bool = false # Whether this device created the match.
 var opponent_id: int = 0 # Zero means no opponent is connected.
@@ -48,8 +50,18 @@ func leave_game() -> void:
 		multiplayer.multiplayer_peer.close() # Close the current connection.
 	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
 	is_host = false # Return to local-only operation.
+	reset_match_state()
+
+
+# Forget everything from the previous match so the next one starts clean.
+func reset_match_state() -> void:
+	loaded_players.clear()
 	finished_players.clear()
-	
+	clock_samples_received = 0
+	best_clock_roundtrip_ms = -1
+	clock_roundtrip_ms = 0
+	host_clock_offset_ms = 0.0
+
 func join_game(address: String) -> Error:
 	leave_game() # Close any previous session.
 	var peer := ENetMultiplayerPeer.new()
@@ -61,10 +73,10 @@ func join_game(address: String) -> Error:
 	return OK # Started connecting; success is reported later.
 
 @rpc("authority", "call_local", "reliable")
-func prepare_match(new_seed: int) -> void:
+func prepare_match(new_seed: int, level: int) -> void:
 	match_seed = new_seed # Store the host's chosen seed.
-	loaded_players.clear() # Start this match with no loading reports.
-	finished_players.clear() # Forget the previous match's reports.
+	match_level = clampi(level, 1, 5) # Never load a level that doesn't exist.
+	reset_match_state() # No loading reports, final reports or clock data yet.
 	match_prepared.emit() # Ask this phone's lobby to update.
 
 

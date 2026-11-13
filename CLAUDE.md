@@ -104,24 +104,29 @@ Done and confirmed:
   host shares final numbers and each phone gets YOU WIN!/YOU LOSE/DRAW (`get_online_outcome`:
   survivor beats eliminated, then higher score, else draw).
 
-Current step — Step 97 CODE ADDED (2026-11-13), NOT YET PHONE-CONFIRMED and not Godot parse-checked
-(the Godot exe couldn't be run from Claude's shell; `_console.exe` is missing): `_on_online_match_finished()` in Level.gd saves
-`GameState.last_result` (mode "online", online_outcome, opp_score, opp_lives, stars 0), waits 2 s,
-opens result.tscn; Result.gd shows the online outcome as heading and rival score/lives instead of
-stars. Check whether these edits are already in the files; add them if not. Include it in my next
-phone test checklist.
+CODE ADDED 2026-11-13, NOT YET PHONE-CONFIRMED and not Godot parse-checked (Claude's shell can't
+launch the Godot exe; `_console.exe` is missing). Waiting for one combined phone test:
+
+- Step 97: `_on_online_match_finished()` saves `GameState.last_result` (mode "online",
+  online_outcome, opp_score, opp_lives, stars 0), waits 2 s, opens Result; Result shows the outcome
+  and rival score/lives instead of stars.
+- Online result flow (decided: "Back to lobby"): Result hides Retry, Meals becomes BACK TO LOBBY →
+  `Net.leave_game()` + Lobby. No rematch.
+- Disconnects: Level listens to `peer_disconnected`/`server_disconnected` → `end_online_early()`:
+  stops, `Net.leave_game()`, shows OPPONENT LEFT; before the song started → Lobby with
+  `Net.lobby_message`; after → Result (no winner). Waiting for final results times out at song end
+  + 15 s → "NO RESULT".
+- Repeated matches: `Net.reset_match_state()` (loaded/finished reports, clock data) runs in
+  `leave_game()` and `prepare_match()`.
+- Online level (decided: host picks): Lobby `LevelPick` OptionButton (host only) →
+  `prepare_match(seed, level)` → `Net.match_level` → loads `level_0N.tscn`. All 5 levels are
+  playable online, even if they're still locked in Solo. The seed is still unused.
 
 ## Remaining work (in order; batch related tasks together)
 
-1. Finish Step 97 (both phones show online results; Solo and CPU results unchanged).
-2. Online result buttons: Retry/Meals currently don't clean up the network. Decide with me a simple
-   flow (e.g. "Back to lobby" that calls `Net.leave_game()`, or a coordinated rematch).
-3. Disconnects during gameplay and while waiting for final results: show "Opponent left", don't
-   wait forever, return to menu safely (rubric + guide question 2).
-4. Repeated matches: reset readiness, final reports, clock and match state; test either phone hosting.
-5. Online level choice: currently always Breakfast; the shared seed isn't used yet (don't claim it is).
-6. Online attack race (designed, not built): 10-catch combo sends a rotten food to the rival.
-7. Pause menu, sound on/off, title screen, credits screen (R10); apply the UI theme to all screens.
-8. Regression pass: all 5 levels, unlocks after app restart, airplane mode, R8 error message,
+1. Phone-test the batch above.
+2. Online attack race (designed, not built): 10-catch combo sends a rotten food to the rival.
+3. Pause menu, sound on/off, title screen, credits screen (R10); apply the UI theme to all screens.
+4. Regression pass: all 5 levels, unlocks after app restart, airplane mode, R8 error message,
    readable layout on phone. Then README, docs/GDD.md, docs/CREDITS.md.
    Ask me whether VS CPU satisfies the rubric's offline mode (it says "AI or pass-and-play").
