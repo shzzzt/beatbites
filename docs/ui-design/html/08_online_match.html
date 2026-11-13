@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Online attack race (light)</title>
+</head>
+<body>
+
+
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;600;700&amp;family=Press+Start+2P&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FBF4FF}
+a{color:#2667B0}a:hover{color:#D9468F}
+.sparkles{position:absolute;left:0;top:0;width:6px;height:6px;box-shadow:40px 60px #E3D4FF,320px 90px #FFC9E3,120px 150px #C7E6FF,250px 40px #E3D4FF,60px 300px #FFC9E3,340px 260px #C7E6FF,200px 220px #E3D4FF,30px 520px #C7E6FF,360px 480px #FFC9E3,150px 400px #E3D4FF,280px 700px #C7E6FF,90px 780px #FFC9E3,330px 600px #E3D4FF}
+</style>
+
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #FBF4FF; font-family: 'Pixelify Sans', sans-serif; color: #3B2A66; box-sizing: border-box">
+  <div class="sparkles" aria-hidden="true"></div>
+
+  <div style="position: absolute; top: 44px; left: 16px; right: 16px; display: flex; flex-direction: column; gap: 8px">
+    <div style="display: flex; align-items: center; gap: 10px">
+      <button aria-label="Pause" style="width: 48px; height: 48px; flex: none; display: flex; align-items: center; justify-content: center; background: #EFE4FF; border: 4px solid #5B4494; box-shadow: 0 4px 0 #D9C8F5; cursor: pointer">
+        <svg width="20" height="20" viewBox="0 0 10 10" shape-rendering="crispEdges" aria-hidden="true"><rect x="2" y="1" width="2" height="8" fill="#3B2A66"></rect><rect x="6" y="1" width="2" height="8" fill="#3B2A66"></rect></svg>
+      </button>
+      <div style="flex: 1; display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #FFFFFF; border: 4px solid #5B4494">
+        <span style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 14px; color: #2667B0; font-weight: 700">YOU</span><span style="font-family: 'Press Start 2P', monospace; font-size: 13px">03480</span></span>
+        <span style="font-family: 'Press Start 2P', monospace; font-size: 11px; color: #6B58A0">VS</span>
+        <span style="display: flex; flex-direction: column; gap: 2px; align-items: flex-end"><span style="font-size: 14px; color: #B02C6C; font-weight: 700">RIVAL</span><span style="font-family: 'Press Start 2P', monospace; font-size: 13px">03120</span></span>
+      </div>
+    </div>
+    <div style="height: 12px; display: flex; border: 3px solid #5B4494" role="img" aria-label="You are ahead">
+      <div style="width: 53%; background: #8CCBFF"></div>
+      <div style="flex: 1; background: #FF9ACD"></div>
+    </div>
+  </div>
+
+  <div style="position: absolute; top: 148px; left: 16px; right: 16px; padding: 10px 12px; background: #FFFFFF; border: 4px solid #5B4494; display: flex; flex-direction: column; gap: 8px">
+    <div style="display: flex; justify-content: space-between; font-size: 16px"><span>Throw meter</span><span style="color: #8A520B; font-weight: 700">7 / 10 combo</span></div>
+    <div style="display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 4px" aria-hidden="true">
+      <span style="height: 14px; background: #FFD66B; border: 2px solid #5B4494"></span>
+      <span style="height: 14px; background: #FFD66B; border: 2px solid #5B4494"></span>
+      <span style="height: 14px; background: #FFD66B; border: 2px solid #5B4494"></span>
+      <span style="height: 14px; background: #FFD66B; border: 2px solid #5B4494"></span>
+      <span style="height: 14px; background: #FFD66B; border: 2px solid #5B4494"></span>
+      <span style="height: 14px; background: #FFD66B; border: 2px solid #5B4494"></span>
+      <span style="height: 14px; background: #FFD66B; border: 2px solid #5B4494"></span>
+      <span style="height: 14px; background: #EFE4FF; border: 2px solid #C9B6EE"></span>
+      <span style="height: 14px; background: #EFE4FF; border: 2px solid #C9B6EE"></span>
+      <span style="height: 14px; background: #EFE4FF; border: 2px solid #C9B6EE"></span>
+    </div>
+  </div>
+
+  <div role="status" style="position: absolute; top: 236px; left: 40px; right: 40px; padding: 8px 10px; background: #F1FBE6; border: 4px solid #8FD14F; display: flex; align-items: center; justify-content: center; gap: 10px">
+    <svg width="28" height="28" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><rect x="0" y="2" width="2" height="3" fill="#8FD14F"></rect><rect x="1" y="3" width="1" height="1" fill="#3B2A66"></rect><rect x="2" y="3" width="5" height="1" fill="#9C8FC4"></rect><rect x="3" y="2" width="1" height="3" fill="#9C8FC4"></rect><rect x="5" y="2" width="1" height="3" fill="#9C8FC4"></rect><rect x="7" y="1" width="1" height="5" fill="#9C8FC4"></rect></svg>
+    <span style="font-family: 'Press Start 2P', monospace; font-size: 11px; color: #2F5E0C">INCOMING!</span>
+  </div>
+
+  <div style="position: absolute; top: 300px; bottom: 120px; left: 136px; border-left: 4px dashed #E6DAFA" aria-hidden="true"></div>
+  <div style="position: absolute; top: 300px; bottom: 120px; left: 252px; border-left: 4px dashed #E6DAFA" aria-hidden="true"></div>
+
+  <div style="position: absolute; top: 320px; left: 280px; padding: 4px; border: 3px dashed #8FD14F; background: #F1FBE6" aria-hidden="true">
+    <svg width="48" height="48" viewBox="0 0 8 8" shape-rendering="crispEdges"><rect x="0" y="2" width="2" height="3" fill="#8FD14F"></rect><rect x="1" y="3" width="1" height="1" fill="#3B2A66"></rect><rect x="2" y="3" width="5" height="1" fill="#9C8FC4"></rect><rect x="3" y="2" width="1" height="3" fill="#9C8FC4"></rect><rect x="5" y="2" width="1" height="3" fill="#9C8FC4"></rect><rect x="7" y="1" width="1" height="5" fill="#9C8FC4"></rect><rect x="2" y="0" width="1" height="1" fill="#8FD14F"></rect><rect x="4" y="6" width="1" height="1" fill="#8FD14F"></rect></svg>
+  </div>
+  <div style="position: absolute; top: 400px; left: 54px" aria-hidden="true">
+    <svg width="48" height="48" viewBox="0 0 8 8" shape-rendering="crispEdges"><rect x="2" y="0" width="4" height="1" fill="#FF9ACD"></rect><rect x="1" y="1" width="6" height="1" fill="#FF9ACD"></rect><rect x="0" y="2" width="8" height="1" fill="#FF9ACD"></rect><rect x="0" y="3" width="3" height="1" fill="#FF9ACD"></rect><rect x="5" y="3" width="3" height="1" fill="#FF9ACD"></rect><rect x="0" y="4" width="3" height="1" fill="#F2C18E"></rect><rect x="5" y="4" width="3" height="1" fill="#F2C18E"></rect><rect x="0" y="5" width="8" height="1" fill="#F2C18E"></rect><rect x="1" y="6" width="6" height="1" fill="#F2C18E"></rect><rect x="2" y="7" width="4" height="1" fill="#D49A62"></rect><rect x="2" y="1" width="1" height="1" fill="#8CCBFF"></rect><rect x="5" y="2" width="1" height="1" fill="#FFF3A0"></rect></svg>
+  </div>
+  <div style="position: absolute; top: 500px; left: 171px" aria-hidden="true">
+    <svg width="48" height="48" viewBox="0 0 8 8" shape-rendering="crispEdges"><rect x="3" y="0" width="1" height="2" fill="#8A5A3C"></rect><rect x="4" y="1" width="2" height="1" fill="#7FD9A4"></rect><rect x="1" y="2" width="6" height="1" fill="#FF8FB8"></rect><rect x="0" y="3" width="8" height="3" fill="#FF8FB8"></rect><rect x="1" y="6" width="6" height="1" fill="#FF8FB8"></rect><rect x="2" y="7" width="4" height="1" fill="#E5679A"></rect><rect x="2" y="3" width="1" height="1" fill="#FFFFFF"></rect></svg>
+  </div>
+
+  <div style="position: absolute; top: 590px; left: 0; right: 0; text-align: center; font-family: 'Press Start 2P', monospace; font-size: 18px; color: #2667B0; text-shadow: 3px 3px 0 #FFC9E3">GOOD!</div>
+
+  <div style="position: absolute; top: 700px; left: 16px; right: 16px; border-top: 4px dashed #FF9ACD" aria-hidden="true"></div>
+  <div style="position: absolute; top: 640px; left: 31px" aria-hidden="true">
+    <svg width="96" height="72" viewBox="0 0 12 9" shape-rendering="crispEdges"><rect x="1" y="0" width="1" height="2" fill="#FF9ACD"></rect><rect x="10" y="0" width="1" height="2" fill="#FF9ACD"></rect><rect x="0" y="2" width="12" height="1" fill="#E6F4FF"></rect><rect x="1" y="3" width="10" height="3" fill="#8CCBFF"></rect><rect x="2" y="6" width="8" height="1" fill="#8CCBFF"></rect><rect x="3" y="7" width="6" height="1" fill="#5FA6E8"></rect><rect x="4" y="8" width="4" height="1" fill="#5FA6E8"></rect><rect x="3" y="4" width="1" height="1" fill="#3B2A66"></rect><rect x="8" y="4" width="1" height="1" fill="#3B2A66"></rect><rect x="5" y="5" width="2" height="1" fill="#3B2A66"></rect><rect x="2" y="5" width="1" height="1" fill="#FF9ACD"></rect><rect x="9" y="5" width="1" height="1" fill="#FF9ACD"></rect></svg>
+  </div>
+
+  <div style="position: absolute; left: 16px; right: 16px; bottom: 28px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+    <button aria-label="Move left" style="height: 72px; background: #EAF5FF; border: 4px solid #C7E6FF; display: flex; align-items: center; justify-content: center; cursor: pointer">
+      <svg width="32" height="32" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><g fill="#2F7FD1"><rect x="1" y="3" width="1" height="2"></rect><rect x="2" y="2" width="1" height="4"></rect><rect x="3" y="1" width="1" height="6"></rect><rect x="4" y="3" width="3" height="2"></rect></g></svg>
+    </button>
+    <button aria-label="Move right" style="height: 72px; background: #FFEFF7; border: 4px solid #FFC9E3; display: flex; align-items: center; justify-content: center; cursor: pointer">
+      <svg width="32" height="32" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><g fill="#D9468F"><rect x="6" y="3" width="1" height="2"></rect><rect x="5" y="2" width="1" height="4"></rect><rect x="4" y="1" width="1" height="6"></rect><rect x="1" y="3" width="3" height="2"></rect></g></svg>
+    </button>
+  </div>
+</div>
+
+</body>
+</html>
