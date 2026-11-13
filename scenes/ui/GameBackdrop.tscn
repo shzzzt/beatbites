@@ -1,0 +1,55 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/Sparkles.gd" id="1_spark"]
+[ext_resource type="Script" path="res://scripts/DashedLine.gd" id="2_dash"]
+
+[node name="GameBackdrop" type="CanvasLayer"]
+layer = -1
+
+[node name="Sparkles" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_spark")
+
+[node name="LaneLine1" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 236.0
+offset_top = 300.0
+offset_right = 244.0
+offset_bottom = 1160.0
+mouse_filter = 2
+script = ExtResource("2_dash")
+mode = 1
+color = Color(0.8901961, 0.83137256, 1, 1)
+dash = 16.0
+gap = 12.0
+
+[node name="LaneLine2" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 476.0
+offset_top = 300.0
+offset_right = 484.0
+offset_bottom = 1160.0
+mouse_filter = 2
+script = ExtResource("2_dash")
+mode = 1
+color = Color(0.8901961, 0.83137256, 1, 1)
+dash = 16.0
+gap = 12.0
+
+[node name="CatchLine" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 32.0
+offset_top = 1104.0
+offset_right = 688.0
+offset_bottom = 1112.0
+mouse_filter = 2
+script = ExtResource("2_dash")

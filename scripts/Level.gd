@@ -7,7 +7,6 @@ extends Node2D
 @export var middle_pitch_max: int = 81 # Highest pitch sent to the middle.
 @export_range(1, 2, 1) var notes_per_beat: int = 1 # 1 = whole; 2 = half beats.
 
-var opponent_label: Label
 var last_sent_score: int = -1
 var last_sent_lives: int = -1
 var online_music_start_ms: float = -1.0 # Deadline on this phone's clock.
@@ -15,15 +14,15 @@ var waiting_for_online: bool = false # Freeze gameplay until both phones are rea
 var online_result_shown: bool = false # The online match has ended (result or disconnect).
 var opp_last_score: int = 0 # Rival's latest numbers, kept in case they disconnect.
 var opp_last_lives: int = 3
-const MEAL_NAMES: Array[String] = ["Breakfast", "Lunch", "Snack", "Dinner", "Dessert"]
 const RESULT_WAIT_EXTRA: float = 15.0 # Seconds to wait past the song's end for the rival.
 const THROW_COMBO: int = 10 # Every 10-catch combo throws a rotten food at the rival.
 const ATTACK_LEAD_TIME: float = 2.0 # Turn food rotten at least this long before it lands.
-var throw_label: Label # Online throw meter.
-var incoming_label: Label # Big "INCOMING!" warning.
-var incoming_tween: Tween # Hides the warning after a short time.
 const PAUSE_SCENE = preload("res://scenes/ui/PauseMenu.tscn")
+const HUD_SCENE = preload("res://scenes/ui/GameHUD.tscn")
+const BACKDROP_SCENE = preload("res://scenes/ui/GameBackdrop.tscn")
+const TAP_ZONE_TOP: float = 1160.0 # Touches below this belong to the ◀ ▶ zones.
 var pause_menu: PauseMenu
+var hud: GameHUD # Score, lives, goal bar, rival panel, pop-up text.
 var pause_started_ms: int = 0 # When the current pause began.
 # Load the scene we'll use to create food.
 const FOOD_SCENE = preload("res://scenes/actors/food.tscn")
@@ -37,21 +36,19 @@ var caught_count: int = 0 # Good foods caught toward the level goal.
 var song_time: float = -3.0 # Start three seconds before the song.
 var countdown_start_ms: int = 0 # When the countdown began.
 var music_started: bool = false # Distinguish countdown from song ending.
-var last_beat: int = -1 # Remember which beat we already printed.	
+var last_beat: int = -1 # Remember which beat we already printed.
 var breakfast_notes: Array[Dictionary] = [] # Our playable note list.
 var active_food: Array[FallingFood] = [] # Remember our spawned foods.
 var finished: bool = false # Prevent gameplay updates after the ending.
 var judgment_counts: Dictionary = {"PERFECT": 0, "GOOD": 0, "MISS": 0}
 var max_combo: int = 0 # Longest streak during this attempt.
 var lives: int = 3 # Every new attempt starts with three lives.
-var cpu_label: Label # Created only for VS CPU mode.
 var cpu_outcome: String = "" # Final CPU match message.
 
 
 @onready var music: AudioStreamPlayer = $Music # Find our Music child.
 @onready var output_latency: float = AudioServer.get_output_latency()
-@onready var catcher: Node2D = $Catcher # Find the catcher in this level.
-@onready var judgment_label: Label = $HUD/Judgment # Find the HUD text.
+@onready var catcher: Catcher = $Catcher # Find the catcher in this level.
 
 func _ready() -> void:
 	# Read the chart file as text.
@@ -60,7 +57,7 @@ func _ready() -> void:
 	var chart: Dictionary = JSON.parse_string(text)
 		# Build our playable list before spawning any food.
 	bpm = float(chart["bpm"]) # Use this song's exact tempo.
-	
+
 	for note in chart["lead_notes"]:
 		var beat: float = float(note["beat"])
 		# Breakfast accepts notes starting on whole beats.
@@ -72,7 +69,7 @@ func _ready() -> void:
 				"midi": int(note["midi"]), # Original pitch.
 				"lane": pitch_to_lane(int(note["midi"])) # Catch lane.
 			})
-	
+
 	var food_index: int = 0 # Count foods as we create them.
 	# Preview the chart after its opening three seconds.
 	for note in breakfast_notes:
@@ -86,41 +83,40 @@ func _ready() -> void:
 		food.judgment_made.connect(_on_food_judgment)
 		add_child(food) # Put this instance into the level.
 		active_food.append(food) # Remember it for updates.
-			
+
 	# End the attempt when the non-looping song finishes.
 	music.finished.connect(_on_song_finished)
-	judgment_label.text = "Goal: catch %d bites!" % TARGET_CATCHES
+	setup_hud()
 	setup_pause_menu()
 
 	if GameState.mode == "cpu":
 		cpu = CpuRival.new() # Create an independent rival.
 		cpu.setup(level_number) # Accuracy rises each level (55% → 87%).
-		create_cpu_hud()
-		
+		refresh_hud()
+
 	if GameState.mode == "online":
 		waiting_for_online = true # Hold food and the song clock.
-		judgment_label.text = "Online %s\nWaiting for both players..." % MEAL_NAMES[level_number - 1]
+		hud.show_message("WAITING...", "Online %s · waiting for both players" % GameState.meal_name(level_number))
 		# If the other phone drops, we hear about it here (deferred so the
 		# network finishes its current work before we change scenes).
 		multiplayer.peer_disconnected.connect(_on_online_peer_left, CONNECT_DEFERRED)
 		multiplayer.server_disconnected.connect(_on_online_server_left, CONNECT_DEFERRED)
 		Net.both_players_loaded.connect(_on_both_players_loaded)
 		Net.start_scheduled.connect(_on_start_scheduled)
-		create_online_hud()
 		Net.opponent_stats_updated.connect(_on_opponent_stats_updated)
 		Net.online_match_finished.connect(_on_online_match_finished)
 		Net.attack_received.connect(_on_attack_received)
 		Net.report_level_loaded.rpc_id(1) # Report readiness to the host.
 	else:
 		await start_countdown() # Start offline modes normally.
-		
+
 	print("Breakfast playable notes: ", breakfast_notes.size())
 	print("First playable note: ", breakfast_notes[0])
 	# Check that we loaded the expected song and notes.
 	print("Chart BPM: ", chart["bpm"])
 	print("Melody notes: ", chart["lead_notes"].size())
 	print("First note: ", chart["lead_notes"][0])
-	
+
 func _process(_delta: float) -> void:
 	if finished:
 		return
@@ -130,18 +126,16 @@ func _process(_delta: float) -> void:
 
 	if waiting_for_online:
 		return # Stay frozen until the scheduled countdown begins.
-		
+
 	song_time = read_song_time() # Works during countdown and playback.
-	update_cpu() # Evaluate notes whose arrival time has passed.	
-	
+	update_cpu() # Evaluate notes whose arrival time has passed.
+
 	if cpu != null:
-		cpu_label.text = "CPU score: %d\nCPU lives: %d" % [
-		cpu.score, cpu.lives
-		]
-		
+		refresh_hud() # The CPU's numbers change without a signal.
+
 	for food in active_food:
 		food.update_from_song(song_time, get_viewport_rect().size.x)
-		food.judge_catch(song_time, int(catcher.get("lane")))
+		food.judge_catch(song_time, catcher.lane)
 
 	send_online_stats() # Share any changes made by those judgments.
 
@@ -150,7 +144,7 @@ func _process(_delta: float) -> void:
 	# Both sides have now evaluated the current song time.
 	if cpu != null and (lives <= 0 or cpu.lives <= 0):
 		end_cpu_match()
-		return	
+		return
 
 	if beat > last_beat:
 		last_beat = beat # Print only when we reach a new beat.
@@ -162,16 +156,18 @@ func _on_food_judgment(result: String) -> void:
 
 	if result == "HIT_BAD":
 		lives = maxi(0, lives - 1) # Lose exactly one life.
-		judgment_label.text = "ROTTEN!\nLives: %d" % lives
+		hud.show_judgment("ROTTEN!", 0)
+		refresh_hud()
 		if lives == 0 and cpu == null:
 			end_attempt(false) # Lose immediately, regardless of score.
 		return
 
 	if result == "AVOIDED":
-		judgment_label.text = "DODGED!\nLives: %d" % lives
+		hud.show_judgment("DODGED!", combo)
 		return # Avoiding rotten food isn't a MISS.
-	
+
 	judgment_counts[result] += 1 # Count this food's judgment once.
+	var thrown: bool = false
 	if result == "MISS":
 		combo = 0 # A missed good food breaks the streak.
 	else:
@@ -184,14 +180,14 @@ func _on_food_judgment(result: String) -> void:
 			score += 50 # GOOD earns fewer points.
 		if GameState.mode == "online" and combo % THROW_COMBO == 0:
 			throw_attack() # Combo of 10, 20, 30... sends rotten food.
+			thrown = true
 
-	update_throw_meter()
+	# Show the result in the middle and update the HUD numbers.
+	hud.show_judgment(result, combo)
+	if GameState.mode == "online":
+		hud.set_throw(combo % THROW_COMBO, thrown)
+	refresh_hud()
 
-	# Show the current attempt's counters.
-	judgment_label.text = "%s\nScore: %d\nCombo: %d\nCaught: %d\nLives: %d" % [
-		result, score, combo, caught_count, lives
-	]
-	
 func pitch_to_lane(midi: int) -> int:
 	if midi <= low_pitch_max:
 		return 0 # Lower pitches go left.
@@ -216,7 +212,7 @@ func end_attempt(won: bool) -> void:
 		pause_menu.disable() # Online keeps the menu so a waiting player can leave.
 
 	if GameState.mode == "online":
-		judgment_label.text = "You finished!\nWaiting for opponent..."
+		hud.show_message("YOU FINISHED!", "Waiting for your rival...")
 		send_online_stats() # Make sure the rival sees our last numbers.
 		Net.report_match_finished.rpc_id(1, score, lives) # Tell the host.
 		# Don't wait forever: give up a little after the rival's song must have ended.
@@ -228,7 +224,8 @@ func end_attempt(won: bool) -> void:
 
 	# A win earns one star per remaining life; a loss earns none.
 	var stars: int = lives if won else 0
-	
+	var unlocked_before: int = GameState.unlocked_level
+
 	if won and GameState.mode == "solo":
 		# Only Solo clears update campaign unlocks and best stars.
 		GameState.complete_level(level_number, stars)
@@ -245,6 +242,7 @@ func end_attempt(won: bool) -> void:
 		"max_combo": max_combo,
 		"level_path": scene_file_path,
 		"level_number": level_number, # Lets Result offer NEXT MEAL.
+		"newly_unlocked": GameState.unlocked_level > unlocked_before, # Unlock banner.
 		"mode": GameState.mode, # Remember which mode produced this result.
 		"cpu_score": cpu.score if cpu != null else 0,
 		"cpu_lives": cpu.lives if cpu != null else 0,
@@ -252,19 +250,19 @@ func end_attempt(won: bool) -> void:
 	}
 	# Switch after the current food callbacks finish.
 	get_tree().call_deferred("change_scene_to_file", "res://scenes/ui/result.tscn")
-	
+
 func start_countdown() -> void:
 	countdown_start_ms = Time.get_ticks_msec() # Read the elapsed-time clock.
-	# Count backward: 3, 2, 1.
+	# Count backward: 3, 2, 1. The goal is shown underneath (R2).
 	for number in range(3, 0, -1):
-		judgment_label.text = str(number)
+		hud.show_message(str(number), "Goal: catch %d bites!" % TARGET_CATCHES, true)
 		# Wait one second; this timer will respect a future pause.
 		await get_tree().create_timer(1.0, false).timeout
 
-	judgment_label.text = "Goal: catch %d bites!" % TARGET_CATCHES
+	hud.show_message("GO!", "Goal: catch %d bites!" % TARGET_CATCHES, true, 0.8)
 	music_started = true # The countdown has finished.
 	music.play() # Begin playback from the start.
-	
+
 func read_song_time() -> float:
 	if music.playing:
 		# Use the audio clock once playback starts.
@@ -291,19 +289,11 @@ func update_cpu() -> void:
 			break # This note hasn't arrived yet.
 
 		cpu_note_index += 1 # Never evaluate the same note twice.
-		
+
 		if food.is_bad:
 			cpu.judge_bad_note() # Simulate avoiding this rotten food.
 		else:
 			cpu.judge_good_note() # Simulate catching this good food.
-			
-
-func create_cpu_hud() -> void:
-	cpu_label = Label.new() # Create a text label.
-	cpu_label.position = Vector2(24, 420) # Below the player's counters.
-	cpu_label.add_theme_font_size_override("font_size", 32)
-	cpu_label.add_theme_color_override("font_color", Color("#2667B0"))
-	$HUD.add_child(cpu_label) # Put it on the interface layer.
 
 
 func end_cpu_match() -> void:
@@ -322,21 +312,47 @@ func end_cpu_match() -> void:
 
 	end_attempt(cpu_outcome == "YOU WIN") # Open Result.
 
+
+# --- HUD --------------------------------------------------------------------
+
+func setup_hud() -> void:
+	add_child(BACKDROP_SCENE.instantiate()) # Sparkles, lane lines, catch line.
+	hud = HUD_SCENE.instantiate() as GameHUD
+	$HUD.add_child(hud) # The HUD CanvasLayer draws above the food.
+	hud.setup(GameState.mode, level_number, GameState.meal_name(level_number))
+	hud.move_requested.connect(catcher.step) # ◀ ▶ zones move one lane.
+	catcher.ignore_touch_below = TAP_ZONE_TOP
+	if GameState.mode == "online":
+		hud.set_throw(0, false)
+	refresh_hud()
+
+
+# Push every number to the HUD (cheap, so we just do it whenever one changes).
+func refresh_hud() -> void:
+	hud.set_score(score)
+	hud.set_lives(lives)
+	hud.set_goal(caught_count, TARGET_CATCHES)
+	if cpu != null:
+		hud.set_versus(score, lives, cpu.score, cpu.lives)
+	elif GameState.mode == "online":
+		hud.set_versus(score, lives, opp_last_score, opp_last_lives)
+
+
+# --- Online -----------------------------------------------------------------
+
 func _on_both_players_loaded() -> void:
 	if Net.is_host:
 		Net.client_clock_ready.connect(_on_client_clock_ready)
-		judgment_label.text = "Both players loaded!\nWaiting for clock check..."
+		hud.show_message("SYNCING...", "Both players loaded · checking clocks")
 	else:
-		judgment_label.text = "Checking host clock..."
+		hud.show_message("SYNCING...", "Checking the host's clock")
 		Net.clock_sampled.connect(_on_clock_sampled)
 		Net.begin_clock_check()
-		
+
 func _on_clock_sampled() -> void:
-	judgment_label.text = "Clock check complete! (%d samples)\nBest round trip: %d ms\nOffset: %.1f ms" % [
-		Net.clock_samples_received,
-		Net.clock_roundtrip_ms,
-		Net.host_clock_offset_ms
-	]
+	hud.show_message("SYNCED!", "Clock offset %.1f ms · round trip %d ms" % [
+		Net.host_clock_offset_ms, Net.clock_roundtrip_ms
+	])
 	Net.report_clock_ready.rpc_id(1) # Tell the host we're ready.
 
 func _on_client_clock_ready() -> void:
@@ -345,7 +361,7 @@ func _on_client_clock_ready() -> void:
 
 	# Allow one second for delivery, then three seconds of countdown.
 	Net.schedule_start.rpc(Time.get_ticks_msec() + 4000)
-	
+
 func _on_start_scheduled(host_music_start_ms: int) -> void:
 	if online_music_start_ms >= 0.0:
 		return # Ignore duplicate schedules.
@@ -356,8 +372,8 @@ func _on_start_scheduled(host_music_start_ms: int) -> void:
 		online_music_start_ms -= Net.host_clock_offset_ms
 
 	countdown_start_ms = roundi(online_music_start_ms - 3000.0)
-	judgment_label.text = "Get ready!"
-	
+	hud.show_message("GET READY!")
+
 func update_online_countdown() -> void:
 	if online_music_start_ms < 0.0:
 		return # No schedule received yet.
@@ -369,50 +385,12 @@ func update_online_countdown() -> void:
 	waiting_for_online = false # Let food move during the countdown.
 
 	if remaining_ms > 0.0:
-		judgment_label.text = str(ceili(remaining_ms / 1000.0))
+		hud.show_message(str(ceili(remaining_ms / 1000.0)), "Catch more than your rival!", true)
 	else:
-		judgment_label.text = "Goal: catch %d bites!" % TARGET_CATCHES
+		hud.show_message("GO!", "", true, 0.8)
 		music_started = true
 		# If this frame is slightly late, begin at the matching song position.
 		music.play(maxf(0.0, -remaining_ms / 1000.0))
-
-func create_online_hud() -> void:
-	opponent_label = Label.new()
-	opponent_label.position = Vector2(24, 420)
-	opponent_label.add_theme_font_size_override("font_size", 32)
-	opponent_label.add_theme_color_override("font_color", Color("#2667B0"))
-	opponent_label.text = "Opponent score: 0\nOpponent lives: 3"
-	$HUD.add_child(opponent_label)
-
-	throw_label = Label.new()
-	throw_label.position = Vector2(24, 520) # Below the opponent's numbers.
-	throw_label.add_theme_font_size_override("font_size", 32)
-	throw_label.add_theme_color_override("font_color", Color("#D9468F"))
-	$HUD.add_child(throw_label)
-	update_throw_meter()
-
-	incoming_label = Label.new()
-	incoming_label.text = "INCOMING!"
-	incoming_label.position = Vector2(0, 620)
-	incoming_label.size = Vector2(720, 80) # Full width so the text is centered.
-	incoming_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	incoming_label.add_theme_font_size_override("font_size", 64)
-	incoming_label.add_theme_color_override("font_color", Color("#D9468F"))
-	incoming_label.hide()
-	$HUD.add_child(incoming_label)
-
-
-# Shows how close the combo is to the next throw, e.g. "Throw [###-------] 3/10".
-func update_throw_meter() -> void:
-	if throw_label == null:
-		return # Only online matches have a throw meter.
-	var filled: int = combo % THROW_COMBO
-	if filled == 0 and combo > 0:
-		throw_label.text = "THROW! Rotten food sent!"
-		return
-	throw_label.text = "Throw [%s%s] %d/%d" % [
-		"#".repeat(filled), "-".repeat(THROW_COMBO - filled), filled, THROW_COMBO
-	]
 
 
 func throw_attack() -> void:
@@ -433,27 +411,15 @@ func _on_attack_received() -> void:
 		if food.arrival_time < song_time + ATTACK_LEAD_TIME:
 			continue
 		food.make_rotten()
-		show_incoming_warning()
+		hud.show_incoming()
 		return
 	# No food left in the song: the throw simply misses.
-
-
-func show_incoming_warning() -> void:
-	incoming_label.show()
-	if incoming_tween != null:
-		incoming_tween.kill() # A newer attack restarts the 1.5 s display.
-	# A Tween belongs to the label, so it stops by itself if the scene closes.
-	incoming_tween = incoming_label.create_tween()
-	incoming_tween.tween_interval(1.5)
-	incoming_tween.tween_callback(incoming_label.hide)
 
 
 func _on_opponent_stats_updated(new_score: int, new_lives: int) -> void:
 	opp_last_score = new_score
 	opp_last_lives = new_lives
-	opponent_label.text = "Opponent score: %d\nOpponent lives: %d" % [
-		new_score, new_lives
-	]
+	refresh_hud()
 
 
 func send_online_stats() -> void:
@@ -473,7 +439,7 @@ func _on_online_match_finished(my_score: int, my_lives: int, opp_score: int, opp
 	online_result_shown = true
 	pause_menu.disable()
 
-	judgment_label.text = "%s\nYou: %d  Rival: %d" % [outcome, my_score, opp_score]
+	hud.show_message(outcome, "You %d · Rival %d" % [my_score, opp_score])
 
 	# Save the host-confirmed numbers so Result can show them.
 	GameState.last_result = {
@@ -486,6 +452,7 @@ func _on_online_match_finished(my_score: int, my_lives: int, opp_score: int, opp
 		"judgments": judgment_counts.duplicate(),
 		"max_combo": max_combo,
 		"level_path": scene_file_path,
+		"level_number": level_number,
 		"mode": "online",
 		"online_outcome": outcome,
 		"opp_score": opp_score,
@@ -519,7 +486,7 @@ func end_online_early(outcome: String, message: String) -> void:
 	pause_menu.disable()
 	music.stop()
 	Net.leave_game() # Close the broken connection right away.
-	judgment_label.text = "%s\n%s" % [outcome, message]
+	hud.show_message(outcome, message)
 
 	await get_tree().create_timer(2.0).timeout
 
@@ -540,6 +507,7 @@ func end_online_early(outcome: String, message: String) -> void:
 		"judgments": judgment_counts.duplicate(),
 		"max_combo": max_combo,
 		"level_path": scene_file_path,
+		"level_number": level_number,
 		"mode": "online",
 		"online_outcome": outcome,
 		"opp_score": opp_last_score,
@@ -547,6 +515,8 @@ func end_online_early(outcome: String, message: String) -> void:
 	}
 	get_tree().change_scene_to_file("res://scenes/ui/result.tscn")
 
+
+# --- Pause ------------------------------------------------------------------
 
 func setup_pause_menu() -> void:
 	pause_menu = PAUSE_SCENE.instantiate() as PauseMenu
@@ -559,6 +529,9 @@ func setup_pause_menu() -> void:
 
 
 func _on_pause_opened() -> void:
+	pause_menu.set_info("LV %d · %s · %d / %d bites" % [
+		level_number, GameState.meal_name(level_number), caught_count, TARGET_CATCHES
+	])
 	if GameState.mode == "online":
 		return # We can't freeze the other phone, so the match keeps going.
 	pause_started_ms = Time.get_ticks_msec()

@@ -3,9 +3,9 @@ extends Control
 
 func _ready() -> void:
 	# Each button supplies its own mode to the same function.
-	$Content/Solo.pressed.connect(_choose_mode.bind("solo"))
-	$Content/CPU.pressed.connect(_choose_mode.bind("cpu"))
-	$Content/Back.pressed.connect(_on_back_pressed)
+	%Solo.pressed.connect(_choose_mode.bind("solo"))
+	%CPU.pressed.connect(_choose_mode.bind("cpu"))
+	%Back.pressed.connect(_on_back_pressed)
 
 
 func _on_back_pressed() -> void:

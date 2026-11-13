@@ -54,9 +54,30 @@ func make_rotten() -> void:
 	# Used by the online attack: a good food turns rotten mid-song.
 	is_bad = true
 	$Sprite2D.texture = BAD_TEXTURE
+	queue_redraw() # Add the green warning box.
 
 
 func _ready() -> void:
 	if is_bad:
 		# Change only this instance's sprite.
 		$Sprite2D.texture = BAD_TEXTURE
+
+
+# Rotten food gets a pale green box with a dashed green border (mockup 05),
+# so it's easy to spot and dodge. _draw() paints behind the Sprite2D child.
+func _draw() -> void:
+	if not is_bad:
+		return
+	const HALF: float = 64.0 # Box is 128×128 around the 96×96 sprite.
+	const GREEN := Color("#8FD14F")
+	draw_rect(Rect2(-HALF, -HALF, HALF * 2, HALF * 2), Color("#F1FBE6"))
+	var x: float = -HALF
+	while x < HALF: # Top and bottom dashes.
+		draw_rect(Rect2(x, -HALF, 12, 6), GREEN)
+		draw_rect(Rect2(x, HALF - 6, 12, 6), GREEN)
+		x += 20
+	var y: float = -HALF
+	while y < HALF: # Left and right dashes.
+		draw_rect(Rect2(-HALF, y, 6, 12), GREEN)
+		draw_rect(Rect2(HALF - 6, y, 6, 12), GREEN)
+		y += 20

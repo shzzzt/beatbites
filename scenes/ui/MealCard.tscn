@@ -1,0 +1,128 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/MealCard.gd" id="1_card"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_lock.png" id="2_lock"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_star.png" id="3_star"]
+[ext_resource type="Script" path="res://scripts/DashedLine.gd" id="4_dash"]
+
+[node name="MealCard" type="Button"]
+custom_minimum_size = Vector2(0, 168)
+theme_type_variation = &"WhiteButton"
+script = ExtResource("1_card")
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 20
+
+[node name="Row" type="HBoxContainer" parent="Margin"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 24
+
+[node name="Tile" type="PanelContainer" parent="Margin/Row"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(104, 104)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+theme_type_variation = &"NumBlue"
+
+[node name="Number" type="Label" parent="Margin/Row/Tile"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"TitleLabel"
+text = "1"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Lock" type="TextureRect" parent="Margin/Row/Tile"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(48, 54)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("2_lock")
+expand_mode = 1
+
+[node name="Text" type="VBoxContainer" parent="Margin/Row"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+mouse_filter = 2
+theme_override_constants/separation = 4
+
+[node name="MealName" type="Label" parent="Margin/Row/Text"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"MealName"
+text = "Breakfast"
+
+[node name="Info" type="Label" parent="Margin/Row/Text"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"SmallMuted"
+text = "90 BPM · learn to catch"
+autowrap_mode = 3
+
+[node name="Stars" type="HBoxContainer" parent="Margin/Row"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+theme_override_constants/separation = 8
+
+[node name="Star1" type="TextureRect" parent="Margin/Row/Stars"]
+custom_minimum_size = Vector2(35, 35)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("3_star")
+expand_mode = 1
+
+[node name="Star2" type="TextureRect" parent="Margin/Row/Stars"]
+custom_minimum_size = Vector2(35, 35)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("3_star")
+expand_mode = 1
+
+[node name="Star3" type="TextureRect" parent="Margin/Row/Stars"]
+custom_minimum_size = Vector2(35, 35)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("3_star")
+expand_mode = 1
+
+[node name="LockedTag" type="Label" parent="Margin/Row"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_vertical = 4
+theme_type_variation = &"TinyPixel"
+text = "LOCKED"
+
+[node name="Dashes" type="Control" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("4_dash")
+mode = 2
+color = Color(0.7882353, 0.7137255, 0.93333334, 1)
+dash = 16.0
+gap = 12.0

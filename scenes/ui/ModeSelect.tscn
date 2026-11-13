@@ -208,6 +208,7 @@ theme_override_constants/separation = 16
 alignment = 1
 
 [node name="StarIcon" type="TextureRect" parent="Margin/Content/Footer/StarsRow" unique_id=1185730219]
+modulate = Color(0.41960785, 0.34509805, 0.627451, 1)
 custom_minimum_size = Vector2(28, 28)
 layout_mode = 2
 size_flags_vertical = 4

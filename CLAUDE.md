@@ -31,10 +31,13 @@ Godot 4, GDScript 4, Android, portrait 720×1280. I'm a beginner: build efficien
 ## Local setup
 
 - Windows. Project: `D:\BSIT\4TH YR\Special Topics\Lab 5\beat-bites`
-- Godot executable: [D:\BSIT\4TH YR\Special Topics\Lab 5\Godot_v4.7.2-stable_win64.exe]
-  (the `_console.exe` version isn't in that folder; put it next to this one so output shows in
-  the terminal. Claude's shell has so far been blocked from launching Godot, so I check scripts
-  in the editor.)
+- Godot executable (note: `Godot_v4.7.2-stable_win64.exe` is a FOLDER; the programs are inside):
+  `D:\BSIT\4TH YR\Special Topics\Lab 5\Godot_v4.7.2-stable_win64.exe\Godot_v4.7.2-stable_win64_console.exe`
+  (Git Bash: `/d/BSIT/4TH YR/Special Topics/Lab 5/Godot_v4.7.2-stable_win64.exe/Godot_v4.7.2-stable_win64_console.exe`)
+- `--check-only --script` can't see autoloads (GameState, Net) and reports "Identifier not found"
+  for scripts that use them. To check those, run the scene headless instead:
+  `godot --headless --path . res://scenes/ui/LevelSelect.tscn --quit-after 300`.
+  (Headless exit shows a harmless "music_menu.ogg still in use / leaked" warning from Title.)
 - Online testing needs two Android phones on a phone hotspot.
 
 ## The game
@@ -163,6 +166,31 @@ launch the Godot exe; `_console.exe` is missing). Waiting for one combined phone
 - Title animations (Tweens in Title.gd): intro (logo bounces in, rest fades in ~1.6 s), idle
   float (logo words + food), axolotl hops on every beat of the menu song (80 BPM, audio clock,
   handles looping), 0.25 s fade-out on tap. `Sparkles.twinkle` export (on for Title only).
+- All screens restyled to the mockups (2026-11-14), checked by rendering screenshots in a 9:16
+  window (not yet on a phone):
+  - Theme is generated: more variations (WhiteButton, PaleButton, TapZoneLeft/Right, LockedCard,
+    HudPanel, InfoPanel, HintPanel, ErrorPanel, SuccessPanel, Tile*, Num*, ChipPanel, ThrowOn/Off,
+    TugBar, HeroLabel, SmallMuted, MealName, StatValue, ScoreLabel, TinyPixel).
+  - `ui_heart.png` and `ui_star.png` are WHITE shapes: always tint with modulate (heart #FF8FB8,
+    star #F2B230, empty #E3D4FF).
+  - Level Select: `MealCard.tscn`/`MealCard.gd` (class MealCard) × 5 from `GameState.MEALS`;
+    locked = lilac card + dashed border (`DashedLine` mode BOX) + lock icon; hint panel.
+  - Lobby: host panel (HOST → IP box + level picker + START), join panel (IP field + JOIN),
+    pink error panel (`show_error(title, text)`); joining panel hidden while hosting.
+  - Gameplay: `GameHUD.tscn`/`GameHUD.gd` (class GameHUD) added by `Level.setup_hud()` into the
+    level's HUD CanvasLayer; `GameBackdrop.tscn` (layer -1: sparkles, lane dividers, catch line).
+    Level.gd calls `hud.show_message/show_judgment/set_*`; `refresh_hud()` pushes all numbers.
+    Solo: level/score/hearts/goal bar. CPU + Online: YOU vs RIVAL/CPU panel + tug bar; online
+    adds the 10-box throw meter + INCOMING! banner. Old `$HUD/Judgment` label removed from levels.
+  - NEW CONTROL: ◀ ▶ tap zones (y ≥ 1160) move the catcher one lane (`Catcher.step`); tapping a
+    lane above them still works (`Catcher.ignore_touch_below`).
+  - Rotten food draws a pale green box with dashed green border (`Food._draw`).
+  - Pause (06): lilac overlay, PAUSED, "LV · meal · caught/40 bites" (`PauseMenu.set_info`),
+    RESUME / RESTART / SOUND [ON|OFF chip] / QUIT TO MENU; pause button top-left.
+  - Result (07): level line, outcome, 3 stars (fade in), score card + 4 tiles, rival row
+    (CPU/online), "X unlocked!" banner (`last_result.newly_unlocked`), RETRY / NEXT > / MENU.
+  - OfflineSelect + Credits restyled to match (no mockups): cards / scrollable white panel.
+  - `GameState.MEALS`, `meal_name()`, `total_stars()` shared by menus and HUD.
 - Fix: `cpu.setup(level_number)` was never called, so CPU accuracy stayed 55% on all levels;
   now 55/63/71/79/87%.
 - R3: Result has NEXT MEAL (Solo/CPU, when the next meal is unlocked); `last_result.level_number`.
@@ -173,9 +201,8 @@ launch the Godot exe; `_console.exe` is missing). Waiting for one combined phone
 ## Remaining work (in order; batch related tasks together)
 
 1. Phone-test the batch above. Fill in the Credits / docs placeholders.
-2. Restyle the other screens to their mockups using the shared theme:
-   03 Level select, 04 Lobby, 05 Gameplay HUD, 06 Pause, 07 Result, 08 Online HUD.
-   Decide with me: SETTINGS button (real screen or keep BACK).
+2. Decide with me: SETTINGS button (real screen or keep BACK); keep the ◀ ▶ tap zones?
+   Optional polish: varied food sprites (all good food is still an apple).
 3. Regression pass: all 5 levels, unlocks after app restart, airplane mode, R8 error message,
    readable layout on phone. Record results in GDD §11 playtesting.
    Ask me whether VS CPU satisfies the rubric's offline mode (it says "AI or pass-and-play").

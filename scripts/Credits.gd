@@ -2,7 +2,7 @@ extends Control
 
 
 func _ready() -> void:
-	$Content/Back.pressed.connect(_on_back_pressed)
+	%Back.pressed.connect(_on_back_pressed)
 
 
 func _on_back_pressed() -> void:

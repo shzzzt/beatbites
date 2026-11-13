@@ -1,6 +1,11 @@
 [gd_scene format=3 uid="uid://b7h3ex0bktfd7"]
 
 [ext_resource type="Script" uid="uid://bheig8oiw77sd" path="res://scripts/OfflineSelect.gd" id="1_enyg8"]
+[ext_resource type="Script" path="res://scripts/Sparkles.gd" id="2_spark"]
+[ext_resource type="Texture2D" path="res://assets/art/icon_back.png" id="3_back"]
+[ext_resource type="Texture2D" path="res://assets/art/good_donut.png" id="4_donut"]
+[ext_resource type="Texture2D" path="res://assets/art/rival_idle.png" id="5_rival"]
+[ext_resource type="Texture2D" path="res://assets/art/catcher_idle.png" id="6_catcher"]
 
 [node name="OfflineSelect" type="Control" unique_id=1103033410]
 layout_mode = 3
@@ -11,33 +16,184 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_enyg8")
 
-[node name="Content" type="VBoxContainer" parent="." unique_id=230392965]
-custom_minimum_size = Vector2(672, 0)
-layout_mode = 0
-offset_left = 24.0
-offset_top = 160.0
-offset_right = 64.0
-offset_bottom = 200.0
-theme_override_constants/separation = 24
+[node name="Sparkles" type="Control" parent="." unique_id=1288071512]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("2_spark")
 
-[node name="Heading" type="Label" parent="Content" unique_id=1341386818]
-theme_type_variation = &"TitleLabel"
+[node name="Margin" type="MarginContainer" parent="." unique_id=1617439504]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 48
+theme_override_constants/margin_top = 56
+theme_override_constants/margin_right = 48
+theme_override_constants/margin_bottom = 64
+
+[node name="Content" type="VBoxContainer" parent="Margin" unique_id=230392965]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.23137255, 0.16470589, 0.4, 1)
-theme_override_font_sizes/font_size = 40
+mouse_filter = 2
+theme_override_constants/separation = 32
+
+[node name="TopBar" type="HBoxContainer" parent="Margin/Content" unique_id=1981530664]
+layout_mode = 2
+theme_override_constants/separation = 32
+
+[node name="Back" type="Button" parent="Margin/Content/TopBar" unique_id=1588203361]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(80, 80)
+layout_mode = 2
+theme_type_variation = &"IconButton"
+icon = ExtResource("3_back")
+icon_alignment = 1
+expand_icon = true
+
+[node name="Heading" type="Label" parent="Margin/Content/TopBar" unique_id=1341386818]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"LogoLabel"
 text = "PLAY OFFLINE"
+vertical_alignment = 1
 
-[node name="Solo" type="Button" parent="Content" unique_id=974169716]
-custom_minimum_size = Vector2(0, 96)
+[node name="Section" type="Label" parent="Margin/Content" unique_id=1170025339]
 layout_mode = 2
-text = "SOLO CAMPAIGN"
+theme_type_variation = &"SectionLabel"
+text = "NO INTERNET NEEDED"
 
-[node name="CPU" type="Button" parent="Content" unique_id=982544210]
-custom_minimum_size = Vector2(0, 96)
+[node name="Solo" type="Button" parent="Margin/Content" unique_id=974169716]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 216)
 layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="Margin/Content/Solo" unique_id=1376431260]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 36
+theme_override_constants/margin_top = 36
+theme_override_constants/margin_right = 36
+theme_override_constants/margin_bottom = 36
+
+[node name="Row" type="HBoxContainer" parent="Margin/Content/Solo/Margin" unique_id=1934611082]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 32
+
+[node name="Icon" type="TextureRect" parent="Margin/Content/Solo/Margin/Row" unique_id=1209480093]
+custom_minimum_size = Vector2(96, 96)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("4_donut")
+expand_mode = 1
+
+[node name="Text" type="VBoxContainer" parent="Margin/Content/Solo/Margin/Row" unique_id=1726853207]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+mouse_filter = 2
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="Margin/Content/Solo/Margin/Row/Text" unique_id=1430262893]
+layout_mode = 2
+theme_type_variation = &"CardTitle"
+text = "SOLO"
+
+[node name="Body" type="Label" parent="Margin/Content/Solo/Margin/Row/Text" unique_id=1060183716]
+layout_mode = 2
+theme_type_variation = &"CardBody"
+text = "5 meals · unlock them and earn stars"
+autowrap_mode = 3
+
+[node name="CPU" type="Button" parent="Margin/Content" unique_id=982544210]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 216)
+layout_mode = 2
+theme_type_variation = &"BlueButton"
+
+[node name="Margin" type="MarginContainer" parent="Margin/Content/CPU" unique_id=1580027146]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 36
+theme_override_constants/margin_top = 36
+theme_override_constants/margin_right = 36
+theme_override_constants/margin_bottom = 36
+
+[node name="Row" type="HBoxContainer" parent="Margin/Content/CPU/Margin" unique_id=1655911436]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 32
+
+[node name="Icon" type="TextureRect" parent="Margin/Content/CPU/Margin/Row" unique_id=1146383591]
+custom_minimum_size = Vector2(96, 72)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("5_rival")
+expand_mode = 1
+
+[node name="Text" type="VBoxContainer" parent="Margin/Content/CPU/Margin/Row" unique_id=1803447012]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+mouse_filter = 2
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="Margin/Content/CPU/Margin/Row/Text" unique_id=1527709183]
+layout_mode = 2
+theme_type_variation = &"CardTitle"
 text = "VS CPU"
 
-[node name="Back" type="Button" parent="Content" unique_id=1588203361]
-custom_minimum_size = Vector2(0, 96)
+[node name="Body" type="Label" parent="Margin/Content/CPU/Margin/Row/Text" unique_id=1915094040]
 layout_mode = 2
-text = "BACK"
+theme_type_variation = &"CardBody"
+text = "Race a rival · it gets better each meal"
+autowrap_mode = 3
+
+[node name="Filler" type="Control" parent="Margin/Content" unique_id=1415512633]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="Footer" type="HBoxContainer" parent="Margin/Content" unique_id=1062577316]
+layout_mode = 2
+theme_override_constants/separation = 32
+alignment = 1
+
+[node name="You" type="TextureRect" parent="Margin/Content/Footer" unique_id=1774580121]
+custom_minimum_size = Vector2(192, 144)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("6_catcher")
+expand_mode = 1
+
+[node name="VS" type="Label" parent="Margin/Content/Footer" unique_id=1263850318]
+layout_mode = 2
+theme_type_variation = &"SectionLabel"
+text = "VS"
+vertical_alignment = 1
+
+[node name="Rival" type="TextureRect" parent="Margin/Content/Footer" unique_id=1440098216]
+custom_minimum_size = Vector2(192, 144)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("5_rival")
+expand_mode = 1

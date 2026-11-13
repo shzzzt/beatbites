@@ -1,0 +1,395 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/GameHUD.gd" id="1_hud"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_heart.png" id="2_heart"]
+[ext_resource type="Texture2D" path="res://assets/art/bad_fish.png" id="3_fish"]
+[ext_resource type="Texture2D" path="res://assets/art/icon_left.png" id="4_left"]
+[ext_resource type="Texture2D" path="res://assets/art/icon_right.png" id="5_right"]
+
+[node name="GameHUD" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_hud")
+
+[node name="SoloTop" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 0
+offset_right = 720.0
+offset_bottom = 300.0
+mouse_filter = 2
+
+[node name="Info" type="VBoxContainer" parent="SoloTop"]
+layout_mode = 0
+offset_left = 136.0
+offset_top = 52.0
+offset_right = 488.0
+offset_bottom = 140.0
+mouse_filter = 2
+theme_override_constants/separation = 8
+
+[node name="LevelName" type="Label" parent="SoloTop/Info"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"SmallMuted"
+text = "LV 1 · BREAKFAST"
+
+[node name="Score" type="Label" parent="SoloTop/Info"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ScoreLabel"
+text = "00000"
+
+[node name="Hearts" type="HBoxContainer" parent="SoloTop"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 496.0
+offset_top = 68.0
+offset_right = 688.0
+offset_bottom = 116.0
+mouse_filter = 2
+theme_override_constants/separation = 8
+alignment = 2
+
+[node name="Heart1" type="TextureRect" parent="SoloTop/Hearts"]
+custom_minimum_size = Vector2(56, 48)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("2_heart")
+expand_mode = 1
+
+[node name="Heart2" type="TextureRect" parent="SoloTop/Hearts"]
+custom_minimum_size = Vector2(56, 48)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("2_heart")
+expand_mode = 1
+
+[node name="Heart3" type="TextureRect" parent="SoloTop/Hearts"]
+custom_minimum_size = Vector2(56, 48)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("2_heart")
+expand_mode = 1
+
+[node name="GoalPanel" type="PanelContainer" parent="SoloTop"]
+layout_mode = 0
+offset_left = 32.0
+offset_top = 168.0
+offset_right = 688.0
+offset_bottom = 288.0
+mouse_filter = 2
+theme_type_variation = &"HudPanel"
+
+[node name="GoalBox" type="VBoxContainer" parent="SoloTop/GoalPanel"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 12
+
+[node name="GoalRow" type="HBoxContainer" parent="SoloTop/GoalPanel/GoalBox"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="GoalText" type="Label" parent="SoloTop/GoalPanel/GoalBox/GoalRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+text = "Goal: catch 40 bites"
+
+[node name="GoalCount" type="Label" parent="SoloTop/GoalPanel/GoalBox/GoalRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"CardBody"
+theme_override_colors/font_color = Color(0.14901961, 0.40392157, 0.6901961, 1)
+text = "0 / 40"
+
+[node name="GoalBar" type="ProgressBar" parent="SoloTop/GoalPanel/GoalBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+mouse_filter = 2
+max_value = 40.0
+step = 1.0
+show_percentage = false
+
+[node name="VersusTop" type="Control" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 0
+offset_right = 720.0
+offset_bottom = 460.0
+mouse_filter = 2
+
+[node name="VersusPanel" type="PanelContainer" parent="VersusTop"]
+layout_mode = 0
+offset_left = 128.0
+offset_top = 48.0
+offset_right = 688.0
+offset_bottom = 148.0
+mouse_filter = 2
+theme_type_variation = &"HudPanel"
+
+[node name="Row" type="HBoxContainer" parent="VersusTop/VersusPanel"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="You" type="VBoxContainer" parent="VersusTop/VersusPanel/Row"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 4
+
+[node name="YouTop" type="HBoxContainer" parent="VersusTop/VersusPanel/Row/You"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 8
+
+[node name="YouName" type="Label" parent="VersusTop/VersusPanel/Row/You/YouTop"]
+layout_mode = 2
+theme_type_variation = &"CardBody"
+theme_override_colors/font_color = Color(0.14901961, 0.40392157, 0.6901961, 1)
+text = "YOU"
+
+[node name="YouHearts" type="HBoxContainer" parent="VersusTop/VersusPanel/Row/You/YouTop"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+theme_override_constants/separation = 4
+
+[node name="YouScore" type="Label" parent="VersusTop/VersusPanel/Row/You"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"CardTitle"
+theme_override_font_sizes/font_size = 24
+text = "00000"
+
+[node name="VS" type="Label" parent="VersusTop/VersusPanel/Row"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"TinyPixel"
+text = "VS"
+horizontal_alignment = 1
+
+[node name="Rival" type="VBoxContainer" parent="VersusTop/VersusPanel/Row"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 4
+
+[node name="RivalTop" type="HBoxContainer" parent="VersusTop/VersusPanel/Row/Rival"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 8
+alignment = 2
+
+[node name="RivalHearts" type="HBoxContainer" parent="VersusTop/VersusPanel/Row/Rival/RivalTop"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+theme_override_constants/separation = 4
+
+[node name="RivalName" type="Label" parent="VersusTop/VersusPanel/Row/Rival/RivalTop"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"CardBody"
+theme_override_colors/font_color = Color(0.6901961, 0.17254902, 0.42352942, 1)
+text = "RIVAL"
+
+[node name="RivalScore" type="Label" parent="VersusTop/VersusPanel/Row/Rival"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"CardTitle"
+theme_override_font_sizes/font_size = 24
+text = "00000"
+horizontal_alignment = 2
+
+[node name="TugBar" type="ProgressBar" parent="VersusTop"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 32.0
+offset_top = 164.0
+offset_right = 688.0
+offset_bottom = 196.0
+mouse_filter = 2
+theme_type_variation = &"TugBar"
+max_value = 1.0
+value = 0.5
+show_percentage = false
+
+[node name="ThrowPanel" type="PanelContainer" parent="VersusTop"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 32.0
+offset_top = 216.0
+offset_right = 688.0
+offset_bottom = 336.0
+mouse_filter = 2
+theme_type_variation = &"HudPanel"
+
+[node name="ThrowBox" type="VBoxContainer" parent="VersusTop/ThrowPanel"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 12
+
+[node name="ThrowRow" type="HBoxContainer" parent="VersusTop/ThrowPanel/ThrowBox"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="ThrowText" type="Label" parent="VersusTop/ThrowPanel/ThrowBox/ThrowRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+text = "Throw meter"
+
+[node name="ThrowCount" type="Label" parent="VersusTop/ThrowPanel/ThrowBox/ThrowRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"CardBody"
+theme_override_colors/font_color = Color(0.5411765, 0.32156864, 0.043137256, 1)
+text = "0 / 10 combo"
+
+[node name="ThrowBoxes" type="HBoxContainer" parent="VersusTop/ThrowPanel/ThrowBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 10
+
+[node name="Incoming" type="PanelContainer" parent="VersusTop"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_left = 80.0
+offset_top = 356.0
+offset_right = 640.0
+offset_bottom = 444.0
+mouse_filter = 2
+theme_type_variation = &"SuccessPanel"
+
+[node name="Row" type="HBoxContainer" parent="VersusTop/Incoming"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="Fish" type="TextureRect" parent="VersusTop/Incoming/Row"]
+custom_minimum_size = Vector2(48, 48)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("3_fish")
+expand_mode = 1
+
+[node name="Text" type="Label" parent="VersusTop/Incoming/Row"]
+layout_mode = 2
+theme_type_variation = &"CardTitle"
+theme_override_colors/font_color = Color(0.18431373, 0.36862746, 0.047058824, 1)
+theme_override_font_sizes/font_size = 24
+text = "INCOMING!"
+vertical_alignment = 1
+
+[node name="Message" type="VBoxContainer" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_left = 32.0
+offset_top = 470.0
+offset_right = 688.0
+offset_bottom = 700.0
+mouse_filter = 2
+theme_override_constants/separation = 16
+
+[node name="MessageTitle" type="Label" parent="Message"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"HeroLabel"
+text = "3"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="MessageSub" type="Label" parent="Message"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"MutedLabel"
+text = "Goal: catch 40 bites!"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Judgment" type="Label" parent="."]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0)
+layout_mode = 0
+offset_top = 740.0
+offset_right = 720.0
+offset_bottom = 800.0
+theme_type_variation = &"HeroLabel"
+text = "PERFECT!"
+horizontal_alignment = 1
+
+[node name="Combo" type="Label" parent="."]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0)
+layout_mode = 0
+offset_top = 816.0
+offset_right = 720.0
+offset_bottom = 876.0
+theme_type_variation = &"StatValue"
+theme_override_colors/font_color = Color(0.6039216, 0.35686275, 0.047058824, 1)
+theme_override_font_sizes/font_size = 44
+text = "x12 COMBO"
+horizontal_alignment = 1
+
+[node name="LeftZone" type="Button" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 32.0
+offset_top = 1168.0
+offset_right = 348.0
+offset_bottom = 1256.0
+focus_mode = 0
+theme_type_variation = &"TapZoneLeft"
+
+[node name="Arrow" type="TextureRect" parent="LeftZone"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -24.0
+offset_top = -24.0
+offset_right = 24.0
+offset_bottom = 24.0
+mouse_filter = 2
+texture = ExtResource("4_left")
+expand_mode = 1
+
+[node name="RightZone" type="Button" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 372.0
+offset_top = 1168.0
+offset_right = 688.0
+offset_bottom = 1256.0
+focus_mode = 0
+theme_type_variation = &"TapZoneRight"
+
+[node name="Arrow" type="TextureRect" parent="RightZone"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -24.0
+offset_top = -24.0
+offset_right = 24.0
+offset_bottom = 24.0
+mouse_filter = 2
+texture = ExtResource("5_right")
+expand_mode = 1

@@ -19,12 +19,3 @@ position = Vector2(360, 1080)
 stream = ExtResource("3_xv7r2")
 
 [node name="HUD" type="CanvasLayer" parent="." unique_id=1859559952]
-
-[node name="Judgment" type="Label" parent="HUD" unique_id=1730401662]
-offset_left = 24.0
-offset_top = 180.0
-offset_right = 150.0
-offset_bottom = 203.0
-theme_override_colors/font_color = Color(0.23137255, 0.16470589, 0.4, 1)
-theme_override_font_sizes/font_size = 32
-text = "Catch the apple!"

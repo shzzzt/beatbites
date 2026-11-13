@@ -1,6 +1,9 @@
 [gd_scene format=3 uid="uid://d354aar67bsdc"]
 
 [ext_resource type="Script" uid="uid://bjebufmbinupu" path="res://scripts/Result.gd" id="1_3dhtb"]
+[ext_resource type="Script" path="res://scripts/Sparkles.gd" id="2_spark"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_star.png" id="3_star"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_unlock.png" id="4_unlock"]
 
 [node name="Result" type="Control" unique_id=2080969085]
 layout_mode = 3
@@ -11,40 +14,271 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_3dhtb")
 
-[node name="Content" type="VBoxContainer" parent="." unique_id=249456022]
-custom_minimum_size = Vector2(672, 0)
-layout_mode = 0
-offset_left = 24.0
-offset_top = 160.0
-offset_right = 64.0
-offset_bottom = 200.0
+[node name="Sparkles" type="Control" parent="." unique_id=1203385107]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("2_spark")
+
+[node name="Margin" type="MarginContainer" parent="." unique_id=1664813890]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 64
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 48
+
+[node name="Content" type="VBoxContainer" parent="Margin" unique_id=249456022]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 16
+
+[node name="LevelLine" type="Label" parent="Margin/Content" unique_id=1437788051]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"MutedLabel"
+text = "LV 1 · BREAKFAST"
+horizontal_alignment = 1
+
+[node name="Heading" type="Label" parent="Margin/Content" unique_id=1256320928]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"HeroLabel"
+text = "LEVEL CLEARED!"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="Stars" type="HBoxContainer" parent="Margin/Content" unique_id=1872504119]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 24
+alignment = 1
+
+[node name="Star1" type="TextureRect" parent="Margin/Content/Stars" unique_id=1093266871]
+custom_minimum_size = Vector2(112, 112)
+layout_mode = 2
+size_flags_vertical = 8
+mouse_filter = 2
+texture = ExtResource("3_star")
+expand_mode = 1
+
+[node name="Star2" type="TextureRect" parent="Margin/Content/Stars" unique_id=1580211139]
+custom_minimum_size = Vector2(126, 126)
+layout_mode = 2
+size_flags_vertical = 8
+mouse_filter = 2
+texture = ExtResource("3_star")
+expand_mode = 1
+
+[node name="Star3" type="TextureRect" parent="Margin/Content/Stars" unique_id=1324659410]
+custom_minimum_size = Vector2(112, 112)
+layout_mode = 2
+size_flags_vertical = 8
+mouse_filter = 2
+texture = ExtResource("3_star")
+expand_mode = 1
+
+[node name="SubLine" type="Label" parent="Margin/Content" unique_id=866681477]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"SmallMuted"
+text = "Caught 0 / 40 · 3 lives left"
+horizontal_alignment = 1
+
+[node name="StatsPanel" type="PanelContainer" parent="Margin/Content" unique_id=1914390625]
+layout_mode = 2
+
+[node name="StatsBox" type="VBoxContainer" parent="Margin/Content/StatsPanel" unique_id=1449186311]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="ScoreRow" type="HBoxContainer" parent="Margin/Content/StatsPanel/StatsBox" unique_id=1062918573]
+layout_mode = 2
+
+[node name="ScoreCaption" type="Label" parent="Margin/Content/StatsPanel/StatsBox/ScoreRow" unique_id=1738201992]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"MutedLabel"
+text = "SCORE"
+
+[node name="ScoreValue" type="Label" parent="Margin/Content/StatsPanel/StatsBox/ScoreRow" unique_id=1263570412]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ScoreLabel"
+theme_override_font_sizes/font_size = 40
+text = "00000"
+
+[node name="RivalRow" type="HBoxContainer" parent="Margin/Content/StatsPanel/StatsBox" unique_id=1985027340]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+
+[node name="RivalCaption" type="Label" parent="Margin/Content/StatsPanel/StatsBox/RivalRow" unique_id=1309514783]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"MutedLabel"
+text = "RIVAL"
+
+[node name="RivalValue" type="Label" parent="Margin/Content/StatsPanel/StatsBox/RivalRow" unique_id=1602775021]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ScoreLabel"
+theme_override_colors/font_color = Color(0.14901961, 0.40392157, 0.6901961, 1)
+theme_override_font_sizes/font_size = 24
+text = "00000 · 3 lives"
+
+[node name="Grid" type="GridContainer" parent="Margin/Content/StatsPanel/StatsBox" unique_id=1757236458]
+layout_mode = 2
+theme_override_constants/h_separation = 20
+theme_override_constants/v_separation = 20
+columns = 2
+
+[node name="Perfect" type="PanelContainer" parent="Margin/Content/StatsPanel/StatsBox/Grid" unique_id=1126604466]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"TilePink"
+
+[node name="Box" type="VBoxContainer" parent="Margin/Content/StatsPanel/StatsBox/Grid/Perfect" unique_id=1584066305]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="Caption" type="Label" parent="Margin/Content/StatsPanel/StatsBox/Grid/Perfect/Box" unique_id=1023853120]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7607843, 0.23137255, 0.5019608, 1)
+text = "PERFECT"
+
+[node name="PerfectValue" type="Label" parent="Margin/Content/StatsPanel/StatsBox/Grid/Perfect/Box" unique_id=1950133906]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"StatValue"
+text = "0"
+
+[node name="Good" type="PanelContainer" parent="Margin/Content/StatsPanel/StatsBox/Grid" unique_id=1489012373]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"TileBlue"
+
+[node name="Box" type="VBoxContainer" parent="Margin/Content/StatsPanel/StatsBox/Grid/Good" unique_id=1349606001]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="Caption" type="Label" parent="Margin/Content/StatsPanel/StatsBox/Grid/Good/Box" unique_id=1710945412]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.14901961, 0.40392157, 0.6901961, 1)
+text = "GOOD"
+
+[node name="GoodValue" type="Label" parent="Margin/Content/StatsPanel/StatsBox/Grid/Good/Box" unique_id=1218840391]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"StatValue"
+text = "0"
+
+[node name="Miss" type="PanelContainer" parent="Margin/Content/StatsPanel/StatsBox/Grid" unique_id=1592771106]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"TileLilac"
+
+[node name="Box" type="VBoxContainer" parent="Margin/Content/StatsPanel/StatsBox/Grid/Miss" unique_id=1186350944]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="Caption" type="Label" parent="Margin/Content/StatsPanel/StatsBox/Grid/Miss/Box" unique_id=1462107703]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.41960785, 0.34509805, 0.627451, 1)
+text = "MISS"
+
+[node name="MissValue" type="Label" parent="Margin/Content/StatsPanel/StatsBox/Grid/Miss/Box" unique_id=1731189015]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"StatValue"
+text = "0"
+
+[node name="Combo" type="PanelContainer" parent="Margin/Content/StatsPanel/StatsBox/Grid" unique_id=1834096617]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"TileYellow"
+
+[node name="Box" type="VBoxContainer" parent="Margin/Content/StatsPanel/StatsBox/Grid/Combo" unique_id=1050742316]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="Caption" type="Label" parent="Margin/Content/StatsPanel/StatsBox/Grid/Combo/Box" unique_id=1366220587]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5411765, 0.32156864, 0.043137256, 1)
+text = "MAX COMBO"
+
+[node name="ComboValue" type="Label" parent="Margin/Content/StatsPanel/StatsBox/Grid/Combo/Box" unique_id=1626960342]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"StatValue"
+text = "0"
+
+[node name="Unlocked" type="PanelContainer" parent="Margin/Content" unique_id=1170364211]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_type_variation = &"SuccessPanel"
+
+[node name="Row" type="HBoxContainer" parent="Margin/Content/Unlocked" unique_id=1504727040]
+layout_mode = 2
 theme_override_constants/separation = 24
 
-[node name="Heading" type="Label" parent="Content" unique_id=1256320928]
-theme_type_variation = &"TitleLabel"
+[node name="Icon" type="TextureRect" parent="Margin/Content/Unlocked/Row" unique_id=1977093114]
+custom_minimum_size = Vector2(48, 54)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.23137255, 0.16470589, 0.4, 1)
-theme_override_font_sizes/font_size = 40
-text = "RESULT"
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("4_unlock")
+expand_mode = 1
 
-[node name="Details" type="Label" parent="Content" unique_id=866681477]
+[node name="UnlockedText" type="Label" parent="Margin/Content/Unlocked/Row" unique_id=1846609227]
+unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.23137255, 0.16470589, 0.4, 1)
-theme_override_font_sizes/font_size = 28
-text = "Your results will appear here."
+theme_type_variation = &"CardBody"
+theme_override_colors/font_color = Color(0.18431373, 0.36862746, 0.047058824, 1)
+theme_override_font_sizes/font_size = 36
+text = "Lunch unlocked!"
 
-[node name="Retry" type="Button" parent="Content" unique_id=2061663467]
-custom_minimum_size = Vector2(0, 96)
+[node name="Filler" type="Control" parent="Margin/Content" unique_id=1373939108]
 layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="Buttons" type="HBoxContainer" parent="Margin/Content" unique_id=1556405772]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Retry" type="Button" parent="Margin/Content/Buttons" unique_id=2061663467]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 104)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"PurpleButton"
 text = "RETRY"
 
-[node name="Next" type="Button" parent="Content" unique_id=1847302265]
+[node name="Next" type="Button" parent="Margin/Content/Buttons" unique_id=1847302265]
+unique_name_in_owner = true
 visible = false
-custom_minimum_size = Vector2(0, 96)
+custom_minimum_size = Vector2(0, 104)
 layout_mode = 2
-text = "NEXT MEAL"
+size_flags_horizontal = 3
+text = "NEXT >"
 
-[node name="Meals" type="Button" parent="Content" unique_id=1105334628]
-custom_minimum_size = Vector2(0, 96)
+[node name="Meals" type="Button" parent="Margin/Content/Buttons" unique_id=1105334628]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 104)
 layout_mode = 2
-text = "MEALS"
+size_flags_horizontal = 3
+theme_type_variation = &"PaleButton"
+text = "MENU"

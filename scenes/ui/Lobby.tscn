@@ -1,6 +1,8 @@
 [gd_scene format=3 uid="uid://cw880g617js3a"]
 
 [ext_resource type="Script" uid="uid://ch1k1x34e0epv" path="res://scripts/Lobby.gd" id="1_j7rk1"]
+[ext_resource type="Script" path="res://scripts/Sparkles.gd" id="2_spark"]
+[ext_resource type="Texture2D" path="res://assets/art/icon_back.png" id="3_back"]
 
 [node name="Lobby" type="Control" unique_id=1221934773]
 layout_mode = 3
@@ -11,67 +13,198 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_j7rk1")
 
-[node name="Content" type="VBoxContainer" parent="." unique_id=459995418]
-custom_minimum_size = Vector2(672, 0)
-layout_mode = 0
-offset_left = 24.0
-offset_top = 80.0
-offset_right = 696.0
-offset_bottom = 120.0
-theme_override_constants/separation = 16
+[node name="Sparkles" type="Control" parent="." unique_id=1873530912]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("2_spark")
 
-[node name="Heading" type="Label" parent="Content" unique_id=208298464]
+[node name="Margin" type="MarginContainer" parent="." unique_id=1561297015]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 56
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 48
+
+[node name="Content" type="VBoxContainer" parent="Margin" unique_id=459995418]
 layout_mode = 2
-theme_type_variation = &"TitleLabel"
-theme_override_colors/font_color = Color(0.23137255, 0.16470589, 0.4, 1)
-theme_override_font_sizes/font_size = 40
+mouse_filter = 2
+theme_override_constants/separation = 36
+
+[node name="TopBar" type="HBoxContainer" parent="Margin/Content" unique_id=1630741983]
+layout_mode = 2
+theme_override_constants/separation = 32
+
+[node name="Back" type="Button" parent="Margin/Content/TopBar" unique_id=1049105692]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(80, 80)
+layout_mode = 2
+theme_type_variation = &"IconButton"
+icon = ExtResource("3_back")
+icon_alignment = 1
+expand_icon = true
+
+[node name="Heading" type="Label" parent="Margin/Content/TopBar" unique_id=208298464]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"LogoLabel"
 text = "FOOD FIGHT"
+vertical_alignment = 1
 
-[node name="Host" type="Button" parent="Content" unique_id=1390061564]
-custom_minimum_size = Vector2(0, 96)
+[node name="HostPanel" type="PanelContainer" parent="Margin/Content" unique_id=1735409566]
+unique_name_in_owner = true
 layout_mode = 2
+
+[node name="HostBox" type="VBoxContainer" parent="Margin/Content/HostPanel" unique_id=1093884152]
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="HostTitle" type="Label" parent="Margin/Content/HostPanel/HostBox" unique_id=1977207468]
+layout_mode = 2
+theme_type_variation = &"SectionLabel"
+theme_override_colors/font_color = Color(0.14901961, 0.40392157, 0.6901961, 1)
 text = "HOST A MATCH"
 
-[node name="HostIP" type="Label" parent="Content" unique_id=1104653039]
+[node name="Host" type="Button" parent="Margin/Content/HostPanel/HostBox" unique_id=1390061564]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 104)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.23137255, 0.16470589, 0.4, 1)
-theme_override_font_sizes/font_size = 28
-text = "Host IP will appear here"
+theme_type_variation = &"BlueButton"
+text = "HOST"
 
-[node name="Address" type="LineEdit" parent="Content" unique_id=1000236927]
-custom_minimum_size = Vector2(0, 80)
+[node name="HostInfo" type="PanelContainer" parent="Margin/Content/HostPanel/HostBox" unique_id=1104653039]
+unique_name_in_owner = true
+visible = false
 layout_mode = 2
-theme_override_font_sizes/font_size = 28
-placeholder_text = "Enter host IP address"
+theme_type_variation = &"InfoPanel"
 
-[node name="Join" type="Button" parent="Content" unique_id=1342821135]
-custom_minimum_size = Vector2(0, 96)
+[node name="InfoBox" type="VBoxContainer" parent="Margin/Content/HostPanel/HostBox/HostInfo" unique_id=1310862251]
 layout_mode = 2
-text = "JOIN MATCH"
+theme_override_constants/separation = 12
 
-[node name="Status" type="Label" parent="Content" unique_id=1180847489]
+[node name="IPCaption" type="Label" parent="Margin/Content/HostPanel/HostBox/HostInfo/InfoBox" unique_id=1474563120]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.23137255, 0.16470589, 0.4, 1)
-theme_override_font_sizes/font_size = 28
-text = "Connect both devices to the same Wi-Fi."
+theme_type_variation = &"MutedLabel"
+text = "Your IP — tell your friend"
+
+[node name="HostIP" type="Label" parent="Margin/Content/HostPanel/HostBox/HostInfo/InfoBox" unique_id=1912380650]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"CardTitle"
+theme_override_font_sizes/font_size = 24
+text = "192.168.1.23"
 autowrap_mode = 3
 
-[node name="LevelPick" type="OptionButton" parent="Content" unique_id=1573920481]
+[node name="HostStatus" type="Label" parent="Margin/Content/HostPanel/HostBox/HostInfo/InfoBox" unique_id=1180847489]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Waiting for player 2 …"
+autowrap_mode = 3
+
+[node name="LevelPick" type="OptionButton" parent="Margin/Content/HostPanel/HostBox" unique_id=1573920481]
+unique_name_in_owner = true
 visible = false
 custom_minimum_size = Vector2(0, 96)
 layout_mode = 2
-theme_override_font_sizes/font_size = 28
+theme_type_variation = &"PurpleButton"
 
-[node name="Start" type="Button" parent="Content" unique_id=1909002323]
-custom_minimum_size = Vector2(0, 96)
+[node name="Start" type="Button" parent="Margin/Content/HostPanel/HostBox" unique_id=1909002323]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(0, 104)
 layout_mode = 2
-theme_override_font_sizes/font_size = 28
 disabled = true
 text = "START MATCH"
 
-[node name="Back" type="Button" parent="Content" unique_id=1049105692]
+[node name="JoinPanel" type="PanelContainer" parent="Margin/Content" unique_id=1196034768]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="JoinBox" type="VBoxContainer" parent="Margin/Content/JoinPanel" unique_id=1785229716]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="JoinTitle" type="Label" parent="Margin/Content/JoinPanel/JoinBox" unique_id=1556209981]
+layout_mode = 2
+theme_type_variation = &"SectionLabel"
+theme_override_colors/font_color = Color(0.7607843, 0.23137255, 0.5019608, 1)
+text = "JOIN A MATCH"
+
+[node name="AddressCaption" type="Label" parent="Margin/Content/JoinPanel/JoinBox" unique_id=1067321587]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Host's IP address"
+
+[node name="JoinRow" type="HBoxContainer" parent="Margin/Content/JoinPanel/JoinBox" unique_id=1442167306]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Address" type="LineEdit" parent="Margin/Content/JoinPanel/JoinBox/JoinRow" unique_id=1000236927]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 104)
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "e.g. 192.168.1.23"
+virtual_keyboard_type = 3
+
+[node name="Join" type="Button" parent="Margin/Content/JoinPanel/JoinBox/JoinRow" unique_id=1342821135]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(152, 104)
+layout_mode = 2
+text = "JOIN"
+
+[node name="JoinStatus" type="Label" parent="Margin/Content/JoinPanel/JoinBox" unique_id=1219866745]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_type_variation = &"SmallMuted"
+text = "Connecting..."
+autowrap_mode = 3
+
+[node name="Filler" type="Control" parent="Margin/Content" unique_id=1688263017]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="ErrorPanel" type="PanelContainer" parent="Margin/Content" unique_id=1291737424]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_type_variation = &"ErrorPanel"
+
+[node name="ErrorBox" type="VBoxContainer" parent="Margin/Content/ErrorPanel" unique_id=1360994208]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="ErrorTitle" type="Label" parent="Margin/Content/ErrorPanel/ErrorBox" unique_id=1857452266]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"SectionLabel"
+theme_override_colors/font_color = Color(0.6901961, 0.17254902, 0.42352942, 1)
+text = "! CAN'T REACH HOST"
+
+[node name="ErrorText" type="Label" parent="Margin/Content/ErrorPanel/ErrorBox" unique_id=1739962417]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Check that both phones are on the same Wi-Fi, then try again."
+autowrap_mode = 3
+
+[node name="BackToModes" type="Button" parent="Margin/Content/ErrorPanel/ErrorBox" unique_id=1525730493]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 96)
 layout_mode = 2
+theme_type_variation = &"PurpleButton"
 text = "BACK TO MODES"
 
 [node name="JoinTimeout" type="Timer" parent="." unique_id=856114656]
