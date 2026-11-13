@@ -10,10 +10,10 @@ Godot 4, GDScript 4, Android, portrait 720×1280. I'm a beginner: build efficien
 - Read the current file before changing it. Never guess file contents or rewrite working features.
 - Check your own work before handing it to me:
   - Parse-check every script you changed with Godot in headless mode, e.g.
-    `godot --headless --path . --check-only --script res://scripts/Level.gd`
-    (the Godot executable path is in "Local setup" below). Fix every error it reports.
+	`godot --headless --path . --check-only --script res://scripts/Level.gd`
+	(the Godot executable path is in "Local setup" below). Fix every error it reports.
   - Run the project headless briefly (`godot --headless --path . --quit-after 300`) and read the
-    output for script errors.
+	output for script errors.
   - Re-read your diff for typos, wrong node paths, and signals connected twice.
 - You may edit `.tscn` files for simple, safe changes (adding a node, a button, a label). For layout
   and styling work, describe what you changed so I can check it in the editor.
@@ -21,7 +21,7 @@ Godot 4, GDScript 4, Android, portrait 720×1280. I'm a beginner: build efficien
 - Only stop and ask me when:
   - a design decision is mine to make (e.g. how online rematch should work), or
   - something needs a real device: two-phone online tests, Android export, touch feel, audio sync.
-    Then batch it: give me ONE short test checklist covering everything since my last test.
+	Then batch it: give me ONE short test checklist covering everything since my last test.
 - Never claim something works on a phone until I confirm it. Never invent test results.
 - After each batch, give me a short summary: what changed, in which files, and why (I'm still learning,
   so explain new Godot ideas in a sentence or two). Then update the Progress section below.
@@ -139,12 +139,12 @@ launch the Godot exe; `_console.exe` is missing). Waiting for one combined phone
 - Theme: `assets/ui_theme.tres` set as project theme (gui/theme/custom). Mockups live in
   `docs/ui-design/` (png + html, 390 wide → multiply sizes by ~1.85). Theme type variations:
   - Buttons: `Button` (pink, default), `BlueButton`, `PurpleButton`, `IconButton` (lilac square,
-    use with `expand_icon` for 12 px icons ×4). 8 px #5B4494 border, shadow (0,12) #D9C8F5.
+	use with `expand_icon` for 12 px icons ×4). 8 px #5B4494 border, shadow (0,12) #D9C8F5.
   - Labels: default body (Pixelify 28), `TitleLabel` (Press Start 40), `LogoLabel` (pink 32 +
-    shadow), `SectionLabel` (Press Start 24 #6B58A0), `CardTitle` (Press Start 32),
-    `CardBody` (Pixelify semibold 32), `MutedLabel` (Pixelify 32 #6B58A0).
+	shadow), `SectionLabel` (Press Start 24 #6B58A0), `CardTitle` (Press Start 32),
+	`CardBody` (Pixelify semibold 32), `MutedLabel` (Pixelify 32 #6B58A0).
   - `PanelContainer`: white card. Inset button highlights from the mockup aren't possible with
-    StyleBoxFlat, so they're left out.
+	StyleBoxFlat, so they're left out.
   - Press Start 2P imported without antialiasing (crisp pixels).
 - `scripts/Sparkles.gd` (class `Sparkles`): full-screen Control that draws the mockup's pastel
   sparkles; add it as the first child of a UI scene.
@@ -152,6 +152,11 @@ launch the Godot exe; `_console.exe` is missing). Waiting for one combined phone
   toggle, Offline (blue) / Online (pink) cards with apple/fish icons, BACK + CREDITS row (mockup
   says SETTINGS, but there's no settings screen yet), catcher, "N / 15 stars collected".
   Nodes use unique names (`%Offline`, `%Sound`…).
+- Title restyled to `01_title.png` (2026-11-14): tap anywhere (or Enter) → ModeSelect; no buttons.
+  Layered "BEAT" (pink) / "BITES" (blue) Press Start 80 (a back label offset 16 px + a font
+  shadow offset 8 px), tagline, apple/blueberry/donut, axolotl on a pink dashed line
+  (`scripts/DashedLine.gd`, reusable `@tool` Control), blinking "TAP TO START" with pink arrow
+  icons, "v0.1 · ITSD 85". Sound + Credits now only on ModeSelect; Credits BACK → ModeSelect.
 - Fix: `cpu.setup(level_number)` was never called, so CPU accuracy stayed 55% on all levels;
   now 55/63/71/79/87%.
 - R3: Result has NEXT MEAL (Solo/CPU, when the next meal is unlocked); `last_result.level_number`.
@@ -162,7 +167,7 @@ launch the Godot exe; `_console.exe` is missing). Waiting for one combined phone
 ## Remaining work (in order; batch related tasks together)
 
 1. Phone-test the batch above. Fill in the Credits / docs placeholders.
-2. Restyle the other screens to their mockups using the shared theme: 01 Title (tap to start),
+2. Restyle the other screens to their mockups using the shared theme:
    03 Level select, 04 Lobby, 05 Gameplay HUD, 06 Pause, 07 Result, 08 Online HUD.
    Decide with me: SETTINGS button (real screen or keep BACK).
 3. Regression pass: all 5 levels, unlocks after app restart, airplane mode, R8 error message,

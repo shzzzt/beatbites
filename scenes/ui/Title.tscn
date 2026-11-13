@@ -2,6 +2,14 @@
 
 [ext_resource type="Script" path="res://scripts/Title.gd" id="1_title"]
 [ext_resource type="AudioStream" path="res://assets/audio/music_menu.ogg" id="2_menu"]
+[ext_resource type="Script" path="res://scripts/Sparkles.gd" id="3_spark"]
+[ext_resource type="Script" path="res://scripts/DashedLine.gd" id="4_line"]
+[ext_resource type="Texture2D" path="res://assets/art/good_apple.png" id="5_apple"]
+[ext_resource type="Texture2D" path="res://assets/art/good_blueberry.png" id="6_berry"]
+[ext_resource type="Texture2D" path="res://assets/art/good_donut.png" id="7_donut"]
+[ext_resource type="Texture2D" path="res://assets/art/catcher_idle.png" id="8_catcher"]
+[ext_resource type="Texture2D" path="res://assets/art/icon_right.png" id="9_right"]
+[ext_resource type="Texture2D" path="res://assets/art/icon_left.png" id="10_left"]
 
 [node name="Title" type="Control"]
 layout_mode = 3
@@ -12,47 +20,230 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_title")
 
-[node name="Content" type="VBoxContainer" parent="."]
-custom_minimum_size = Vector2(672, 0)
-layout_mode = 0
-offset_left = 24.0
-offset_top = 240.0
-offset_right = 696.0
-offset_bottom = 280.0
-theme_override_constants/separation = 32
+[node name="Sparkles" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("3_spark")
 
-[node name="Logo" type="Label" parent="Content"]
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/margin_top = 152
+theme_override_constants/margin_bottom = 44
+
+[node name="Content" type="VBoxContainer" parent="Margin"]
 layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 0
+
+[node name="Beat" type="Control" parent="Margin/Content"]
+custom_minimum_size = Vector2(0, 96)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Back" type="Label" parent="Margin/Content/Beat"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 16.0
+offset_bottom = 16.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_type_variation = &"TitleLabel"
+theme_override_colors/font_color = Color(0.8901961, 0.83137256, 1, 1)
+theme_override_font_sizes/font_size = 80
+text = "BEAT"
+horizontal_alignment = 1
+
+[node name="Front" type="Label" parent="Margin/Content/Beat"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 theme_type_variation = &"TitleLabel"
 theme_override_colors/font_color = Color(0.8509804, 0.27450982, 0.56078434, 1)
-theme_override_font_sizes/font_size = 72
-text = "BEAT
-BITES"
+theme_override_colors/font_shadow_color = Color(0.78039217, 0.9019608, 1, 1)
+theme_override_constants/shadow_offset_x = 8
+theme_override_constants/shadow_offset_y = 8
+theme_override_font_sizes/font_size = 80
+text = "BEAT"
 horizontal_alignment = 1
 
-[node name="Tagline" type="Label" parent="Content"]
+[node name="Gap1" type="Control" parent="Margin/Content"]
+custom_minimum_size = Vector2(0, 24)
 layout_mode = 2
-text = "Catch the food on the beat!"
+mouse_filter = 2
+
+[node name="Bites" type="Control" parent="Margin/Content"]
+custom_minimum_size = Vector2(0, 96)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Back" type="Label" parent="Margin/Content/Bites"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 16.0
+offset_bottom = 16.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_type_variation = &"TitleLabel"
+theme_override_colors/font_color = Color(0.8901961, 0.83137256, 1, 1)
+theme_override_font_sizes/font_size = 80
+text = "BITES"
 horizontal_alignment = 1
 
-[node name="Spacer" type="Control" parent="Content"]
-custom_minimum_size = Vector2(0, 64)
-layout_mode = 2
+[node name="Front" type="Label" parent="Margin/Content/Bites"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_type_variation = &"TitleLabel"
+theme_override_colors/font_color = Color(0.18431373, 0.49803922, 0.81960785, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.7882353, 0.8901961, 1)
+theme_override_constants/shadow_offset_x = 8
+theme_override_constants/shadow_offset_y = 8
+theme_override_font_sizes/font_size = 80
+text = "BITES"
+horizontal_alignment = 1
 
-[node name="Play" type="Button" parent="Content"]
-custom_minimum_size = Vector2(0, 96)
+[node name="Gap2" type="Control" parent="Margin/Content"]
+custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
-text = "PLAY"
+mouse_filter = 2
 
-[node name="Sound" type="Button" parent="Content"]
-custom_minimum_size = Vector2(0, 96)
+[node name="Tagline" type="Label" parent="Margin/Content"]
 layout_mode = 2
-text = "SOUND: ON"
+theme_type_variation = &"MutedLabel"
+theme_override_font_sizes/font_size = 36
+text = "Catch the beat. Eat the beat."
+horizontal_alignment = 1
 
-[node name="Credits" type="Button" parent="Content"]
-custom_minimum_size = Vector2(0, 96)
+[node name="Filler1" type="Control" parent="Margin/Content"]
 layout_mode = 2
-text = "CREDITS"
+size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="Art" type="Control" parent="Margin/Content"]
+custom_minimum_size = Vector2(0, 384)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Apple" type="TextureRect" parent="Margin/Content/Art"]
+layout_mode = 0
+offset_left = 112.0
+offset_right = 208.0
+offset_bottom = 96.0
+mouse_filter = 2
+texture = ExtResource("5_apple")
+expand_mode = 1
+
+[node name="Berry" type="TextureRect" parent="Margin/Content/Art"]
+layout_mode = 0
+offset_left = 520.0
+offset_top = 48.0
+offset_right = 616.0
+offset_bottom = 144.0
+mouse_filter = 2
+texture = ExtResource("6_berry")
+expand_mode = 1
+
+[node name="Donut" type="TextureRect" parent="Margin/Content/Art"]
+layout_mode = 0
+offset_left = 312.0
+offset_top = 128.0
+offset_right = 408.0
+offset_bottom = 224.0
+mouse_filter = 2
+texture = ExtResource("7_donut")
+expand_mode = 1
+
+[node name="CatchLine" type="Control" parent="Margin/Content/Art"]
+layout_mode = 0
+offset_left = 48.0
+offset_top = 288.0
+offset_right = 672.0
+offset_bottom = 296.0
+mouse_filter = 2
+script = ExtResource("4_line")
+
+[node name="Catcher" type="TextureRect" parent="Margin/Content/Art"]
+layout_mode = 0
+offset_left = 264.0
+offset_top = 232.0
+offset_right = 456.0
+offset_bottom = 376.0
+mouse_filter = 2
+texture = ExtResource("8_catcher")
+expand_mode = 1
+
+[node name="Filler2" type="Control" parent="Margin/Content"]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="TapRow" type="HBoxContainer" parent="Margin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 24
+alignment = 1
+
+[node name="ArrowLeft" type="TextureRect" parent="Margin/Content/TapRow"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("9_right")
+expand_mode = 1
+
+[node name="TapLabel" type="Label" parent="Margin/Content/TapRow"]
+layout_mode = 2
+theme_type_variation = &"LogoLabel"
+theme_override_constants/shadow_offset_x = 4
+theme_override_constants/shadow_offset_y = 4
+theme_override_font_sizes/font_size = 24
+text = "TAP TO START"
+
+[node name="ArrowRight" type="TextureRect" parent="Margin/Content/TapRow"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("10_left")
+expand_mode = 1
+
+[node name="Filler3" type="Control" parent="Margin/Content"]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="Version" type="Label" parent="Margin/Content"]
+layout_mode = 2
+theme_type_variation = &"MutedLabel"
+theme_override_font_sizes/font_size = 28
+text = "v0.1 · ITSD 85"
+horizontal_alignment = 1
 
 [node name="MenuMusic" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("2_menu")
