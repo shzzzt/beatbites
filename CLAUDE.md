@@ -182,8 +182,9 @@ launch the Godot exe; `_console.exe` is missing). Waiting for one combined phone
     Level.gd calls `hud.show_message/show_judgment/set_*`; `refresh_hud()` pushes all numbers.
     Solo: level/score/hearts/goal bar. CPU + Online: YOU vs RIVAL/CPU panel + tug bar; online
     adds the 10-box throw meter + INCOMING! banner. Old `$HUD/Judgment` label removed from levels.
-  - NEW CONTROL: ◀ ▶ tap zones (y ≥ 1160) move the catcher one lane (`Catcher.step`); tapping a
-    lane above them still works (`Catcher.ignore_touch_below`).
+  - Controls (decided 2026-11-14: keep both): ◀ ▶ tap zones (y ≥ 1160) move the catcher one lane
+    (`Catcher.step`); tapping/dragging in a lane above them still works
+    (`Catcher.ignore_touch_below`).
   - Rotten food draws a pale green box with dashed green border (`Food._draw`).
   - Pause (06): lilac overlay, PAUSED, "LV · meal · caught/40 bites" (`PauseMenu.set_info`),
     RESUME / RESTART / SOUND [ON|OFF chip] / QUIT TO MENU; pause button top-left.
@@ -201,7 +202,7 @@ launch the Godot exe; `_console.exe` is missing). Waiting for one combined phone
 ## Remaining work (in order; batch related tasks together)
 
 1. Phone-test the batch above. Fill in the Credits / docs placeholders.
-2. Decide with me: SETTINGS button (real screen or keep BACK); keep the ◀ ▶ tap zones?
+2. Decide with me: SETTINGS button (real screen or keep BACK).
    Optional polish: varied food sprites (all good food is still an apple).
 3. Regression pass: all 5 levels, unlocks after app restart, airplane mode, R8 error message,
    readable layout on phone. Record results in GDD §11 playtesting.
