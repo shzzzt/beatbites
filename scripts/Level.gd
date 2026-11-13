@@ -94,6 +94,7 @@ func _ready() -> void:
 
 	if GameState.mode == "cpu":
 		cpu = CpuRival.new() # Create an independent rival.
+		cpu.setup(level_number) # Accuracy rises each level (55% → 87%).
 		create_cpu_hud()
 		
 	if GameState.mode == "online":
