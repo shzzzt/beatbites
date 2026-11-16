@@ -19,7 +19,7 @@ var SECTIONS: Array[Dictionary] = [
 	{
 		"title": "MUSIC", "color": Color("#2667B0"), "icon": SOUND_ICON,
 		"entries": [
-			["Claude (Anthropic)", "AI-generated soundtrack made for this game"],
+			["ChatGPT (OpenAI)", "AI-generated soundtrack made for this game"],
 			["A Table Under the Stars", "Menu", "track"],
 			["Sunrise Bento", "Breakfast", "track"],
 			["Lunchbox Letters", "Lunch", "track"],

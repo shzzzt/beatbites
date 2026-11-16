@@ -8,14 +8,14 @@
 
 | Track | Used for | BPM | Composer / source | License |
 | --- | --- | --- | --- | --- |
-| A Table Under the Stars | Title / menu | 80 | AI-generated with Claude (Anthropic) | Made for this project; no third-party license |
-| Sunrise Bento | Breakfast | 90 | AI-generated with Claude (Anthropic) | Made for this project; no third-party license |
-| Lunchbox Letters | Lunch | 100 | AI-generated with Claude (Anthropic) | Made for this project; no third-party license |
-| Soda Pop Sidequest | Snack | 115 | AI-generated with Claude (Anthropic) | Made for this project; no third-party license |
-| Neon Noodle Rush | Dinner | 125 | AI-generated with Claude (Anthropic) | Made for this project; no third-party license |
-| Sugar Star Sprint | Dessert | 140 | AI-generated with Claude (Anthropic) | Made for this project; no third-party license |
+| A Table Under the Stars | Title / menu | 80 | AI-generated with ChatGPT (OpenAI) | Made for this project; no third-party license |
+| Sunrise Bento | Breakfast | 90 | AI-generated with ChatGPT (OpenAI) | Made for this project; no third-party license |
+| Lunchbox Letters | Lunch | 100 | AI-generated with ChatGPT (OpenAI) | Made for this project; no third-party license |
+| Soda Pop Sidequest | Snack | 115 | AI-generated with ChatGPT (OpenAI) | Made for this project; no third-party license |
+| Neon Noodle Rush | Dinner | 125 | AI-generated with ChatGPT (OpenAI) | Made for this project; no third-party license |
+| Sugar Star Sprint | Dessert | 140 | AI-generated with ChatGPT (OpenAI) | Made for this project; no third-party license |
 
-All six songs were generated with Claude for Beat Bites and are used under Anthropic's terms of service, which assign the outputs to the user. Charts (`assets/audio/music_*.json`) come from each song's lead melody (`music_*_lead.mid`).
+All six songs were generated with ChatGPT for Beat Bites and are used under OpenAI's terms of use, which assign the outputs to the user. Charts (`assets/audio/music_*.json`) come from each song's lead melody (`music_*_lead.mid`).
 
 ## Art
 
