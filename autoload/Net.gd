@@ -23,7 +23,7 @@ var clock_samples_received: int = 0
 var best_clock_roundtrip_ms: int = -1 # No sample chosen yet.
 
 signal client_clock_ready # The joining phone finished its clock check.
-signal attack_received # The rival threw a rotten food at us.
+signal attack_received(kind: String) # The rival used THROW ("rotten") or INK ("ink") on us.
 signal start_scheduled(host_music_start_ms: int)
 
 func _ready() -> void:
@@ -187,12 +187,12 @@ func receive_stats(new_score: int, new_lives: int) -> void:
 
 	opponent_stats_updated.emit(new_score, new_lives)
 
-# Attack race: catching a power food throws one rotten food at the rival.
+# Power foods: catching THROW or INK attacks the rival (kind = "rotten" or "ink").
 @rpc("any_peer", "call_remote", "reliable")
-func send_attack() -> void:
+func send_attack(kind: String) -> void:
 	if multiplayer.get_remote_sender_id() != opponent_id:
 		return # Only our opponent may attack us.
-	attack_received.emit()
+	attack_received.emit(kind)
 
 
 # Each phone sends its final numbers to the host (peer 1).

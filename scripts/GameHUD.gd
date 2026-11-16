@@ -3,8 +3,8 @@ extends Control
 # Gameplay HUD (mockups 05 and 08). Level.gd creates it and calls these
 # functions; the HUD never changes game rules, it only shows numbers.
 #   Solo:          level name, score, hearts, goal bar
-#   VS CPU/Online: YOU vs RIVAL panel + tug bar, and the rotten-food throw
-#                  animations (play_throw / play_incoming)
+#   VS CPU/Online: YOU vs RIVAL panel + tug bar, power-up status chip, and the
+#                  power-up animations (throws, tossed hazards, ink, shield)
 
 const HEART_TEXTURE = preload("res://assets/art/ui_heart.png")
 # ui_heart.png is a white shape, so modulate gives it its exact color.
@@ -17,6 +17,7 @@ const LIGHT_PINK := Color("#FFC9E3")
 const MUTED := Color("#6B58A0")
 const ROTTEN := Color("#B02C6C")
 const GREEN := Color("#3E7A12")
+const GOLD := Color("#9A5B0C")
 
 const FLIGHT_TIME: float = 0.55 # Seconds a thrown rotten food is in the air.
 const PUFF_COLOR := Color(0.56, 0.82, 0.31, 0.8) # Green trail behind it.
@@ -74,73 +75,196 @@ func set_versus(my_score: int, my_lives: int, opp_score: int, opp_lives: int) ->
 	%TugBar.value = 0.5 if total == 0 else float(my_score) / total
 
 
-# --- Throw animations ---------------------------------------------------------
+# --- Power-up animations -------------------------------------------------------
 # All positions are in screen pixels (the HUD covers the whole 720×1280 screen,
 # the same coordinates the level uses for food and the catcher).
 
-# We caught a power food: a rotten food arcs from our axolotl to the rival's
-# side of the panel and splats there.
-func play_throw(from: Vector2) -> void:
-	_float_text(from + Vector2(0, -130), "THROW!", PINK)
+const INK_COLOR := Color("#4A3A7A")
+const INK_SPOT := Color("#7A66B8")
+const INK_TRAIL := Color(0.36, 0.27, 0.58, 0.8)
+const INK_DEBRIS: Array[Color] = [Color("#4A3A7A"), Color("#7A66B8"), Color("#5B4494")]
+const SHIELD_DEBRIS: Array[Color] = [Color("#2667B0"), Color("#BFE2FF"), Color("#FFFFFF")]
+const GOLD_DEBRIS: Array[Color] = [Color("#F2B230"), Color("#FFE27A"), Color("#FFFFFF")]
+const PIXEL: float = 12.0 # Ink blobs are drawn as 12×12 squares (pixel style).
+
+
+# We caught a THROW or INK power: the projectile arcs from our axolotl to the
+# rival's side of the score panel. blocked = the rival had a shield up.
+func play_throw(from: Vector2, kind: String, blocked: bool) -> void:
+	_float_text(from + Vector2(0, -130), "INK!" if kind == "ink" else "THROW!", PINK)
 	var target: Vector2 = _center_of(%Rival)
-	_launch(from, func() -> Vector2: return target, 320.0, func() -> void:
-		_impact(target, "SPLAT!")
-		_shake(%VersusPanel)
-		_flash(%VersusPanel)
+	var projectile: Node2D = _make_ink_ball() if kind == "ink" else _make_rotten_sprite()
+	_launch(projectile, from, func() -> Vector2: return target, Vector2(110, -320), 1.5,
+		func() -> void:
+			if blocked:
+				_impact(target, "BLOCKED!", BLUE, SHIELD_DEBRIS)
+				return
+			_impact(target, "SPLAT!", ROTTEN, INK_DEBRIS if kind == "ink" else DEBRIS_COLORS)
+			_shake(%VersusPanel)
+			_flash(%VersusPanel)
 	)
 
 
-# The rival caught a power food: it flies from their side of the panel down
-# onto one of our bites. get_target returns where that bite is right now (it
-# keeps falling during the flight); on_hit runs when it lands.
-func play_incoming(get_target: Callable, on_hit: Callable) -> void:
-	show_incoming()
+# The rival is about to throw at us: banner, and their side of the panel winds up.
+func play_warning(kind: String) -> void:
+	show_incoming("INK INCOMING!" if kind == "ink" else "INCOMING!")
 	var panel: Control = %VersusPanel
-	# Wind-up: the panel puffs up for a moment before the throw.
 	panel.pivot_offset = panel.size / 2.0
 	var wind_up := create_tween()
 	wind_up.tween_property(panel, "scale", Vector2(1.08, 1.08), 0.1)
 	wind_up.tween_property(panel, "scale", Vector2.ONE, 0.15)
-	_launch(_center_of(%Rival), get_target, -160.0, func() -> void:
-		var spot: Vector2 = get_target.call()
-		on_hit.call()
-		_impact(spot, "ROTTEN!")
+
+
+# One rotten food tossed onto our field from the rival's side, on a random
+# wobbly curve with a random spin. delay staggers several tosses.
+# target = where it lands; on_land runs at that moment.
+func toss_rotten(delay: float, target: Vector2, on_land: Callable) -> void:
+	if delay > 0.0:
+		# false = this timer stops while the game is paused.
+		await get_tree().create_timer(delay, false).timeout
+	var bend := Vector2(randf_range(-280.0, 280.0), randf_range(-140.0, 40.0))
+	var spins: float = randf_range(1.0, 2.5) * (1.0 if randf() < 0.5 else -1.0)
+	_launch(_make_rotten_sprite(), _center_of(%Rival), func() -> Vector2: return target,
+		bend, spins,
+		func() -> void:
+			on_land.call()
+			_impact(target, "", ROTTEN, DEBRIS_COLORS)
 	)
 
 
-# Flies a spinning rotten food along a curve and leaves a green trail.
-# arc > 0 bends the path upward (a lob); arc < 0 bends it sideways/down.
-func _launch(from: Vector2, get_target: Callable, arc: float, on_land: Callable) -> void:
-	var sprite := Sprite2D.new()
-	sprite.texture = FallingFood.BAD_TEXTURES.pick_random()
-	sprite.scale = Vector2(6, 6)
-	sprite.position = from
-	add_child(sprite)
+# The rival's INK hit us: an ink ball flies in and splats purple pixel blobs
+# over part of the field for `duration` seconds (food passes under them).
+func play_ink_hit(duration: float) -> void:
+	var land := Vector2(360, 620)
+	_launch(_make_ink_ball(), _center_of(%Rival), func() -> Vector2: return land,
+		Vector2(-160, -60), 1.0,
+		func() -> void:
+			_impact(land, "INKED!", INK_COLOR, INK_DEBRIS)
+			_spawn_ink(duration)
+	)
+
+
+# Our shield blocked the rival's throw.
+func play_blocked(at: Vector2) -> void:
+	_launch(_make_rotten_sprite(), _center_of(%Rival), func() -> Vector2: return at,
+		Vector2(140, -80), 1.5,
+		func() -> void: _impact(at, "BLOCKED!", BLUE, SHIELD_DEBRIS)
+	)
+
+
+# We caught a SHIELD or x2 power: name pops up above the axolotl with sparkles.
+func show_power(at: Vector2, text: String, kind: String) -> void:
+	var debris: Array[Color] = SHIELD_DEBRIS if kind == "shield" else GOLD_DEBRIS
+	_impact(at + Vector2(0, -40), "", BLUE, debris)
+	_float_text(at + Vector2(0, -130), text, BLUE if kind == "shield" else GOLD)
+
+
+# The rival used a SHIELD or x2 on themselves: short note by their panel.
+func show_rival_power(text: String) -> void:
+	_float_text(_center_of(%Rival) + Vector2(-60, 140), text, MUTED)
+
+
+# Our active powers under the score panel, e.g. "SHIELD  x2 4s".
+func set_status(shield: bool, double_left: float) -> void:
+	var parts: PackedStringArray = []
+	if shield:
+		parts.append("SHIELD")
+	if double_left > 0.0:
+		parts.append("x2 %ds" % ceili(double_left))
+	%Status.visible = not parts.is_empty()
+	%StatusText.text = "  ".join(parts)
+
+
+# Flies a projectile along a curve, spinning and leaving a trail.
+# bend moves the curve's middle point (negative y = higher arc).
+func _launch(projectile: Node2D, from: Vector2, get_target: Callable, bend: Vector2,
+		spins: float, on_land: Callable) -> void:
+	projectile.position = from
+	add_child(projectile)
+	var trail_color: Color = projectile.get_meta("trail", PUFF_COLOR)
 	var trail: Dictionary = {"last": 0.0} # A Dictionary so the lambda can change it.
 	var fly := func(t: float) -> void:
 		var end: Vector2 = get_target.call()
-		# Quadratic Bezier curve: start → bend point → end.
-		var bend: Vector2 = (from + end) / 2.0 + Vector2(arc * 0.35, -absf(arc))
-		if arc < 0.0:
-			bend = (from + end) / 2.0 + Vector2(arc, 0.0)
-		sprite.position = from.lerp(bend, t).lerp(bend.lerp(end, t), t).round()
-		sprite.rotation = t * TAU * 1.5 # One and a half spins.
+		var middle: Vector2 = (from + end) / 2.0 + bend
+		# Quadratic Bezier curve: start → middle → end.
+		projectile.position = from.lerp(middle, t).lerp(middle.lerp(end, t), t).round()
+		projectile.rotation = t * TAU * spins
 		if t - trail["last"] >= 0.07:
 			trail["last"] = t
-			_puff(sprite.position)
+			_puff(projectile.position, trail_color)
 	var tween := create_tween()
 	tween.tween_method(fly, 0.0, 1.0, FLIGHT_TIME).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
 	tween.tween_callback(func() -> void:
-		sprite.queue_free()
+		projectile.queue_free()
 		on_land.call()
 	)
 
 
-# Splat at a spot: flying pixel debris + floating text.
-func _impact(spot: Vector2, text: String) -> void:
+func _make_rotten_sprite() -> Sprite2D:
+	var sprite := Sprite2D.new()
+	sprite.texture = FallingFood.BAD_TEXTURES.pick_random()
+	sprite.scale = Vector2(6, 6)
+	return sprite
+
+
+# A purple pixel ball (drawn with squares when Godot asks it to draw).
+func _make_ink_ball() -> Node2D:
+	var ball := Node2D.new()
+	ball.set_meta("trail", INK_TRAIL)
+	ball.draw.connect(func() -> void:
+		for y in range(-4, 4):
+			for x in range(-4, 4):
+				if Vector2(x + 0.5, y + 0.5).length() <= 4.0:
+					var spot: bool = x == -2 and y == -2 # One light pixel = shine.
+					ball.draw_rect(Rect2(x * PIXEL, y * PIXEL, PIXEL, PIXEL),
+						INK_SPOT if spot else INK_COLOR)
+	)
+	return ball
+
+
+# Big ink blobs on the field; they pop in, stay, then fade away.
+func _spawn_ink(duration: float) -> void:
+	var ink := Control.new()
+	ink.size = size
+	ink.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	# Each blob: center x, center y, radius. Big blobs plus small drips.
+	var blobs: Array[Vector3] = []
+	for i in 3:
+		blobs.append(Vector3(randf_range(140, 580), randf_range(400, 840), randf_range(96, 132)))
+	for i in 6:
+		var parent: Vector3 = blobs[i % 3]
+		var offset: Vector2 = Vector2.RIGHT.rotated(randf() * TAU) * (parent.z + 30.0)
+		blobs.append(Vector3(parent.x + offset.x, parent.y + offset.y, randf_range(18, 36)))
+	ink.draw.connect(func() -> void:
+		for blob in blobs:
+			var center := (Vector2(blob.x, blob.y) / PIXEL).floor() * PIXEL # Snap to grid.
+			var cells: int = ceili(blob.z / PIXEL)
+			for gy in range(-cells, cells + 1):
+				for gx in range(-cells, cells + 1):
+					var cell := Vector2(gx, gy) * PIXEL
+					# Wobbly edge: the radius changes a little with the angle.
+					var edge: float = blob.z * (0.85 + 0.15 * sin(cell.angle() * 5.0 + blob.z))
+					if cell.length() > edge:
+						continue
+					var shine: bool = (cell + Vector2(blob.z, blob.z) * 0.35).length() < blob.z * 0.22
+					ink.draw_rect(Rect2(center + cell, Vector2(PIXEL, PIXEL)), INK_SPOT if shine else INK_COLOR)
+	)
+	add_child(ink)
+	move_child(ink, 0) # Under the score panels and pop-up text.
+	ink.pivot_offset = Vector2(360, 620)
+	ink.scale = Vector2(0.4, 0.4)
+	var tween := create_tween()
+	tween.tween_property(ink, "scale", Vector2.ONE, 0.2).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.tween_interval(duration)
+	tween.tween_property(ink, "modulate:a", 0.0, 0.6)
+	tween.tween_callback(ink.queue_free)
+
+
+# Splat at a spot: flying pixel debris (+ floating text if any).
+func _impact(spot: Vector2, text: String, text_color: Color, debris: Array[Color]) -> void:
 	for i in 12:
 		var bit := ColorRect.new()
-		bit.color = DEBRIS_COLORS[i % DEBRIS_COLORS.size()]
+		bit.color = debris[i % debris.size()]
 		bit.size = Vector2(12, 12)
 		bit.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		bit.position = spot - bit.size / 2.0
@@ -151,13 +275,14 @@ func _impact(spot: Vector2, text: String) -> void:
 			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 		tween.tween_property(bit, "modulate:a", 0.0, 0.45)
 		tween.chain().tween_callback(bit.queue_free)
-	_float_text(spot + Vector2(0, -70), text, ROTTEN)
+	if text != "":
+		_float_text(spot + Vector2(0, -70), text, text_color)
 
 
-# One square of the green trail; fades out by itself.
-func _puff(spot: Vector2) -> void:
+# One square of the trail; fades out by itself.
+func _puff(spot: Vector2, color: Color) -> void:
 	var puff := ColorRect.new()
-	puff.color = PUFF_COLOR
+	puff.color = color
 	puff.size = Vector2(18, 18)
 	puff.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	puff.position = spot - puff.size / 2.0
@@ -168,7 +293,7 @@ func _puff(spot: Vector2) -> void:
 	tween.tween_callback(puff.queue_free)
 
 
-# Text that floats up and fades (THROW!, SPLAT!, ROTTEN!).
+# Text that floats up and fades (THROW!, SPLAT!, BLOCKED!...).
 func _float_text(spot: Vector2, text: String, color: Color) -> void:
 	var label := Label.new()
 	label.theme_type_variation = &"CardTitle"
@@ -212,7 +337,8 @@ func _center_of(node: Control) -> Vector2:
 
 # --- Pop-ups ----------------------------------------------------------------
 
-func show_incoming() -> void:
+func show_incoming(text: String = "INCOMING!") -> void:
+	%IncomingText.text = text
 	%Incoming.show()
 	if incoming_tween:
 		incoming_tween.kill() # A newer attack restarts the 1.5 s display.

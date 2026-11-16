@@ -75,7 +75,7 @@ All five levels use the same scene script (`Level.gd`). Each level scene sets it
 - Same rules, plus a simulated rival (`CpuRival`) that judges every food at the same moment as the player.
 - CPU accuracy goes up each level: **55% → 63% → 71% → 79% → 87%**. When it catches a food, 75% of catches are PERFECT and the rest GOOD. It fails to dodge rotten food with the same chance it misses a good one.
 - **Outcome:** a survivor beats an eliminated player; otherwise the higher score wins; otherwise it's a draw. VS CPU doesn't change unlocks or stars.
-- **Power food attacks:** the same as online (see 5.4). The CPU catches power food with its normal accuracy and throws back; when you hit the CPU, its next good food counts as rotten for it (it dodges with its normal accuracy, otherwise loses a life).
+- **Power foods:** the same as online (see 5.4). The CPU catches power foods with its normal accuracy and uses them too. Against the CPU: THROW gives it 3 extra rotten foods to dodge (each one it fails costs a life), INK lowers its catch chance by 30% for 4 s, and its own SHIELD can block your attack.
 - It needs no network, so it works in airplane mode.
 
 ### 5.3 Online (2 phones)
@@ -86,9 +86,19 @@ All five levels use the same scene script (`Level.gd`). Each level scene sets it
 - **Outcome:** the same rule as VS CPU, decided by the host (see 6.3).
 
 ### 5.4 Power food and attacks (VS CPU and Online)
-- Every 12th food (the 6th, 18th, 30th …) is a **power food**: a normal good food with a pulsing gold glow and four circling sparkles. Power food is never rotten.
-- **Catching it** (PERFECT or GOOD) throws a rotten food at the rival: "THROW!" pops up, a spinning rotten food arcs from your axolotl to the rival's side of the score panel leaving a green trail, then **SPLAT!** with flying pixel debris while the panel shakes and flashes red.
-- **Getting hit:** an **INCOMING!** banner appears, the score panel winds up, and a rotten food flies from the rival's side onto one of your upcoming bites. That bite turns rotten with a pop, debris and **ROTTEN!**, and the screen shakes. The chosen bite still lands at least 0.9 s after the hit, so you can dodge it.
+- Every 10th food (the 5th, 15th, 25th …) is a **power food**: a normal good food with a pulsing colored glow, four circling sparkles and a small label underneath. Power food is never rotten. Its type is picked with a fixed seed, so both phones get the same power foods.
+
+| Power | Glow | Chance | Effect |
+| --- | --- | --- | --- |
+| THROW | green | 3 in 7 | Tosses **3 rotten foods onto the rival's field** |
+| INK | purple | 2 in 7 | Purple pixel ink covers part of the rival's field for 4 s |
+| SHIELD | blue | 1 in 7 | Blocks the next THROW or INK aimed at you |
+| x2 | gold | 1 in 7 | Double points for 6 s (status chip shows the seconds left) |
+
+- **Throwing (THROW or INK):** "THROW!" / "INK!" pops up, the projectile spins along an arc from your axolotl to the rival's side of the score panel with a trail, then **SPLAT!** with pixel debris while the panel shakes and flashes red (or **BLOCKED!** against a CPU shield).
+- **Getting hit by THROW:** an **INCOMING!** banner appears and the rival's side of the panel winds up, then 3 rotten foods are tossed one after another on random wobbly, spinning curves. Each lands in a random lane at a random on-beat time and keeps falling as an extra hazard. Hazards never land within 0.3 s of another food in the same lane, and always land at least 0.7 s before reaching the catcher, so they can be dodged. Catching one costs a life; dodging it shows DODGED!.
+- **Getting hit by INK:** "INK INCOMING!", an ink ball flies in and splats big purple pixel blobs over part of the field (food passes underneath), which fade after 4 s.
+- **SHIELD / x2:** the name pops up above your axolotl; a status chip under the score panel shows "SHIELD" and/or "x2 5s". A shield is used up by the next attack (BLOCKED!).
 - Missing a power food does nothing special. (This replaced the earlier 10-combo throw meter.)
 
 ## 6. Online design

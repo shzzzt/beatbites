@@ -236,19 +236,24 @@ launch the Godot exe; `_console.exe` is missing). Waiting for one combined phone
 	finger's `relative` x, lane = column under its center, snaps to lane center on release. A plain
 	tap does nothing. Arrow keys still work on PC.
 
-- Power food attacks (2026-11-17; VS CPU checked in Godot with screenshots, online NOT tested):
-  - VS CPU + Online: food_index % 12 == 5 (and not rotten) → `Food.is_power` (gold glow + 4 circling
-	sparkles in `Food._draw`). Catching it → `Level.throw_attack()`: `hud.play_throw(catcher pos)`
-	(spinning rotten food arc + green trail → SPLAT!, debris, rival panel shake + red flash); CPU:
-	`cpu.incoming += 1` (its next good food is judged as rotten); online: `Net.send_attack` RPC.
-  - Receiving (`Level.receive_attack()`, from Net.attack_received or when the CPU catches a power
-	food — `CpuRival.judge_good_note()` now returns bool): picks the first good, non-power,
-	untargeted bite landing ≥ FLIGHT_TIME 0.55 + ATTACK_REACT_TIME 0.9 s ahead, `hud.play_incoming()`
-	(INCOMING! banner, panel wind-up, projectile homes onto the falling bite) → `make_rotten()`
-	(scale pop) + `shake_screen()` (Level position shake; HUD stays still).
+- Power foods (2026-11-17; VS CPU checked in Godot with screenshots, online NOT tested; the
+  send_attack RPC now has a `kind` argument, so BOTH phones need the new APK):
+  - VS CPU + Online: food_index % 10 == 4 (not rotten) → `Food.power_kind` from
+	`Level.POWER_KINDS` (rotten ×3, ink ×2, shield, double) with an RNG seeded level_number + 1000
+	(same on both phones). `Food._draw`: colored glow + 4 sparkles + label chip (`Food.POWERS`).
+  - Catch → `Level.use_power(kind)`: shield → `has_shield`; double → `double_until` (+6 s, points ×2);
+	rotten/ink → `hud.play_throw(pos, kind, blocked)` + online `Net.send_attack(kind)` RPC, or CPU:
+	`cpu.shield` blocks, rotten → `cpu.incoming += 3` (extra `judge_bad_note` per processed food),
+	ink → `cpu.ink_until` (−30% accuracy 4 s). CPU catches power → `cpu_use_power()`.
+  - Receiving (`Level.receive_attack(kind)`): `hud.play_warning` (banner + panel wind-up); shield →
+	`hud.play_blocked`; ink → `hud.play_ink_hit(4 s)` (pixel blobs drawn via the `draw` signal, HUD
+	layer so they cover food); rotten → `spawn_hazards(3)`: random lane + random half-beat arrival
+	≥ 0.7 s after landing, free if no food within 0.3 s in that lane; hazard = new FallingFood in
+	`Level.hazards` (not active_food, so the CPU loop is unaffected), `waiting_to_land` hidden
+	until `hud.toss_rotten()` lands → `Food.land()` pop + `shake_screen()`.
+  - HUD: `%Status` chip (y 204: "SHIELD  x2 5s"), INCOMING! banner at y 252 with `%IncomingText`.
   - Judgment signal is bound with the food: `judgment_made.connect(_on_food_judgment.bind(food))`.
-  - 10-combo throw meter removed (HUD ThrowPanel, set_throw, THROW_COMBO). INCOMING! banner moved
-	to y 216. Not a bug after all: food passes UNDER the HUD panels (checked canvas layers).
+  - 10-combo throw meter removed. Not a bug: food passes UNDER the HUD (checked with a cover rect).
 
 ## Remaining work (in order; batch related tasks together)
 
