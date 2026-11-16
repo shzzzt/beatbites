@@ -524,6 +524,37 @@ border_width_right = 4
 border_width_bottom = 4
 border_color = Color(0.356863, 0.266667, 0.580392, 1)
 
+[sub_resource type="StyleBoxFlat" id="ScrollTrack"]
+content_margin_left = 6.0
+content_margin_top = 0.0
+content_margin_right = 6.0
+content_margin_bottom = 0.0
+bg_color = Color(0.937255, 0.894118, 1, 1)
+
+[sub_resource type="StyleBoxFlat" id="ScrollGrabber"]
+content_margin_left = 6.0
+content_margin_top = 0.0
+content_margin_right = 6.0
+content_margin_bottom = 0.0
+bg_color = Color(0.862745, 0.8, 1, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.356863, 0.266667, 0.580392, 1)
+
+[sub_resource type="StyleBoxFlat" id="ScrollGrabberHi"]
+content_margin_left = 6.0
+content_margin_top = 0.0
+content_margin_right = 6.0
+content_margin_bottom = 0.0
+bg_color = Color(1, 0.8, 0.898039, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.356863, 0.266667, 0.580392, 1)
+
 [sub_resource type="StyleBoxFlat" id="Field"]
 content_margin_left = 24.0
 content_margin_top = 8.0
@@ -691,6 +722,10 @@ TitleLabel/fonts/font = ExtResource("2_title")
 TugBar/base_type = &"ProgressBar"
 TugBar/styles/background = SubResource("TugBackground")
 TugBar/styles/fill = SubResource("BarFill")
+VScrollBar/styles/grabber = SubResource("ScrollGrabber")
+VScrollBar/styles/grabber_highlight = SubResource("ScrollGrabberHi")
+VScrollBar/styles/grabber_pressed = SubResource("ScrollGrabberHi")
+VScrollBar/styles/scroll = SubResource("ScrollTrack")
 WhiteButton/base_type = &"Button"
 WhiteButton/styles/hover = SubResource("WhiteButtonNormal")
 WhiteButton/styles/hover_pressed = SubResource("WhiteButtonPressed")

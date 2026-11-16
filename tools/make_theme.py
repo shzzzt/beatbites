@@ -144,6 +144,15 @@ items += [f'HSlider/styles/slider = SubResource("{track}")',
           'HSlider/icons/grabber = ExtResource("3_grabber")',
           'HSlider/icons/grabber_highlight = ExtResource("3_grabber")']
 
+# ---------------- Scrollbar (Credits list) ----------------
+sb_track = box("ScrollTrack", "#EFE4FF", None, 0, None, 0, (6, 0, 6, 0))
+sb_grab = box("ScrollGrabber", "#DCCCFF", PURPLE, 4, None, 0, (6, 0, 6, 0))
+sb_grab_hi = box("ScrollGrabberHi", "#FFCCE5", PURPLE, 4, None, 0, (6, 0, 6, 0))
+items += [f'VScrollBar/styles/scroll = SubResource("{sb_track}")',
+          f'VScrollBar/styles/grabber = SubResource("{sb_grab}")',
+          f'VScrollBar/styles/grabber_highlight = SubResource("{sb_grab_hi}")',
+          f'VScrollBar/styles/grabber_pressed = SubResource("{sb_grab_hi}")']
+
 # ---------------- LineEdit ----------------
 field = box("Field", "#F6F0FF", PURPLE, 8, None, 0, (24, 8, 24, 8))
 items += [f"LineEdit/colors/font_color = {c(INK)}",
