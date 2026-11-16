@@ -4,7 +4,28 @@ A rhythm catching game for Android, made with Godot 4 for ITSD 85 (Mobile Game w
 
 Food falls in three lanes on the beat of the music. Move the axolotl catcher between lanes to catch each bite on time, dodge rotten food, and clear five meals from Breakfast to Dessert. Play alone, against a CPU rival, or against a friend on a second phone.
 
-> Screenshots: _[add images from `docs/screenshots/`]_
+## Screenshots
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/screenshots/01_title.png" width="180" alt="Title screen"><br><sub>Title</sub></td>
+    <td align="center"><img src="docs/screenshots/02_mode_select.png" width="180" alt="Mode select"><br><sub>Mode select</sub></td>
+    <td align="center"><img src="docs/screenshots/05_level_select.png" width="180" alt="Level select with stars"><br><sub>Level select</sub></td>
+    <td align="center"><img src="docs/screenshots/06_gameplay_solo.png" width="180" alt="Solo gameplay with a PERFECT catch and rotten food"><br><sub>Solo gameplay</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/screenshots/07_gameplay_vs_cpu.png" width="180" alt="VS CPU gameplay with versus panel"><br><sub>VS CPU</sub></td>
+    <td align="center"><img src="docs/screenshots/09_result_cleared.png" width="180" alt="Level cleared result screen"><br><sub>Level cleared</sub></td>
+    <td align="center"><img src="docs/screenshots/08_result_vs_cpu.png" width="180" alt="VS CPU win result screen"><br><sub>VS CPU result</sub></td>
+    <td align="center"><img src="docs/screenshots/04_online_lobby.png" width="180" alt="Online lobby with name field"><br><sub>Online lobby</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/screenshots/03_offline_select.png" width="180" alt="Offline mode select"><br><sub>Offline modes</sub></td>
+    <td align="center"><img src="docs/screenshots/10_settings.png" width="180" alt="Settings screen"><br><sub>Settings</sub></td>
+    <td></td>
+    <td></td>
+  </tr>
+</table>
 
 ## Features
 
