@@ -4,6 +4,9 @@ extends Node2D
 @export_file("*.json") var chart_path: String = \
 	"res://assets/audio/music_breakfast.json" # Chart used by this level.
 @export_range(3, 5, 1) var lane_count: int = 3 # Harder meals have more lanes.
+# Seconds a food takes to fall to the catch line. Shorter = faster drops and
+# more space between bites (Breakfast 3.0 → Dessert 1.6).
+@export_range(1.0, 3.0, 0.1) var fall_time: float = 3.0
 @export_range(1, 2, 1) var notes_per_beat: int = 1 # 1 = whole; 2 = half beats.
 
 var last_sent_score: int = -1
@@ -90,6 +93,7 @@ func _ready() -> void:
 		food.arrival_time = float(note["time"]) # Each gets its own timing.
 		food.lane = int(note["lane"]) # Each gets its own lane.
 		food.lane_count = lane_count
+		food.fall_time = fall_time
 		food.hide() # Stay hidden until the fall begins.
 		food.judgment_made.connect(_on_food_judgment)
 		add_child(food) # Put this instance into the level.

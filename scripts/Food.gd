@@ -5,6 +5,7 @@ signal judgment_made(result: String) # Tell the level what happened.
 var arrival_time: float = 0.0 # When this food should reach the catcher.
 var lane: int = 0 # Which lane it belongs to (0 = leftmost).
 var lane_count: int = 3 # How many lanes this level has (set by the level).
+var fall_time: float = 3.0 # Seconds from the top to the catch line (set by the level).
 var judged: bool = false # This food remembers its own judgment state.
 var is_bad: bool = false # Whether this particular food is rotten.
 var variant: int = 0 # Which picture to use (set by the level before add_child).
@@ -29,8 +30,9 @@ const BAD_TEXTURES: Array[Texture2D] = [
 ]
 
 func update_from_song(time: float, width: float) -> void:
-	# Every food takes three seconds to reach the catch line.
-	var progress: float = (time - (arrival_time - 3.0)) / 3.0
+	# 0 = just appeared at the top, 1 = at the catch line. Harder meals use a
+	# shorter fall_time, so food drops faster and the bites are spaced further apart.
+	var progress: float = (time - (arrival_time - fall_time)) / fall_time
 	visible = not judged and progress >= 0.0 and progress <= 1.2
 
 	var lane_width: float = width / lane_count

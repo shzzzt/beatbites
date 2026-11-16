@@ -27,10 +27,11 @@ Beat Bites is a rhythm catching game. Food falls down lanes in time with the mus
 
 ### 3.1 Lanes and timing
 - Each note in a song's melody becomes one food. The **melody's shape decides the lane**: when the melody goes up, the food moves one lane right; when it goes down, one lane left; a repeated note stays in the same lane. A big jump (more than 4 semitones) moves two lanes when there are 4 or more lanes. At the edge, the food bounces back toward the middle, and after 3 foods in one lane the next one moves toward the center, so the chart never sits on one side for long. The same chart always gives the same lanes, so both phones match online.
+- **Fall speed per meal:** a food takes 3.0 s to fall in Breakfast, then 2.6 s (Lunch), 2.2 s (Snack), 1.9 s (Dinner) and 1.6 s (Dessert). Harder meals drop food faster, which also spreads the bites further apart on screen instead of bunching them up.
 - **Lanes per meal:** Breakfast and Lunch have 3, Snack and Dinner 4, Dessert 5. The axolotl is drawn smaller (×5 or ×4 pixel scale) when there are more lanes, so it still fits one lane.
 - **Controls:** put a finger anywhere and drag. The axolotl slides the same distance as the finger, and counts as being in whichever lane its center is over. Lifting the finger snaps it to the middle of that lane. (On a PC: mouse drag or the arrow keys.)
 - Rotten foods use their own sprites (rotten apple, banana, juice, fish), and good foods are picked from 8 sprites, never the same one twice in a row.
-- Every food takes 3 seconds to fall from the top to the catch line. Its position is driven by the **audio clock** (`playback position + time since last mix − output latency`), so the food stays in sync with the music even when frames drop.
+- Every food takes a fixed time to fall from the top to the catch line (3 s in Breakfast, less in later meals, see below). Its position is driven by the **audio clock** (`playback position + time since last mix − output latency`), so the food stays in sync with the music even when frames drop.
 
 ### 3.2 Judgments and scoring
 

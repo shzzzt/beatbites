@@ -169,14 +169,14 @@ launch the Godot exe; `_console.exe` is missing). Waiting for one combined phone
 - All screens restyled to the mockups (2026-11-14), checked by rendering screenshots in a 9:16
   window (not yet on a phone):
   - Theme is generated: more variations (WhiteButton, PaleButton, TapZoneLeft/Right, LockedCard,
-    HudPanel, InfoPanel, HintPanel, ErrorPanel, SuccessPanel, Tile*, Num*, ChipPanel, ThrowOn/Off,
-    TugBar, HeroLabel, SmallMuted, MealName, StatValue, ScoreLabel, TinyPixel).
+	HudPanel, InfoPanel, HintPanel, ErrorPanel, SuccessPanel, Tile*, Num*, ChipPanel, ThrowOn/Off,
+	TugBar, HeroLabel, SmallMuted, MealName, StatValue, ScoreLabel, TinyPixel).
   - `ui_heart.png` and `ui_star.png` are WHITE shapes: always tint with modulate (heart #FF8FB8,
-    star #F2B230, empty #E3D4FF).
+	star #F2B230, empty #E3D4FF).
   - Level Select: `MealCard.tscn`/`MealCard.gd` (class MealCard) × 5 from `GameState.MEALS`;
-    locked = lilac card + dashed border (`DashedLine` mode BOX) + lock icon; hint panel.
+	locked = lilac card + dashed border (`DashedLine` mode BOX) + lock icon; hint panel.
   - Lobby: host panel (HOST → IP box + level picker + START), join panel (IP field + JOIN),
-    pink error panel (`show_error(title, text)`); joining panel hidden while hosting.
+	pink error panel (`show_error(title, text)`); joining panel hidden while hosting.
   - Gameplay: `GameHUD.tscn`/`GameHUD.gd` (class GameHUD) added by `Level.setup_hud()` into the
 	level's HUD CanvasLayer; `GameBackdrop.tscn` (layer -1: sparkles, lane dividers, catch line).
 	Level.gd calls `hud.show_message/show_judgment/set_*`; `refresh_hud()` pushes all numbers.
@@ -201,15 +201,15 @@ launch the Godot exe; `_console.exe` is missing). Waiting for one combined phone
   - `GameState.username` (max 10, `clean_username()`, `set_username()`, saved; default "ChefNNN").
 	Edited in the Lobby's YOUR NAME field (locked while hosting/joining).
   - `Net.share_name` RPC on connect → `Net.opponent_name` + `opponent_named` signal; cleared in
-    `leave_game()`. Shown in Lobby status, versus HUD (`%YouName`/`%RivalName`, ellipsis) and
-    Result (`last_result.opp_name`).
+	`leave_game()`. Shown in Lobby status, versus HUD (`%YouName`/`%RivalName`, ellipsis) and
+	Result (`last_result.opp_name`).
   - `scripts/LanDiscovery.gd` (class LanDiscovery, child of Lobby): host `advertise({name, meal})`
-    broadcasts JSON (magic "beatbites-v1", random session id) every 1 s on UDP 24568 to
-    255.255.255.255 and each x.y.z.255; joiners `listen()` and get `hosts_changed` (grouped by
-    session id, best IP = same /24 as ours, gone after 4 s). Host stops advertising when full.
+	broadcasts JSON (magic "beatbites-v1", random session id) every 1 s on UDP 24568 to
+	255.255.255.255 and each x.y.z.255; joiners `listen()` and get `hosts_changed` (grouped by
+	session id, best IP = same /24 as ours, gone after 4 s). Host stops advertising when full.
   - Lobby: match cards (tap = join), "JOIN BY IP INSTEAD" fallback row, HostIP shown small.
   - Android export: enabled change_wifi_multicast_state, access_wifi_state, access_network_state
-    (needed to receive broadcasts). Needs a fresh APK export.
+	(needed to receive broadcasts). Needs a fresh APK export.
 - Fix: `cpu.setup(level_number)` was never called, so CPU accuracy stayed 55% on all levels;
   now 55/63/71/79/87%.
 - R3: Result has NEXT MEAL (Solo/CPU, when the next meal is unlocked); `last_result.level_number`.
@@ -220,6 +220,8 @@ launch the Godot exe; `_console.exe` is missing). Waiting for one combined phone
   - Food sprites: `FallingFood.GOOD_TEXTURES` (8) / `BAD_TEXTURES` (4) + `variant`; Level picks
 	variants with an RNG seeded by level_number (same foods every play and on both phones), never the
 	same food twice in a row. Rotten food has no green box any more (sprite only).
+  - Fall speed: `Level.fall_time` export → `Food.fall_time` (L1 3.0, L2 2.6, L3 2.2, L4 1.9,
+	L5 1.6 s). Faster drops spread the bites apart (user asked: harder = faster, less crowded).
   - Lanes: `Level.lane_count` export (L1–2: 3, L3–4: 4, L5: 5). `Level.assign_lanes()` follows the
 	melody contour (up → right, down → left, jump > 4 semitones = 2 lanes when 4+ lanes, bounce off
 	walls, max 3 in a row off-center; L1–2 ignore 1-semitone steps). Old low/middle_pitch_max removed.
