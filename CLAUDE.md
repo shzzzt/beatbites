@@ -42,8 +42,8 @@ Godot 4, GDScript 4, Android, portrait 720×1280. I'm a beginner: build efficien
 
 ## The game
 
-Rhythm catching game. Food falls in 3 lanes on the beat of the music; the player taps/drags to move
-an axolotl catcher between lanes. Levels are meals:
+Rhythm catching game. Food falls in lanes (3/3/4/4/5 per level) on the beat of the music; the player
+drags anywhere to slide an axolotl catcher between lanes. Levels are meals:
 
 | #   | Level     | BPM | New thing                         |
 | --- | --------- | --- | --------------------------------- |
@@ -76,12 +76,12 @@ Modes: Solo (campaign + unlocks), VS CPU (`CpuRival`, accuracy rises per level),
 - Autoloads: `res://autoload/Net.gd` (`Net`), `GameState` (mode, unlocked_level, best_stars,
   last_result, complete_level()).
 - `res://scripts/Level.gd` — gameplay, used by `scenes/levels/level_01..05.tscn`
-  (exports: level_number, chart_path, low/middle_pitch_max, notes_per_beat).
+  (exports: level_number, chart_path, lane_count, notes_per_beat).
 - `Food.gd` (`FallingFood`, scenes/actors/food.tscn), `catcher.gd`, `CpuRival.gd` (RefCounted).
 - UI scripts: `ModeSelect.gd`, `OfflineSelect.gd`, `LevelSelects.gd`, `Lobby.gd`, `Result.gd`.
 - Scenes: `scenes/ui/ModeSelect.tscn`, `OfflineSelect.tscn`, `LevelSelect.tscn`, `Lobby.tscn`, `result.tscn`.
 - Charts: `res://assets/audio/music_<meal>.json` (`bpm`, `beat_times_seconds`, `lead_notes`
-  [{beat, duration_beats, midi}]). Lane comes from pitch. Song time uses the audio clock
+  [{beat, duration_beats, midi}]). Lane comes from the melody's contour (`Level.assign_lanes`). Song time uses the audio clock
   (`get_playback_position() + get_time_since_last_mix() - output_latency`).
 - Online uses ENet, port 24567, max 2 players. Test over a phone hotspot (school Wi-Fi blocks it).
 
@@ -182,9 +182,7 @@ launch the Godot exe; `_console.exe` is missing). Waiting for one combined phone
 	Level.gd calls `hud.show_message/show_judgment/set_*`; `refresh_hud()` pushes all numbers.
 	Solo: level/score/hearts/goal bar. CPU + Online: YOU vs RIVAL/CPU panel + tug bar; online
 	adds the 10-box throw meter + INCOMING! banner. Old `$HUD/Judgment` label removed from levels.
-  - Controls (decided 2026-11-14: keep both): ◀ ▶ tap zones (y ≥ 1160) move the catcher one lane
-	(`Catcher.step`); tapping/dragging in a lane above them still works (`Catcher.ignore_touch_below`).
-  - Rotten food draws a pale green box with dashed green border (`Food._draw`).
+  - Controls: see the 2026-11-16 entry below (tap zones removed, drag only).
   - Pause (06): lilac overlay, PAUSED, "LV · meal · caught/40 bites" (`PauseMenu.set_info`),
 	RESUME / RESTART / SOUND [ON|OFF chip] / QUIT TO MENU; pause button top-left.
   - Result (07): level line, outcome, 3 stars (fade in), score card + 4 tiles, rival row
@@ -218,11 +216,23 @@ launch the Godot exe; `_console.exe` is missing). Waiting for one combined phone
 - Docs written (2026-11-14): README.md, docs/GDD.md, docs/CREDITS.md. Placeholders `[...]` for my
   name, music/art sources and licenses, APK link, screenshots, playtest table.
   Chart fact: Lunch has 62 playable foods vs Breakfast 92 (table above says "busier chart"; it isn't).
+- Gameplay changes (2026-11-16; run in Godot with screenshots, NOT on a phone):
+  - Food sprites: `FallingFood.GOOD_TEXTURES` (8) / `BAD_TEXTURES` (4) + `variant`; Level picks
+	variants with an RNG seeded by level_number (same foods every play and on both phones), never the
+	same food twice in a row. Rotten food has no green box any more (sprite only).
+  - Lanes: `Level.lane_count` export (L1–2: 3, L3–4: 4, L5: 5). `Level.assign_lanes()` follows the
+	melody contour (up → right, down → left, jump > 4 semitones = 2 lanes when 4+ lanes, bounce off
+	walls, max 3 in a row off-center; L1–2 ignore 1-semitone steps). Old low/middle_pitch_max removed.
+	Lane counts per level [L1 27/46/19, L5 49/107/73/53/30]; switches L1 88, L2 57, L3 86, L4 88, L5 259.
+  - `GameBackdrop.gd` (class GameBackdrop) draws lane_count−1 dashed dividers. Food and Catcher have
+	`lane_count`; `Catcher.setup(count)` scales the sprite ×6/×5/×4 for 3/4/5 lanes.
+  - Controls: ◀ ▶ tap zones removed (HUD + `move_requested`). Drag anywhere: the axolotl slides by the
+	finger's `relative` x, lane = column under its center, snaps to lane center on release. A plain
+	tap does nothing. Arrow keys still work on PC.
 
 ## Remaining work (in order; batch related tasks together)
 
 1. Phone-test the batch above. Fill in the Credits / docs placeholders.
-2. Optional polish: varied food sprites (all good food is still an apple).
-3. Regression pass: all 5 levels, unlocks after app restart, airplane mode, R8 error message,
+2. Regression pass: all 5 levels, unlocks after app restart, airplane mode, R8 error message,
    readable layout on phone. Record results in GDD §11 playtesting.
    Ask me whether VS CPU satisfies the rubric's offline mode (it says "AI or pass-and-play").

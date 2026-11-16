@@ -3,8 +3,7 @@ extends Node2D
 @export var level_number: int = 1 # Breakfast = 1, Lunch = 2, etc.
 @export_file("*.json") var chart_path: String = \
 	"res://assets/audio/music_breakfast.json" # Chart used by this level.
-@export var low_pitch_max: int = 76 # Highest pitch sent left.
-@export var middle_pitch_max: int = 81 # Highest pitch sent to the middle.
+@export_range(3, 5, 1) var lane_count: int = 3 # Harder meals have more lanes.
 @export_range(1, 2, 1) var notes_per_beat: int = 1 # 1 = whole; 2 = half beats.
 
 var last_sent_score: int = -1
@@ -20,7 +19,6 @@ const ATTACK_LEAD_TIME: float = 2.0 # Turn food rotten at least this long before
 const PAUSE_SCENE = preload("res://scenes/ui/PauseMenu.tscn")
 const HUD_SCENE = preload("res://scenes/ui/GameHUD.tscn")
 const BACKDROP_SCENE = preload("res://scenes/ui/GameBackdrop.tscn")
-const TAP_ZONE_TOP: float = 1160.0 # Touches below this belong to the ◀ ▶ zones.
 var pause_menu: PauseMenu
 var hud: GameHUD # Score, lives, goal bar, rival panel, pop-up text.
 var pause_started_ms: int = 0 # When the current pause began.
@@ -67,18 +65,31 @@ func _ready() -> void:
 			breakfast_notes.append({
 				"time": beat * 60.0 / bpm, # Convert using this song's tempo.
 				"midi": int(note["midi"]), # Original pitch.
-				"lane": pitch_to_lane(int(note["midi"])) # Catch lane.
 			})
+	assign_lanes(breakfast_notes) # Give every note a lane from the melody's shape.
+	catcher.setup(lane_count)
 
 	var food_index: int = 0 # Count foods as we create them.
+	# Pick food pictures with a random generator seeded by the level number,
+	# so the same meal always shows the same foods (on both phones online).
+	var picker := RandomNumberGenerator.new()
+	picker.seed = level_number
+	var last_variant: int = -1
 	# Preview the chart after its opening three seconds.
 	for note in breakfast_notes:
 		var food: FallingFood = FOOD_SCENE.instantiate() as FallingFood
 		# Snack onward: every tenth food is rotten.
 		food.is_bad = level_number >= 3 and food_index % 10 == 9
 		food_index += 1 # Advance to the next food number.
+		# Random picture, but never the same food twice in a row.
+		var variant: int = picker.randi_range(0, FallingFood.GOOD_TEXTURES.size() - 2)
+		if variant >= last_variant and last_variant >= 0:
+			variant += 1
+		food.variant = variant
+		last_variant = variant
 		food.arrival_time = float(note["time"]) # Each gets its own timing.
 		food.lane = int(note["lane"]) # Each gets its own lane.
+		food.lane_count = lane_count
 		food.hide() # Stay hidden until the fall begins.
 		food.judgment_made.connect(_on_food_judgment)
 		add_child(food) # Put this instance into the level.
@@ -188,12 +199,48 @@ func _on_food_judgment(result: String) -> void:
 		hud.set_throw(combo % THROW_COMBO, thrown)
 	refresh_hud()
 
-func pitch_to_lane(midi: int) -> int:
-	if midi <= low_pitch_max:
-		return 0 # Lower pitches go left.
-	elif midi <= middle_pitch_max:
-		return 1 # Middle pitches go in the middle.
-	return 2 # Everything higher goes right.
+# Lanes follow the melody's shape instead of its exact pitch (exact pitch
+# made long runs sit on one side):
+#   - the note goes up   -> move right; goes down -> move left; same -> stay
+#     (Breakfast and Lunch only move on steps of 2+ semitones)
+#   - a big jump (more than 4 semitones) moves 2 lanes when there are 4+ lanes
+#   - hitting a wall bounces back toward the middle
+#   - after 3 notes in the same lane, the next one moves toward the center,
+#     so the player never camps on one side for long.
+# Same input always gives the same lanes, so both phones match online.
+const MAX_SAME_LANE: int = 3
+
+func assign_lanes(notes: Array[Dictionary]) -> void:
+	var last_lane: int = lane_count - 1
+	var center: float = last_lane / 2.0
+	var lane: int = floori(center)
+	var previous_midi: int = -1
+	var same_lane_run: int = 0
+	for note in notes:
+		var midi: int = note["midi"]
+		if previous_midi >= 0:
+			var jump: int = midi - previous_midi
+			var step: int = 0
+			# Breakfast and Lunch ignore 1-semitone steps, so they move a bit less.
+			var min_jump: int = 2 if level_number <= 2 else 1
+			if absi(jump) >= min_jump:
+				step = 2 if absi(jump) > 4 and lane_count >= 4 else 1
+				step *= signi(jump)
+			var new_lane: int = lane + step
+			if new_lane > last_lane:
+				new_lane = last_lane - (new_lane - last_lane) # Bounce off the right wall.
+			elif new_lane < 0:
+				new_lane = -new_lane # Bounce off the left wall.
+			if new_lane == lane:
+				same_lane_run += 1 # Count notes repeated in this lane.
+				if same_lane_run >= MAX_SAME_LANE and not is_equal_approx(lane, center):
+					new_lane = lane + (1 if lane < center else -1) # Drift to the middle.
+			new_lane = clampi(new_lane, 0, last_lane)
+			if new_lane != lane:
+				same_lane_run = 0 # Moved, so start counting again.
+			lane = new_lane
+		note["lane"] = lane
+		previous_midi = midi
 
 func _on_song_finished() -> void:
 	if cpu != null:
@@ -322,12 +369,12 @@ func end_cpu_match() -> void:
 # --- HUD --------------------------------------------------------------------
 
 func setup_hud() -> void:
-	add_child(BACKDROP_SCENE.instantiate()) # Sparkles, lane lines, catch line.
+	var backdrop: CanvasLayer = BACKDROP_SCENE.instantiate() # GameBackdrop.gd
+	backdrop.lane_count = lane_count # Draw one dashed line between each pair of lanes.
+	add_child(backdrop) # Sparkles, lane lines, catch line.
 	hud = HUD_SCENE.instantiate() as GameHUD
 	$HUD.add_child(hud) # The HUD CanvasLayer draws above the food.
 	hud.setup(GameState.mode, level_number, GameState.meal_name(level_number))
-	hud.move_requested.connect(catcher.step) # ◀ ▶ zones move one lane.
-	catcher.ignore_touch_below = TAP_ZONE_TOP
 	if GameState.mode == "online":
 		hud.set_throw(0, false)
 	refresh_hud()

@@ -3,17 +3,37 @@ extends Node2D
 signal judgment_made(result: String) # Tell the level what happened.
 
 var arrival_time: float = 0.0 # When this food should reach the catcher.
-var lane: int = 0 # Which of the three lanes it belongs to.
+var lane: int = 0 # Which lane it belongs to (0 = leftmost).
+var lane_count: int = 3 # How many lanes this level has (set by the level).
 var judged: bool = false # This food remembers its own judgment state.
-const BAD_TEXTURE = preload("res://assets/art/bad_apple.png")
 var is_bad: bool = false # Whether this particular food is rotten.
+var variant: int = 0 # Which picture to use (set by the level before add_child).
+
+# All food pictures (16×16, shown ×6). The first good foods line up with
+# their rotten versions: apple → rotten apple, banana → rotten banana.
+const GOOD_TEXTURES: Array[Texture2D] = [
+	preload("res://assets/art/good_apple.png"),
+	preload("res://assets/art/good_banana.png"),
+	preload("res://assets/art/good_blueberry.png"),
+	preload("res://assets/art/good_donut.png"),
+	preload("res://assets/art/good_candy.png"),
+	preload("res://assets/art/good_fries.png"),
+	preload("res://assets/art/good_icecream.png"),
+	preload("res://assets/art/good_bepsi.png"),
+]
+const BAD_TEXTURES: Array[Texture2D] = [
+	preload("res://assets/art/bad_apple.png"),
+	preload("res://assets/art/bad_banana.png"),
+	preload("res://assets/art/bad_juice.png"),
+	preload("res://assets/art/bad_fish.png"),
+]
 
 func update_from_song(time: float, width: float) -> void:
 	# Every food takes three seconds to reach the catch line.
 	var progress: float = (time - (arrival_time - 3.0)) / 3.0
 	visible = not judged and progress >= 0.0 and progress <= 1.2
 
-	var lane_width: float = width / 3.0
+	var lane_width: float = width / lane_count
 	position.x = (lane + 0.5) * lane_width # Center of this food's lane.
 	position.y = lerpf(-96.0, 960.0, progress) # Audio-controlled height.
 
@@ -53,31 +73,15 @@ func judge_catch(time: float, catcher_lane: int) -> void:
 func make_rotten() -> void:
 	# Used by the online attack: a good food turns rotten mid-song.
 	is_bad = true
-	$Sprite2D.texture = BAD_TEXTURE
-	queue_redraw() # Add the green warning box.
+	update_texture()
 
 
 func _ready() -> void:
-	if is_bad:
-		# Change only this instance's sprite.
-		$Sprite2D.texture = BAD_TEXTURE
+	update_texture()
 
 
-# Rotten food gets a pale green box with a dashed green border (mockup 05),
-# so it's easy to spot and dodge. _draw() paints behind the Sprite2D child.
-func _draw() -> void:
-	if not is_bad:
-		return
-	const HALF: float = 64.0 # Box is 128×128 around the 96×96 sprite.
-	const GREEN := Color("#8FD14F")
-	draw_rect(Rect2(-HALF, -HALF, HALF * 2, HALF * 2), Color("#F1FBE6"))
-	var x: float = -HALF
-	while x < HALF: # Top and bottom dashes.
-		draw_rect(Rect2(x, -HALF, 12, 6), GREEN)
-		draw_rect(Rect2(x, HALF - 6, 12, 6), GREEN)
-		x += 20
-	var y: float = -HALF
-	while y < HALF: # Left and right dashes.
-		draw_rect(Rect2(-HALF, y, 6, 12), GREEN)
-		draw_rect(Rect2(HALF - 6, y, 6, 12), GREEN)
-		y += 20
+# Show the picture that matches this food's variant and rotten state.
+# Changing the texture only affects this one instance.
+func update_texture() -> void:
+	var pictures: Array[Texture2D] = BAD_TEXTURES if is_bad else GOOD_TEXTURES
+	$Sprite2D.texture = pictures[variant % pictures.size()]

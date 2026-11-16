@@ -9,7 +9,7 @@
 
 ## 1. Concept
 
-Beat Bites is a rhythm catching game. Food falls down three lanes in time with the music, and the player moves an axolotl catcher left, middle or right to catch each bite as it lands on the beat. Each level is a meal of the day with its own song and tempo, and the meals get faster and trickier from Breakfast to Dessert.
+Beat Bites is a rhythm catching game. Food falls down lanes in time with the music (3 lanes in the first meals, 4 and then 5 in the harder ones), and the player drags an axolotl catcher left and right to catch each bite as it lands on the beat. Each level is a meal of the day with its own song and tempo, and the meals get faster and trickier from Breakfast to Dessert.
 
 **Pitch:** _"Catch your meals on the beat, one bite at a time."_
 
@@ -26,7 +26,10 @@ Beat Bites is a rhythm catching game. Food falls down three lanes in time with t
 ## 3. Mechanics
 
 ### 3.1 Lanes and timing
-- Each note in a song's melody becomes one food. The note's **pitch decides its lane**: low notes go left, middle notes go center, high notes go right.
+- Each note in a song's melody becomes one food. The **melody's shape decides the lane**: when the melody goes up, the food moves one lane right; when it goes down, one lane left; a repeated note stays in the same lane. A big jump (more than 4 semitones) moves two lanes when there are 4 or more lanes. At the edge, the food bounces back toward the middle, and after 3 foods in one lane the next one moves toward the center, so the chart never sits on one side for long. The same chart always gives the same lanes, so both phones match online.
+- **Lanes per meal:** Breakfast and Lunch have 3, Snack and Dinner 4, Dessert 5. The axolotl is drawn smaller (×5 or ×4 pixel scale) when there are more lanes, so it still fits one lane.
+- **Controls:** put a finger anywhere and drag. The axolotl slides the same distance as the finger, and counts as being in whichever lane its center is over. Lifting the finger snaps it to the middle of that lane. (On a PC: mouse drag or the arrow keys.)
+- Rotten foods use their own sprites (rotten apple, banana, juice, fish), and good foods are picked from 8 sprites, never the same one twice in a row.
 - Every food takes 3 seconds to fall from the top to the catch line. Its position is driven by the **audio clock** (`playback position + time since last mix − output latency`), so the food stays in sync with the music even when frames drop.
 
 ### 3.2 Judgments and scoring
@@ -50,15 +53,15 @@ Beat Bites is a rhythm catching game. Food falls down three lanes in time with t
 
 | # | Meal | Song | BPM | Length | Playable foods | Lane switches | What's new |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | Breakfast | Sunrise Bento | 90 | 64 s | 92 | 50 | Learn to catch (whole-beat notes) |
-| 2 | Lunch | Lunchbox Letters | 100 | 77 s | 62 | 38 | Faster tempo |
-| 3 | Snack | Soda Pop Sidequest | 115 | 67 s | 128 | 53 | Rotten food (every 10th food) |
-| 4 | Dinner | Neon Noodle Rush | 125 | 77 s | 120 | 75 | Faster, more lane switches |
-| 5 | Dessert | Sugar Star Sprint | 140 | 69 s | 312 | 175 | Half-beat notes: everything at once |
+| 1 | Breakfast | Sunrise Bento | 90 | 64 s | 92 | 88 | Learn to catch (3 lanes, whole-beat notes) |
+| 2 | Lunch | Lunchbox Letters | 100 | 77 s | 62 | 57 | Faster tempo |
+| 3 | Snack | Soda Pop Sidequest | 115 | 67 s | 128 | 86 | 4 lanes, rotten food (every 10th food) |
+| 4 | Dinner | Neon Noodle Rush | 125 | 77 s | 120 | 88 | Faster, 2-lane jumps on big melody leaps |
+| 5 | Dessert | Sugar Star Sprint | 140 | 69 s | 312 | 259 | 5 lanes and half-beat notes: everything at once |
 
 _"Playable foods" and "lane switches" are counted from each level's chart with its lane settings. Levels 1–4 use whole-beat notes only, and Dessert also uses half-beat notes._
 
-All five levels use the same scene script (`Level.gd`). Each level scene sets its own `level_number`, chart file, pitch-to-lane limits and `notes_per_beat`.
+All five levels use the same scene script (`Level.gd`). Each level scene sets its own `level_number`, chart file, `lane_count` and `notes_per_beat`.
 
 ## 5. Game modes
 
@@ -131,7 +134,7 @@ Title (tap) ──► Mode Select ──► Offline Select ──► Level Selec
 | Offline Select | Solo / VS CPU cards, Back |
 | Level Select | 5 meal cards (number, BPM, stars) or dashed LOCKED cards, star total, hint, Back |
 | Lobby | Host panel (local IP, level picker, Start), Join panel (IP field), pink error panel, Back |
-| Gameplay HUD | Pause, level + score, hearts, goal bar (Solo) or YOU vs RIVAL/CPU panel + tug bar; online throw meter + INCOMING! banner; judgment and combo pop-ups; ◀ ▶ tap zones |
+| Gameplay HUD | Pause, level + score, hearts, goal bar (Solo) or YOU vs RIVAL/CPU panel + tug bar; online throw meter + INCOMING! banner; judgment and combo pop-ups; drag anywhere to move |
 | Pause | Level + bites caught, Resume, Restart (offline), Sound ON/OFF, Quit to Menu / Leave Match |
 | Result | Outcome, stars (Solo) or rival score, score card with PERFECT/GOOD/MISS/MAX COMBO, unlock banner, Retry / Next / Menu or Back to Lobby |
 | Settings | Sound ON/OFF, volume slider, audio delay (−200…+200 ms), progress summary + Reset progress (tap twice) |

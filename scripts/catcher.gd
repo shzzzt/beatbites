@@ -1,38 +1,51 @@
 class_name Catcher
 extends Node2D
+# The axolotl. Put a finger anywhere on the screen and slide it: the axolotl
+# slides the same distance (like dragging it). A tap without sliding does nothing.
+# The lane it is in is whichever lane column its center is over.
 
-var lane: int = 1 # Lane numbers: 0 = left, 1 = middle, 2 = right.
-# Touches below this y belong to the HUD's ◀ ▶ tap zones, not to lane taps.
-var ignore_touch_below: float = INF
+var lane: int = 1 # 0 = leftmost lane.
+var lane_count: int = 3 # Set by the level with setup().
+# Sprite size per lane count, so the axolotl fits its lane (whole-number scales).
+const SCALE_FOR_LANES: Dictionary = {3: 6, 4: 5, 5: 4}
 
 
 func _ready() -> void:
-	# Start in the middle, using the actual screen width.
-	move_to_touch(get_viewport_rect().size.x / 2.0)
+	setup(lane_count)
+
+
+# Level.gd calls this once it knows how many lanes the meal has.
+func setup(count: int) -> void:
+	lane_count = count
+	var pixel_scale: int = SCALE_FOR_LANES.get(count, 4)
+	$Sprite2D.scale = Vector2(pixel_scale, pixel_scale)
+	set_lane(floori((count - 1) / 2.0)) # Middle lane (left-middle when the count is even).
+
+
+func lane_width() -> float:
+	return get_viewport_rect().size.x / lane_count
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventScreenTouch:
-		if event.pressed and event.position.y < ignore_touch_below:
-			move_to_touch(event.position.x) # Move on a finger press, not its release.
-	elif event is InputEventScreenDrag:
-		if event.position.y < ignore_touch_below:
-			move_to_touch(event.position.x) # Follow a dragging finger.
+	if event is InputEventScreenDrag:
+		# relative = how far the finger moved since the last drag event.
+		slide_to(position.x + event.relative.x)
+	elif event is InputEventScreenTouch and not event.pressed:
+		set_lane(lane) # Finger lifted: settle neatly in the middle of the lane.
+	elif event.is_action_pressed("ui_left"):
+		set_lane(lane - 1) # Keyboard, for testing on a PC.
+	elif event.is_action_pressed("ui_right"):
+		set_lane(lane + 1)
 
 
-func move_to_touch(touch_x: float) -> void:
-	var lane_width: float = get_viewport_rect().size.x / 3.0
-	# Find the touched column and keep its number between 0 and 2.
-	set_lane(int(touch_x / lane_width))
-
-
-# Move one lane left (-1) or right (+1); used by the HUD tap zones.
-func step(direction: int) -> void:
-	set_lane(lane + direction)
+# Follow the finger smoothly, but never past the outer lane centers.
+func slide_to(x: float) -> void:
+	var half: float = lane_width() / 2.0
+	position.x = roundf(clampf(x, half, get_viewport_rect().size.x - half))
+	lane = clampi(int(position.x / lane_width()), 0, lane_count - 1)
 
 
 func set_lane(new_lane: int) -> void:
-	var lane_width: float = get_viewport_rect().size.x / 3.0
-	lane = clampi(new_lane, 0, 2)
+	lane = clampi(new_lane, 0, lane_count - 1)
 	# Move horizontally to that column's center, rounded to a pixel.
-	position.x = roundf((lane + 0.5) * lane_width)
+	position.x = roundf((lane + 0.5) * lane_width())

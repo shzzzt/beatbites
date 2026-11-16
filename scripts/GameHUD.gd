@@ -5,8 +5,6 @@ extends Control
 #   Solo:          level name, score, hearts, goal bar
 #   VS CPU/Online: YOU vs RIVAL panel + tug bar (+ throw meter online)
 
-signal move_requested(direction: int) # -1 = left zone, +1 = right zone.
-
 const HEART_TEXTURE = preload("res://assets/art/ui_heart.png")
 # ui_heart.png is a white shape, so modulate gives it its exact color.
 const FULL_HEART := Color("#FF8FB8")
@@ -26,8 +24,6 @@ var incoming_tween: Tween
 
 
 func _ready() -> void:
-	%LeftZone.pressed.connect(func() -> void: move_requested.emit(-1))
-	%RightZone.pressed.connect(func() -> void: move_requested.emit(1))
 	_fill_hearts(%YouHearts)
 	_fill_hearts(%RivalHearts)
 	# Ten boxes for the throw meter, filled in by set_throw().

@@ -8,6 +8,7 @@
 script = ExtResource("1_4wrbh")
 level_number = 3
 chart_path = "res://assets/audio/music_snack.json"
+lane_count = 4
 
 [node name="Catcher" parent="." unique_id=464772695 instance=ExtResource("2_ps4tf")]
 position = Vector2(360, 1080)

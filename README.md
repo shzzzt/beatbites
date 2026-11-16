@@ -2,7 +2,7 @@
 
 A rhythm catching game for Android, made with Godot 4 for ITSD 85 (Mobile Game with Level Progression and Offline/Online Multiplayer).
 
-Food falls in three lanes on the beat of the music. Move the axolotl catcher between lanes to catch each bite on time, dodge rotten food, and clear five meals from Breakfast to Dessert. Play alone, against a CPU rival, or against a friend on a second phone.
+Food falls in lanes on the beat of the music (3 lanes at first, up to 5 in Dessert). Move the axolotl catcher between lanes to catch each bite on time, dodge rotten food, and clear five meals from Breakfast to Dessert. Play alone, against a CPU rival, or against a friend on a second phone.
 
 ## Screenshots
 
@@ -40,7 +40,7 @@ Food falls in three lanes on the beat of the music. Move the axolotl catcher bet
 
 | Action | How |
 | --- | --- |
-| Move the catcher | Tap or drag in the left, middle or right third of the screen |
+| Move the catcher | Put a finger anywhere and drag left or right; the axolotl slides with it |
 | Pause | Pause icon (top right) or the Android back button |
 
 - **PERFECT** (caught ≤ 0.06 s after the beat) = 100 pts, **GOOD** (≤ 0.16 s) = 50 pts, otherwise **MISS** (breaks your combo).
