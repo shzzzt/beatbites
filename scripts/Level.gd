@@ -27,7 +27,9 @@ const RESULT_WAIT_EXTRA: float = 15.0 # Seconds to wait past the song's end for 
 # most common). The same seed on both phones gives the same power foods.
 const POWER_EVERY: int = 10
 const POWER_OFFSET: int = 4
-const POWER_KINDS: Array[String] = ["rotten", "rotten", "rotten", "ink", "ink", "shield", "double"]
+const POWER_KINDS: Array[String] = ["rotten", "rotten", "rotten", "ink", "ink", "shield", "double", "life"]
+const MAX_LIVES: int = 3
+const FULL_LIFE_BONUS: int = 200 # HEART caught with full lives gives points instead.
 const HAZARD_COUNT: int = 3 # Rotten foods tossed onto the rival's field by THROW.
 const HAZARD_REACT_TIME: float = 0.7 # A tossed hazard lands at least this long before reaching the catcher.
 const INK_TIME: float = 4.0 # Seconds the INK blobs stay on the field.
@@ -85,8 +87,9 @@ func _ready() -> void:
 	var picker := RandomNumberGenerator.new()
 	picker.seed = level_number
 	var last_variant: int = -1
-	var power_picker := RandomNumberGenerator.new() # Chooses each power food's kind.
+	var power_picker := RandomNumberGenerator.new() # Shuffles the power "bag".
 	power_picker.seed = level_number + 1000
+	var power_bag: Array[String] = []
 	# Preview the chart after its opening three seconds.
 	for note in breakfast_notes:
 		var food: FallingFood = FOOD_SCENE.instantiate() as FallingFood
@@ -94,7 +97,9 @@ func _ready() -> void:
 		food.is_bad = level_number >= 3 and food_index % 10 == 9
 		# VS CPU / Online: power foods (same ones on both phones, never rotten).
 		if GameState.mode != "solo" and not food.is_bad and food_index % POWER_EVERY == POWER_OFFSET:
-			food.power_kind = POWER_KINDS[power_picker.randi() % POWER_KINDS.size()]
+			if power_bag.is_empty():
+				power_bag = shuffled_powers(power_picker) # Refill: every kind comes up again.
+			food.power_kind = power_bag.pop_back()
 		food_index += 1 # Advance to the next food number.
 		# Random picture, but never the same food twice in a row.
 		var variant: int = picker.randi_range(0, FallingFood.GOOD_TEXTURES.size() - 2)
@@ -511,10 +516,32 @@ func update_online_countdown() -> void:
 #   ink:            purple blobs cover part of the rival's field for 4 s
 #   shield:         blocks the next attack thrown at you
 #   double (x2):    double points for 6 s
+#   life (HEART):   +1 life (max 3); with full lives, +200 points instead
+
+# A shuffled copy of POWER_KINDS (a "bag"): dealing from a bag means every
+# kind shows up regularly, instead of pure luck giving one meal no THROW at all.
+# Uses our seeded generator (Array.shuffle() wouldn't be the same on both phones).
+func shuffled_powers(rng: RandomNumberGenerator) -> Array[String]:
+	var bag: Array[String] = POWER_KINDS.duplicate()
+	for i in range(bag.size() - 1, 0, -1): # Fisher-Yates shuffle.
+		var j: int = rng.randi_range(0, i)
+		var swap: String = bag[i]
+		bag[i] = bag[j]
+		bag[j] = swap
+	return bag
+
 
 # We caught a power food.
 func use_power(kind: String) -> void:
 	match kind:
+		"life":
+			if lives < MAX_LIVES:
+				lives += 1
+				hud.show_power(catcher.position, "+1 LIFE!", kind)
+			else:
+				score += FULL_LIFE_BONUS
+				hud.show_power(catcher.position, "+%d!" % FULL_LIFE_BONUS, kind)
+			refresh_hud() # Show the new heart / score right away.
 		"shield":
 			has_shield = true
 			hud.show_power(catcher.position, "SHIELD!", kind)
@@ -546,6 +573,13 @@ func cpu_use_power(kind: String) -> void:
 		"double":
 			cpu.double_until = song_time + DOUBLE_TIME
 			hud.show_rival_power("CPU x2!")
+		"life":
+			if cpu.lives < MAX_LIVES:
+				cpu.lives += 1
+				hud.show_rival_power("CPU +1 LIFE!")
+			else:
+				cpu.score += FULL_LIFE_BONUS
+				hud.show_rival_power("CPU +%d!" % FULL_LIFE_BONUS)
 		_:
 			receive_attack(kind)
 

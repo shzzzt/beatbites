@@ -86,19 +86,20 @@ All five levels use the same scene script (`Level.gd`). Each level scene sets it
 - **Outcome:** the same rule as VS CPU, decided by the host (see 6.3).
 
 ### 5.4 Power food and attacks (VS CPU and Online)
-- Every 10th food (the 5th, 15th, 25th …) is a **power food**: a normal good food with a pulsing colored glow, four circling sparkles and a small label underneath. Power food is never rotten. Its type is picked with a fixed seed, so both phones get the same power foods.
+- Every 10th food (the 5th, 15th, 25th …) is a **power food**: a normal good food with a pulsing colored glow, four circling sparkles and a small label underneath. Power food is never rotten. Types are dealt from a shuffled "bag" of 8 (3× THROW, 2× INK, SHIELD, x2, HEART) that refills when empty, so every type shows up in every meal. The shuffle uses a fixed seed, so both phones get the same power foods.
 
 | Power | Glow | Chance | Effect |
 | --- | --- | --- | --- |
-| THROW | green | 3 in 7 | Tosses **3 rotten foods onto the rival's field** |
-| INK | purple | 2 in 7 | Purple pixel ink covers part of the rival's field for 4 s |
-| SHIELD | blue | 1 in 7 | Blocks the next THROW or INK aimed at you |
-| x2 | gold | 1 in 7 | Double points for 6 s (status chip shows the seconds left) |
+| THROW | green | 3 in 8 | Tosses **3 rotten foods onto the rival's field** |
+| INK | purple | 2 in 8 | Purple pixel ink covers part of the rival's field for 4 s |
+| SHIELD | blue | 1 in 8 | Blocks the next THROW or INK aimed at you |
+| x2 | gold | 1 in 8 | Double points for 6 s (status chip shows the seconds left) |
+| HEART | pink | 1 in 8 | +1 life (max 3) and a heart flies up to your hearts; with full lives, +200 points instead |
 
 - **Throwing (THROW or INK):** "THROW!" / "INK!" pops up, the projectile spins along an arc from your axolotl to the rival's side of the score panel with a trail, then **SPLAT!** with pixel debris while the panel shakes and flashes red (or **BLOCKED!** against a CPU shield).
 - **Getting hit by THROW:** an **INCOMING!** banner appears and the rival's side of the panel winds up, then 3 rotten foods are tossed one after another on random wobbly, spinning curves. Each lands in a random lane at a random on-beat time and keeps falling as an extra hazard. Hazards never land within 0.3 s of another food in the same lane, and always land at least 0.7 s before reaching the catcher, so they can be dodged. Catching one costs a life; dodging it shows DODGED!.
 - **Getting hit by INK:** "INK INCOMING!", an ink ball flies in and splats big purple pixel blobs over part of the field (food passes underneath), which fade after 4 s.
-- **SHIELD / x2:** the name pops up above your axolotl; a status chip under the score panel shows "SHIELD" and/or "x2 5s". A shield is used up by the next attack (BLOCKED!).
+- **SHIELD / x2 / HEART:** the name pops up above your axolotl; a status chip under the score panel shows "SHIELD" and/or "x2 5s". A shield is used up by the next attack (BLOCKED!).
 - Missing a power food does nothing special. (This replaced the earlier 10-combo throw meter.)
 
 ## 6. Online design

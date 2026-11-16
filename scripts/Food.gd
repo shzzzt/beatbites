@@ -22,6 +22,7 @@ const POWERS: Dictionary = {
 	"ink": {"glow": Color(0.8, 0.72, 1.0, 0.65), "sparkle": Color("#5B4494"), "label": "INK"},
 	"shield": {"glow": Color(0.75, 0.89, 1.0, 0.7), "sparkle": Color("#2667B0"), "label": "SHIELD"},
 	"double": {"glow": Color(1.0, 0.89, 0.48, 0.6), "sparkle": Color("#F2B230"), "label": "x2"},
+	"life": {"glow": Color(1.0, 0.72, 0.84, 0.7), "sparkle": Color("#D9468F"), "label": "HEART"},
 }
 const SPARKLE_LIGHT := Color("#FFF6D6")
 const LABEL_FONT = preload("res://assets/fonts/PressStart2P-Regular.ttf")

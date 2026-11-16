@@ -85,6 +85,7 @@ const INK_TRAIL := Color(0.36, 0.27, 0.58, 0.8)
 const INK_DEBRIS: Array[Color] = [Color("#4A3A7A"), Color("#7A66B8"), Color("#5B4494")]
 const SHIELD_DEBRIS: Array[Color] = [Color("#2667B0"), Color("#BFE2FF"), Color("#FFFFFF")]
 const GOLD_DEBRIS: Array[Color] = [Color("#F2B230"), Color("#FFE27A"), Color("#FFFFFF")]
+const HEART_DEBRIS: Array[Color] = [Color("#FF8FB8"), Color("#D9468F"), Color("#FFFFFF")]
 const PIXEL: float = 12.0 # Ink blobs are drawn as 12×12 squares (pixel style).
 
 
@@ -154,9 +155,41 @@ func play_blocked(at: Vector2) -> void:
 
 # We caught a SHIELD or x2 power: name pops up above the axolotl with sparkles.
 func show_power(at: Vector2, text: String, kind: String) -> void:
-	var debris: Array[Color] = SHIELD_DEBRIS if kind == "shield" else GOLD_DEBRIS
-	_impact(at + Vector2(0, -40), "", BLUE, debris)
-	_float_text(at + Vector2(0, -130), text, BLUE if kind == "shield" else GOLD)
+	var debris: Array[Color] = GOLD_DEBRIS
+	var color: Color = GOLD
+	match kind:
+		"shield":
+			debris = SHIELD_DEBRIS
+			color = BLUE
+		"life":
+			debris = HEART_DEBRIS
+			color = PINK
+			_flying_heart(at, %YouHearts)
+	_impact(at + Vector2(0, -40), "", color, debris)
+	_float_text(at + Vector2(0, -130), text, color)
+
+
+# HEART power: a big heart floats from the axolotl up to our hearts in the panel.
+func _flying_heart(from: Vector2, hearts: Control) -> void:
+	var heart := Sprite2D.new()
+	heart.texture = HEART_TEXTURE
+	heart.modulate = FULL_HEART # ui_heart.png is white, so tint it pink.
+	heart.scale = Vector2(8, 8)
+	heart.position = from
+	add_child(heart)
+	var tween := create_tween()
+	heart.position = from + Vector2(0, -90) # Start just above the axolotl.
+	# Hop up a little, then fly to our hearts, shrinking to their size near the end.
+	tween.tween_property(heart, "position", heart.position + Vector2(0, -60), 0.2) \
+		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.tween_property(heart, "position", _center_of(hearts), 0.5) \
+		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	tween.parallel().tween_property(heart, "scale", Vector2(3, 3), 0.5) \
+		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	tween.tween_callback(func() -> void:
+		heart.queue_free()
+		_shake(%VersusPanel) # Little bump when it arrives.
+	)
 
 
 # The rival used a SHIELD or x2 on themselves: short note by their panel.

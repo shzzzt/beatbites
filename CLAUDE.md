@@ -239,8 +239,11 @@ launch the Godot exe; `_console.exe` is missing). Waiting for one combined phone
 - Power foods (2026-11-17; VS CPU checked in Godot with screenshots, online NOT tested; the
   send_attack RPC now has a `kind` argument, so BOTH phones need the new APK):
   - VS CPU + Online: food_index % 10 == 4 (not rotten) → `Food.power_kind` from
-	`Level.POWER_KINDS` (rotten ×3, ink ×2, shield, double) with an RNG seeded level_number + 1000
-	(same on both phones). `Food._draw`: colored glow + 4 sparkles + label chip (`Food.POWERS`).
+	`Level.POWER_KINDS` (rotten ×3, ink ×2, shield, double, life) dealt from a shuffled bag
+	(`shuffled_powers()`, Fisher-Yates with an RNG seeded level_number + 1000, refills when empty;
+	same on both phones, every kind in every meal). Heart ("life"): +1 life up to MAX_LIVES 3, else
+	+200; `hud.show_power` flies a heart sprite to `%YouHearts`; CPU gets the same. Versus only
+	(Solo stars = lives, so no hearts there). `Food._draw`: colored glow + 4 sparkles + label chip (`Food.POWERS`).
   - Catch → `Level.use_power(kind)`: shield → `has_shield`; double → `double_until` (+6 s, points ×2);
 	rotten/ink → `hud.play_throw(pos, kind, blocked)` + online `Net.send_attack(kind)` RPC, or CPU:
 	`cpu.shield` blocks, rotten → `cpu.incoming += 3` (extra `judge_bad_note` per processed food),
