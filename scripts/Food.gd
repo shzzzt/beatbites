@@ -11,6 +11,13 @@ const START_Y: float = -96.0 # Just above the top of the screen.
 var judged: bool = false # This food remembers its own judgment state.
 var is_bad: bool = false # Whether this particular food is rotten.
 var variant: int = 0 # Which picture to use (set by the level before add_child).
+# VS CPU / Online: catching a power food throws a rotten food at the rival.
+var is_power: bool = false
+var targeted: bool = false # An incoming attack is already flying at this food.
+
+const GLOW := Color(1.0, 0.89, 0.48, 0.55) # Soft gold circle behind power food.
+const SPARKLE := Color("#F2B230")
+const SPARKLE_LIGHT := Color("#FFF6D6")
 
 # All food pictures (16×16, shown ×6). The first good foods line up with
 # their rotten versions: apple → rotten apple, banana → rotten banana.
@@ -40,6 +47,8 @@ func update_from_song(time: float, width: float) -> void:
 	var lane_width: float = width / lane_count
 	position.x = (lane + 0.5) * lane_width # Center of this food's lane.
 	position.y = lerpf(START_Y, catch_y, progress) # Audio-controlled height.
+	if is_power and visible:
+		queue_redraw() # Animate the glow every frame (see _draw).
 
 func judge_catch(time: float, catcher_lane: int) -> void:
 	if judged or time < arrival_time:
@@ -75,9 +84,31 @@ func judge_catch(time: float, catcher_lane: int) -> void:
 	judgment_made.emit(result) # Send the result to the level.
 	
 func make_rotten() -> void:
-	# Used by the online attack: a good food turns rotten mid-song.
+	# Used by attacks: a good food turns rotten mid-song.
 	is_bad = true
+	is_power = false
 	update_texture()
+	queue_redraw() # Remove the power glow if it had one.
+	# Little "pop" so the change is easy to notice (whole-number scales only).
+	var sprite: Sprite2D = $Sprite2D
+	sprite.scale = Vector2(8, 8)
+	create_tween().tween_property(sprite, "scale", Vector2(6, 6), 0.2)
+
+
+# Power food: a pulsing gold glow with four sparkles circling it.
+# _draw() paints behind the Sprite2D child.
+func _draw() -> void:
+	if not is_power:
+		return
+	var seconds: float = Time.get_ticks_msec() / 1000.0
+	draw_circle(Vector2.ZERO, 60.0 + 6.0 * sin(seconds * 8.0), GLOW)
+	for i in 4:
+		var angle: float = seconds * 2.5 + i * TAU / 4.0
+		var spot: Vector2 = (Vector2.RIGHT.rotated(angle) * 64.0).round()
+		# A pixel "plus" sparkle: one tall and one wide rectangle.
+		draw_rect(Rect2(spot.x - 3, spot.y - 9, 6, 18), SPARKLE)
+		draw_rect(Rect2(spot.x - 9, spot.y - 3, 18, 6), SPARKLE)
+		draw_rect(Rect2(spot.x - 3, spot.y - 3, 6, 6), SPARKLE_LIGHT)
 
 
 func _ready() -> void:

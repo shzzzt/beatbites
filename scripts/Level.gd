@@ -22,8 +22,13 @@ var online_result_shown: bool = false # The online match has ended (result or di
 var opp_last_score: int = 0 # Rival's latest numbers, kept in case they disconnect.
 var opp_last_lives: int = 3
 const RESULT_WAIT_EXTRA: float = 15.0 # Seconds to wait past the song's end for the rival.
-const THROW_COMBO: int = 10 # Every 10-catch combo throws a rotten food at the rival.
-const ATTACK_LEAD_TIME: float = 2.0 # Turn food rotten at least this long before it lands.
+# VS CPU / Online: every 12th food (the 6th, 18th, 30th…) is a glowing power
+# food. Catching it throws a rotten food at the rival.
+const POWER_EVERY: int = 12
+const POWER_OFFSET: int = 5
+# An incoming rotten food lands on a bite that is still at least this many
+# seconds from the catcher, so there's time to dodge it.
+const ATTACK_REACT_TIME: float = 0.9
 const PAUSE_SCENE = preload("res://scenes/ui/PauseMenu.tscn")
 const HUD_SCENE = preload("res://scenes/ui/GameHUD.tscn")
 const BACKDROP_SCENE = preload("res://scenes/ui/GameBackdrop.tscn")
@@ -79,6 +84,9 @@ func _ready() -> void:
 		var food: FallingFood = FOOD_SCENE.instantiate() as FallingFood
 		# Snack onward: every tenth food is rotten.
 		food.is_bad = level_number >= 3 and food_index % 10 == 9
+		# VS CPU / Online: power foods (same ones on both phones, never rotten).
+		food.is_power = GameState.mode != "solo" and not food.is_bad \
+			and food_index % POWER_EVERY == POWER_OFFSET
 		food_index += 1 # Advance to the next food number.
 		# Random picture, but never the same food twice in a row.
 		var variant: int = picker.randi_range(0, FallingFood.GOOD_TEXTURES.size() - 2)
@@ -92,7 +100,9 @@ func _ready() -> void:
 		food.fall_time = fall_time
 		food.catch_y = catcher.position.y # Land on the axolotl exactly on the beat.
 		food.hide() # Stay hidden until the fall begins.
-		food.judgment_made.connect(_on_food_judgment)
+		# bind() adds the food itself as an extra argument, so the handler
+		# knows which food was judged (e.g. whether it was a power food).
+		food.judgment_made.connect(_on_food_judgment.bind(food))
 		add_child(food) # Put this instance into the level.
 		active_food.append(food) # Remember it for updates.
 
@@ -162,7 +172,7 @@ func _process(_delta: float) -> void:
 		last_beat = beat # Print only when we reach a new beat.
 		print("Beat ", beat + 1) # Show human-friendly numbering from 1.
 
-func _on_food_judgment(result: String) -> void:
+func _on_food_judgment(result: String, food: FallingFood) -> void:
 	if finished or lives <= 0:
 		return # An eliminated player cannot earn further points.
 
@@ -179,7 +189,6 @@ func _on_food_judgment(result: String) -> void:
 		return # Avoiding rotten food isn't a MISS.
 
 	judgment_counts[result] += 1 # Count this food's judgment once.
-	var thrown: bool = false
 	if result == "MISS":
 		combo = 0 # A missed good food breaks the streak.
 	else:
@@ -190,14 +199,11 @@ func _on_food_judgment(result: String) -> void:
 			score += 100
 		else:
 			score += 50 # GOOD earns fewer points.
-		if GameState.mode == "online" and combo % THROW_COMBO == 0:
-			throw_attack() # Combo of 10, 20, 30... sends rotten food.
-			thrown = true
+		if food.is_power:
+			throw_attack() # Caught a power food: throw rotten food at the rival.
 
 	# Show the result in the middle and update the HUD numbers.
 	hud.show_judgment(result, combo)
-	if GameState.mode == "online":
-		hud.set_throw(combo % THROW_COMBO, thrown)
 	refresh_hud()
 
 # Choose which melody notes become food.
@@ -383,8 +389,12 @@ func update_cpu() -> void:
 
 		if food.is_bad:
 			cpu.judge_bad_note() # Simulate avoiding this rotten food.
-		else:
-			cpu.judge_good_note() # Simulate catching this good food.
+		elif cpu.incoming > 0:
+			# We threw rotten food at the CPU: its next good food counts as rotten.
+			cpu.incoming -= 1
+			cpu.judge_bad_note()
+		elif cpu.judge_good_note() and food.is_power:
+			receive_attack() # The CPU caught a power food and throws at us.
 
 
 func end_cpu_match() -> void:
@@ -413,8 +423,6 @@ func setup_hud() -> void:
 	hud = HUD_SCENE.instantiate() as GameHUD
 	$HUD.add_child(hud) # The HUD CanvasLayer draws above the food.
 	hud.setup(GameState.mode, level_number, GameState.meal_name(level_number))
-	if GameState.mode == "online":
-		hud.set_throw(0, false)
 	refresh_hud()
 
 
@@ -484,27 +492,55 @@ func update_online_countdown() -> void:
 		music.play(maxf(0.0, -remaining_ms / 1000.0))
 
 
+# --- Rotten-food attacks (VS CPU and Online) ---------------------------------
+
+# We caught a power food.
 func throw_attack() -> void:
-	if Net.opponent_id == 0:
-		return # Nobody to throw at.
-	Net.send_attack.rpc_id(Net.opponent_id)
+	hud.play_throw(catcher.position) # Fly from our axolotl to the rival's panel.
+	if cpu != null:
+		cpu.incoming += 1 # The CPU's next good food turns rotten for it.
+	elif GameState.mode == "online" and Net.opponent_id != 0:
+		Net.send_attack.rpc_id(Net.opponent_id)
 
 
 func _on_attack_received() -> void:
+	receive_attack() # The online rival caught a power food.
+
+
+# The rival threw at us: pick one of our upcoming bites, animate the rotten
+# food flying onto it, and turn it rotten when it lands.
+func receive_attack() -> void:
 	if finished:
 		return # Our match is already over.
 
-	# Turn the next good food that's still far enough away rotten,
-	# so the player has time to see it and dodge.
+	# The bite must still be far enough away after the flight to dodge it.
+	var earliest: float = song_time + GameHUD.FLIGHT_TIME + ATTACK_REACT_TIME
 	for food in active_food:
-		if food.judged or food.is_bad:
+		if food.judged or food.is_bad or food.is_power or food.targeted:
 			continue
-		if food.arrival_time < song_time + ATTACK_LEAD_TIME:
+		if food.arrival_time < earliest:
 			continue
-		food.make_rotten()
-		hud.show_incoming()
+		food.targeted = true
+		# The bite keeps falling during the flight, so aim at where it is now.
+		var aim := func() -> Vector2:
+			return Vector2(food.position.x, maxf(food.position.y, 120.0))
+		hud.play_incoming(aim, _attack_lands.bind(food))
 		return
 	# No food left in the song: the throw simply misses.
+
+
+func _attack_lands(food: FallingFood) -> void:
+	if finished or food.judged:
+		return
+	food.make_rotten()
+	shake_screen()
+
+
+# Shakes the food and the catcher for a moment (the HUD stays still).
+func shake_screen() -> void:
+	var tween := create_tween()
+	for offset in [Vector2(10, 6), Vector2(-8, -4), Vector2(6, 3), Vector2(-3, -2), Vector2.ZERO]:
+		tween.tween_property(self, "position", offset, 0.04)
 
 
 func _on_opponent_stats_updated(new_score: int, new_lives: int) -> void:

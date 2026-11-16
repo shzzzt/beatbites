@@ -75,14 +75,21 @@ All five levels use the same scene script (`Level.gd`). Each level scene sets it
 - Same rules, plus a simulated rival (`CpuRival`) that judges every food at the same moment as the player.
 - CPU accuracy goes up each level: **55% → 63% → 71% → 79% → 87%**. When it catches a food, 75% of catches are PERFECT and the rest GOOD. It fails to dodge rotten food with the same chance it misses a good one.
 - **Outcome:** a survivor beats an eliminated player; otherwise the higher score wins; otherwise it's a draw. VS CPU doesn't change unlocks or stars.
+- **Power food attacks:** the same as online (see 5.4). The CPU catches power food with its normal accuracy and throws back; when you hit the CPU, its next good food counts as rotten for it (it dodges with its normal accuracy, otherwise loses a life).
 - It needs no network, so it works in airplane mode.
 
 ### 5.3 Online (2 phones)
 - One phone **hosts** and the other **joins** with the host's local IP address (ENet, UDP port 24567, max 2 players).
 - The host chooses the meal. All five meals are available online.
 - During the match, each phone shows the rival's live score and lives.
-- **Attack race:** every 10-catch combo (10, 20, 30 …) throws a rotten food at the rival. On the rival's phone, the next good food landing at least 2 seconds later turns rotten, and a big **INCOMING!** warning appears. A throw meter shows progress toward the next throw.
+- **Attack race:** power foods (see 5.4). Both phones get the same power foods, so neither player gets more chances to attack.
 - **Outcome:** the same rule as VS CPU, decided by the host (see 6.3).
+
+### 5.4 Power food and attacks (VS CPU and Online)
+- Every 12th food (the 6th, 18th, 30th …) is a **power food**: a normal good food with a pulsing gold glow and four circling sparkles. Power food is never rotten.
+- **Catching it** (PERFECT or GOOD) throws a rotten food at the rival: "THROW!" pops up, a spinning rotten food arcs from your axolotl to the rival's side of the score panel leaving a green trail, then **SPLAT!** with flying pixel debris while the panel shakes and flashes red.
+- **Getting hit:** an **INCOMING!** banner appears, the score panel winds up, and a rotten food flies from the rival's side onto one of your upcoming bites. That bite turns rotten with a pop, debris and **ROTTEN!**, and the screen shakes. The chosen bite still lands at least 0.9 s after the hit, so you can dodge it.
+- Missing a power food does nothing special. (This replaced the earlier 10-combo throw meter.)
 
 ## 6. Online design
 
@@ -136,7 +143,7 @@ Title (tap) ──► Mode Select ──► Offline Select ──► Level Selec
 | Offline Select | Solo / VS CPU cards, Back |
 | Level Select | 5 meal cards (number, BPM, stars) or dashed LOCKED cards, star total, hint, Back |
 | Lobby | Host panel (local IP, level picker, Start), Join panel (IP field), pink error panel, Back |
-| Gameplay HUD | Pause, level + score, hearts, goal bar (Solo) or YOU vs RIVAL/CPU panel + tug bar; online throw meter + INCOMING! banner; judgment and combo pop-ups; drag anywhere to move |
+| Gameplay HUD | Pause, level + score, hearts, goal bar (Solo) or YOU vs RIVAL/CPU panel + tug bar; power food glow, throw / SPLAT! / INCOMING! animations; judgment and combo pop-ups; drag anywhere to move |
 | Pause | Level + bites caught, Resume, Restart (offline), Sound ON/OFF, Quit to Menu / Leave Match |
 | Result | Outcome, stars (Solo) or rival score, score card with PERFECT/GOOD/MISS/MAX COMBO, unlock banner, Retry / Next / Menu or Back to Lobby |
 | Settings | Sound ON/OFF, volume slider, audio delay (−200…+200 ms), progress summary + Reset progress (tap twice) |

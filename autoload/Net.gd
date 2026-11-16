@@ -187,7 +187,7 @@ func receive_stats(new_score: int, new_lives: int) -> void:
 
 	opponent_stats_updated.emit(new_score, new_lives)
 
-# Attack race: a 10-catch combo throws one rotten food at the rival.
+# Attack race: catching a power food throws one rotten food at the rival.
 @rpc("any_peer", "call_remote", "reliable")
 func send_attack() -> void:
 	if multiplayer.get_remote_sender_id() != opponent_id:

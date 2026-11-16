@@ -129,10 +129,7 @@ launch the Godot exe; `_console.exe` is missing). Waiting for one combined phone
 - Online level (decided: host picks): Lobby `LevelPick` OptionButton (host only) →
   `prepare_match(seed, level)` → `Net.match_level` → loads `level_0N.tscn`. All 5 levels are
   playable online, even if they're still locked in Solo. The seed is still unused.
-- Attack race: every 10-catch combo (10, 20, 30…) → `Net.send_attack` RPC → rival's
-  `_on_attack_received()` turns their next good food landing ≥2 s ahead rotten
-  (`FallingFood.make_rotten()`) and shows INCOMING! for 1.5 s. Throw meter label
-  "Throw [###-------] 3/10" under the opponent numbers. MISS resets it (combo breaks).
+- Attack race: REPLACED 2026-11-17 by power food (see "Power food attacks" below).
 - R10 screens: `Title.tscn` is now the main scene (PLAY / SOUND / CREDITS, menu music);
   `Credits.tscn` has [PLACEHOLDERS] for my name, music and art sources. BACK buttons on
   ModeSelect → Title and OfflineSelect → ModeSelect.
@@ -181,7 +178,7 @@ launch the Godot exe; `_console.exe` is missing). Waiting for one combined phone
 	level's HUD CanvasLayer; `GameBackdrop.tscn` (layer -1: sparkles, lane dividers, catch line).
 	Level.gd calls `hud.show_message/show_judgment/set_*`; `refresh_hud()` pushes all numbers.
 	Solo: level/score/hearts/goal bar. CPU + Online: YOU vs RIVAL/CPU panel + tug bar; online
-	adds the 10-box throw meter + INCOMING! banner. Old `$HUD/Judgment` label removed from levels.
+	adds the INCOMING! banner (throw meter removed 2026-11-17). Old `$HUD/Judgment` label removed from levels.
   - Controls: see the 2026-11-16 entry below (tap zones removed, drag only).
   - Pause (06): lilac overlay, PAUSED, "LV · meal · caught/40 bites" (`PauseMenu.set_info`),
 	RESUME / RESTART / SOUND [ON|OFF chip] / QUIT TO MENU; pause button top-left.
@@ -238,6 +235,20 @@ launch the Godot exe; `_console.exe` is missing). Waiting for one combined phone
   - Controls: ◀ ▶ tap zones removed (HUD + `move_requested`). Drag anywhere: the axolotl slides by the
 	finger's `relative` x, lane = column under its center, snaps to lane center on release. A plain
 	tap does nothing. Arrow keys still work on PC.
+
+- Power food attacks (2026-11-17; VS CPU checked in Godot with screenshots, online NOT tested):
+  - VS CPU + Online: food_index % 12 == 5 (and not rotten) → `Food.is_power` (gold glow + 4 circling
+	sparkles in `Food._draw`). Catching it → `Level.throw_attack()`: `hud.play_throw(catcher pos)`
+	(spinning rotten food arc + green trail → SPLAT!, debris, rival panel shake + red flash); CPU:
+	`cpu.incoming += 1` (its next good food is judged as rotten); online: `Net.send_attack` RPC.
+  - Receiving (`Level.receive_attack()`, from Net.attack_received or when the CPU catches a power
+	food — `CpuRival.judge_good_note()` now returns bool): picks the first good, non-power,
+	untargeted bite landing ≥ FLIGHT_TIME 0.55 + ATTACK_REACT_TIME 0.9 s ahead, `hud.play_incoming()`
+	(INCOMING! banner, panel wind-up, projectile homes onto the falling bite) → `make_rotten()`
+	(scale pop) + `shake_screen()` (Level position shake; HUD stays still).
+  - Judgment signal is bound with the food: `judgment_made.connect(_on_food_judgment.bind(food))`.
+  - 10-combo throw meter removed (HUD ThrowPanel, set_throw, THROW_COMBO). INCOMING! banner moved
+	to y 216. Not a bug after all: food passes UNDER the HUD panels (checked canvas layers).
 
 ## Remaining work (in order; batch related tasks together)
 

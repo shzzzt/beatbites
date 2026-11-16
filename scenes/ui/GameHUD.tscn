@@ -125,6 +125,7 @@ offset_bottom = 460.0
 mouse_filter = 2
 
 [node name="VersusPanel" type="PanelContainer" parent="VersusTop"]
+unique_name_in_owner = true
 layout_mode = 0
 offset_left = 128.0
 offset_top = 48.0
@@ -179,6 +180,7 @@ text = "VS"
 horizontal_alignment = 1
 
 [node name="Rival" type="VBoxContainer" parent="VersusTop/VersusPanel/Row"]
+unique_name_in_owner = true
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 4
@@ -228,53 +230,14 @@ max_value = 1.0
 value = 0.5
 show_percentage = false
 
-[node name="ThrowPanel" type="PanelContainer" parent="VersusTop"]
-unique_name_in_owner = true
-layout_mode = 0
-offset_left = 32.0
-offset_top = 216.0
-offset_right = 688.0
-offset_bottom = 336.0
-mouse_filter = 2
-theme_type_variation = &"HudPanel"
-
-[node name="ThrowBox" type="VBoxContainer" parent="VersusTop/ThrowPanel"]
-layout_mode = 2
-mouse_filter = 2
-theme_override_constants/separation = 12
-
-[node name="ThrowRow" type="HBoxContainer" parent="VersusTop/ThrowPanel/ThrowBox"]
-layout_mode = 2
-mouse_filter = 2
-
-[node name="ThrowText" type="Label" parent="VersusTop/ThrowPanel/ThrowBox/ThrowRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 32
-text = "Throw meter"
-
-[node name="ThrowCount" type="Label" parent="VersusTop/ThrowPanel/ThrowBox/ThrowRow"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_type_variation = &"CardBody"
-theme_override_colors/font_color = Color(0.5411765, 0.32156864, 0.043137256, 1)
-text = "0 / 10 combo"
-
-[node name="ThrowBoxes" type="HBoxContainer" parent="VersusTop/ThrowPanel/ThrowBox"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 32)
-layout_mode = 2
-mouse_filter = 2
-theme_override_constants/separation = 10
-
 [node name="Incoming" type="PanelContainer" parent="VersusTop"]
 unique_name_in_owner = true
 visible = false
 layout_mode = 0
 offset_left = 80.0
-offset_top = 356.0
+offset_top = 216.0
 offset_right = 640.0
-offset_bottom = 444.0
+offset_bottom = 304.0
 mouse_filter = 2
 theme_type_variation = &"SuccessPanel"
 
