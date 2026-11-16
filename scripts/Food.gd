@@ -5,7 +5,9 @@ signal judgment_made(result: String) # Tell the level what happened.
 var arrival_time: float = 0.0 # When this food should reach the catcher.
 var lane: int = 0 # Which lane it belongs to (0 = leftmost).
 var lane_count: int = 3 # How many lanes this level has (set by the level).
-var fall_time: float = 3.0 # Seconds from the top to the catch line (set by the level).
+var fall_time: float = 2.4 # Seconds from the top to the catcher (set by the level).
+var catch_y: float = 1080.0 # Height of the axolotl; food is here exactly on the beat.
+const START_Y: float = -96.0 # Just above the top of the screen.
 var judged: bool = false # This food remembers its own judgment state.
 var is_bad: bool = false # Whether this particular food is rotten.
 var variant: int = 0 # Which picture to use (set by the level before add_child).
@@ -37,7 +39,7 @@ func update_from_song(time: float, width: float) -> void:
 
 	var lane_width: float = width / lane_count
 	position.x = (lane + 0.5) * lane_width # Center of this food's lane.
-	position.y = lerpf(-96.0, 960.0, progress) # Audio-controlled height.
+	position.y = lerpf(START_Y, catch_y, progress) # Audio-controlled height.
 
 func judge_catch(time: float, catcher_lane: int) -> void:
 	if judged or time < arrival_time:

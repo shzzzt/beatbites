@@ -8,7 +8,7 @@
 script = ExtResource("1_c5o3r")
 level_number = 2
 chart_path = "res://assets/audio/music_lunch.json"
-fall_time = 2.6
+fall_time = 2.1
 
 [node name="Catcher" parent="." unique_id=464772695 instance=ExtResource("2_3acmf")]
 position = Vector2(360, 1080)

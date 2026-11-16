@@ -4,10 +4,13 @@ extends Node2D
 @export_file("*.json") var chart_path: String = \
 	"res://assets/audio/music_breakfast.json" # Chart used by this level.
 @export_range(3, 5, 1) var lane_count: int = 3 # Harder meals have more lanes.
-# Seconds a food takes to fall to the catch line. Shorter = faster drops and
-# more space between bites (Breakfast 3.0 → Dessert 1.6).
-@export_range(1.0, 3.0, 0.1) var fall_time: float = 3.0
+# Seconds a food takes to fall onto the axolotl. Shorter = faster drops and
+# more space between bites (Breakfast 2.4 → Dessert 1.2).
+@export_range(1.0, 3.0, 0.1) var fall_time: float = 2.4
 @export_range(1, 2, 1) var notes_per_beat: int = 1 # 1 = whole; 2 = half beats.
+# Skip a note if it comes sooner than this after the previous food (seconds),
+# so bites never fall in a tight stream. 0 = keep every note.
+@export_range(0.0, 1.0, 0.05) var min_gap: float = 0.0
 
 var last_sent_score: int = -1
 var last_sent_lives: int = -1
@@ -59,16 +62,22 @@ func _ready() -> void:
 		# Build our playable list before spawning any food.
 	bpm = float(chart["bpm"]) # Use this song's exact tempo.
 
+	var last_kept_time: float = -INF
 	for note in chart["lead_notes"]:
 		var beat: float = float(note["beat"])
+		var time: float = beat * 60.0 / bpm # Convert using this song's tempo.
 		# Breakfast accepts notes starting on whole beats.
 		# A half-beat becomes a whole number when multiplied by two.
 		var grid_position: float = beat * notes_per_beat
-		if is_equal_approx(grid_position, roundf(grid_position)):
-			breakfast_notes.append({
-				"time": beat * 60.0 / bpm, # Convert using this song's tempo.
-				"midi": int(note["midi"]), # Original pitch.
-			})
+		if not is_equal_approx(grid_position, roundf(grid_position)):
+			continue
+		if time - last_kept_time < min_gap - 0.001:
+			continue # Too close to the previous food: leave a gap.
+		last_kept_time = time
+		breakfast_notes.append({
+			"time": time,
+			"midi": int(note["midi"]), # Original pitch.
+		})
 	assign_lanes(breakfast_notes) # Give every note a lane from the melody's shape.
 	catcher.setup(lane_count)
 
@@ -94,6 +103,7 @@ func _ready() -> void:
 		food.lane = int(note["lane"]) # Each gets its own lane.
 		food.lane_count = lane_count
 		food.fall_time = fall_time
+		food.catch_y = catcher.position.y # Land on the axolotl exactly on the beat.
 		food.hide() # Stay hidden until the fall begins.
 		food.judgment_made.connect(_on_food_judgment)
 		add_child(food) # Put this instance into the level.

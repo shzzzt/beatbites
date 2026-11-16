@@ -27,7 +27,8 @@ Beat Bites is a rhythm catching game. Food falls down lanes in time with the mus
 
 ### 3.1 Lanes and timing
 - Each note in a song's melody becomes one food. The **melody's shape decides the lane**: when the melody goes up, the food moves one lane right; when it goes down, one lane left; a repeated note stays in the same lane. A big jump (more than 4 semitones) moves two lanes when there are 4 or more lanes. At the edge, the food bounces back toward the middle, and after 3 foods in one lane the next one moves toward the center, so the chart never sits on one side for long. The same chart always gives the same lanes, so both phones match online.
-- **Fall speed per meal:** a food takes 3.0 s to fall in Breakfast, then 2.6 s (Lunch), 2.2 s (Snack), 1.9 s (Dinner) and 1.6 s (Dessert). Harder meals drop food faster, which also spreads the bites further apart on screen instead of bunching them up.
+- **Fall speed per meal:** a food takes 2.4 s to fall onto the axolotl in Breakfast, then 2.1 s (Lunch), 1.8 s (Snack), 1.5 s (Dinner) and 1.2 s (Dessert), so it lands on the axolotl exactly on the beat. Harder meals drop food faster (about 490 px/s in Breakfast up to 980 px/s in Dessert), which also spreads the bites further apart on screen: at least about 330 px between bites in every meal.
+- **Minimum gap:** a level can skip notes that come too soon after the previous food (`min_gap`). Dessert uses 0.35 s, so its half-beat stream becomes one food every ~0.43 s, still including off-beat notes.
 - **Lanes per meal:** Breakfast and Lunch have 3, Snack and Dinner 4, Dessert 5. The axolotl is drawn smaller (×5 or ×4 pixel scale) when there are more lanes, so it still fits one lane.
 - **Controls:** put a finger anywhere and drag. The axolotl slides the same distance as the finger, and counts as being in whichever lane its center is over. Lifting the finger snaps it to the middle of that lane. (On a PC: mouse drag or the arrow keys.)
 - Rotten foods use their own sprites (rotten apple, banana, juice, fish), and good foods are picked from 8 sprites, never the same one twice in a row.
@@ -58,7 +59,7 @@ Beat Bites is a rhythm catching game. Food falls down lanes in time with the mus
 | 2 | Lunch | Lunchbox Letters | 100 | 77 s | 62 | 57 | Faster tempo |
 | 3 | Snack | Soda Pop Sidequest | 115 | 67 s | 128 | 86 | 4 lanes, rotten food (every 10th food) |
 | 4 | Dinner | Neon Noodle Rush | 125 | 77 s | 120 | 88 | Faster, 2-lane jumps on big melody leaps |
-| 5 | Dessert | Sugar Star Sprint | 140 | 69 s | 312 | 259 | 5 lanes and half-beat notes: everything at once |
+| 5 | Dessert | Sugar Star Sprint | 140 | 69 s | 156 | 136 | 5 lanes, fastest drops, off-beat notes: everything at once |
 
 _"Playable foods" and "lane switches" are counted from each level's chart with its lane settings. Levels 1–4 use whole-beat notes only, and Dessert also uses half-beat notes._
 

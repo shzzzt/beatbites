@@ -9,8 +9,9 @@ script = ExtResource("1_xv7r2")
 level_number = 5
 chart_path = "res://assets/audio/music_dessert.json"
 lane_count = 5
-fall_time = 1.6
+fall_time = 1.2
 notes_per_beat = 2
+min_gap = 0.35
 
 [node name="Catcher" parent="." unique_id=464772695 instance=ExtResource("2_jejc5")]
 position = Vector2(360, 1080)

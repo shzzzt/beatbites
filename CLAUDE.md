@@ -76,7 +76,7 @@ Modes: Solo (campaign + unlocks), VS CPU (`CpuRival`, accuracy rises per level),
 - Autoloads: `res://autoload/Net.gd` (`Net`), `GameState` (mode, unlocked_level, best_stars,
   last_result, complete_level()).
 - `res://scripts/Level.gd` — gameplay, used by `scenes/levels/level_01..05.tscn`
-  (exports: level_number, chart_path, lane_count, notes_per_beat).
+  (exports: level_number, chart_path, lane_count, fall_time, notes_per_beat, min_gap).
 - `Food.gd` (`FallingFood`, scenes/actors/food.tscn), `catcher.gd`, `CpuRival.gd` (RefCounted).
 - UI scripts: `ModeSelect.gd`, `OfflineSelect.gd`, `LevelSelects.gd`, `Lobby.gd`, `Result.gd`.
 - Scenes: `scenes/ui/ModeSelect.tscn`, `OfflineSelect.tscn`, `LevelSelect.tscn`, `Lobby.tscn`, `result.tscn`.
@@ -220,12 +220,15 @@ launch the Godot exe; `_console.exe` is missing). Waiting for one combined phone
   - Food sprites: `FallingFood.GOOD_TEXTURES` (8) / `BAD_TEXTURES` (4) + `variant`; Level picks
 	variants with an RNG seeded by level_number (same foods every play and on both phones), never the
 	same food twice in a row. Rotten food has no green box any more (sprite only).
-  - Fall speed: `Level.fall_time` export → `Food.fall_time` (L1 3.0, L2 2.6, L3 2.2, L4 1.9,
-	L5 1.6 s). Faster drops spread the bites apart (user asked: harder = faster, less crowded).
+  - Fall speed (revised 2026-11-17): `Level.fall_time` export → `Food.fall_time` (L1 2.4, L2 2.1,
+	L3 1.8, L4 1.5, L5 1.2 s). Food now lands on the catcher (`Food.catch_y` = catcher y 1080; it
+	used to reach the beat at y 960, 120 px above). `Level.min_gap` skips notes closer than that to
+	the previous food (L5 0.35 → 156 foods instead of 312). Every level ≥ ~330 px between bites
+	(user asked twice: harder = faster drops, bites spaced out, not crowded).
   - Lanes: `Level.lane_count` export (L1–2: 3, L3–4: 4, L5: 5). `Level.assign_lanes()` follows the
 	melody contour (up → right, down → left, jump > 4 semitones = 2 lanes when 4+ lanes, bounce off
 	walls, max 3 in a row off-center; L1–2 ignore 1-semitone steps). Old low/middle_pitch_max removed.
-	Lane counts per level [L1 27/46/19, L5 49/107/73/53/30]; switches L1 88, L2 57, L3 86, L4 88, L5 259.
+	Lane counts per level [L1 27/46/19, L5 20/47/43/34/12]; switches L1 88, L2 57, L3 86, L4 88, L5 136.
   - `GameBackdrop.gd` (class GameBackdrop) draws lane_count−1 dashed dividers. Food and Catcher have
 	`lane_count`; `Catcher.setup(count)` scales the sprite ×6/×5/×4 for 3/4/5 lanes.
   - Controls: ◀ ▶ tap zones removed (HUD + `move_requested`). Drag anywhere: the axolotl slides by the
