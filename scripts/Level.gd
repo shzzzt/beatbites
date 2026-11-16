@@ -7,9 +7,11 @@ extends Node2D
 # Seconds a food takes to fall onto the axolotl. Shorter = faster drops and
 # more space between bites (Breakfast 2.4 → Dessert 1.2).
 @export_range(1.0, 3.0, 0.1) var fall_time: float = 2.4
-@export_range(1, 2, 1) var notes_per_beat: int = 1 # 1 = whole; 2 = half beats.
-# Skip a note if it comes sooner than this after the previous food (seconds),
-# so bites never fall in a tight stream. 0 = keep every note.
+# Which notes may become food: 1 = whole beats only, 2 = also half beats,
+# 4 = also quarter beats (like the off-beat "¾" notes in Dinner).
+@export_range(1, 4, 1) var notes_per_beat: int = 1
+# Minimum seconds between two foods, so bites never fall in a tight stream.
+# Whole-beat notes are kept first; off-beat notes only fill gaps. 0 = keep all.
 @export_range(0.0, 1.0, 0.05) var min_gap: float = 0.0
 
 var last_sent_score: int = -1
@@ -62,22 +64,7 @@ func _ready() -> void:
 		# Build our playable list before spawning any food.
 	bpm = float(chart["bpm"]) # Use this song's exact tempo.
 
-	var last_kept_time: float = -INF
-	for note in chart["lead_notes"]:
-		var beat: float = float(note["beat"])
-		var time: float = beat * 60.0 / bpm # Convert using this song's tempo.
-		# Breakfast accepts notes starting on whole beats.
-		# A half-beat becomes a whole number when multiplied by two.
-		var grid_position: float = beat * notes_per_beat
-		if not is_equal_approx(grid_position, roundf(grid_position)):
-			continue
-		if time - last_kept_time < min_gap - 0.001:
-			continue # Too close to the previous food: leave a gap.
-		last_kept_time = time
-		breakfast_notes.append({
-			"time": time,
-			"midi": int(note["midi"]), # Original pitch.
-		})
+	breakfast_notes = pick_notes(chart["lead_notes"])
 	assign_lanes(breakfast_notes) # Give every note a lane from the melody's shape.
 	catcher.setup(lane_count)
 
@@ -212,6 +199,43 @@ func _on_food_judgment(result: String) -> void:
 	if GameState.mode == "online":
 		hud.set_throw(combo % THROW_COMBO, thrown)
 	refresh_hud()
+
+# Choose which melody notes become food.
+#  1. Only notes on the allowed grid (notes_per_beat): e.g. with 2, a note on
+#     beat 3.5 is allowed (3.5 × 2 = 7, a whole number) but 3.75 is not.
+#  2. Whole-beat notes are kept first, then off-beat notes, and a note is
+#     skipped if it is closer than min_gap seconds to any food already kept.
+#     So off-beat notes only fill empty spaces and never make a tight stream.
+func pick_notes(lead_notes: Array) -> Array[Dictionary]:
+	var on_beat: Array[Dictionary] = []
+	var off_beat: Array[Dictionary] = []
+	for note in lead_notes:
+		var beat: float = float(note["beat"])
+		var grid_position: float = beat * notes_per_beat
+		if not is_equal_approx(grid_position, roundf(grid_position)):
+			continue
+		var entry: Dictionary = {
+			"time": beat * 60.0 / bpm, # Convert using this song's tempo.
+			"midi": int(note["midi"]), # Original pitch.
+		}
+		if is_equal_approx(beat, roundf(beat)):
+			on_beat.append(entry)
+		else:
+			off_beat.append(entry)
+
+	var kept: Array[Dictionary] = []
+	for entry in on_beat + off_beat:
+		var fits: bool = true
+		for other in kept:
+			if absf(entry["time"] - other["time"]) < min_gap - 0.001:
+				fits = false # Too close to a food we already have.
+				break
+		if fits:
+			kept.append(entry)
+	# Back into song order (off-beat notes were added last).
+	kept.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a["time"] < b["time"])
+	return kept
+
 
 # Lanes follow the melody's shape instead of its exact pitch (exact pitch
 # made long runs sit on one side):
