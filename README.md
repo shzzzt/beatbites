@@ -90,4 +90,4 @@ docs/          GDD.md, CREDITS.md, playtest notes, screenshots
 
 ## Author
 
-_[Your name]_. Solo project for ITSD 85.
+Shauntie Velasco. Solo project for ITSD 85.
