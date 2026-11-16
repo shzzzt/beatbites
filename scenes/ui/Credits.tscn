@@ -75,18 +75,22 @@ size_flags_horizontal = 3
 text = "Beat Bites
 ITSD 85 Mobile Game Project
 
-Game design & code:
-[YOUR NAME]
-
-Music (Sunrise Bento, Lunchbox Letters, Soda Pop Sidequest, Neon Noodle Rush, Sugar Star Sprint, A Table Under the Stars):
-[COMPOSER / SOURCE]
+Game design, code & charts:
+Shauntie Velasco
 
 Pixel art:
-[ARTIST / SOURCE]
+Shauntie Velasco
+
+Music (Sunrise Bento, Lunchbox Letters, Soda Pop Sidequest, Neon Noodle Rush, Sugar Star Sprint, A Table Under the Stars):
+AI-generated with Claude (Anthropic) for this game
 
 Fonts (SIL Open Font License):
 Press Start 2P by CodeMan38
 Pixelify Sans by Stefie Justprince
 
-Made with Godot Engine (MIT License)"
+Playtesting:
+Jan Eduard Sanchez
+
+Made with Godot Engine (MIT License)
+Coding help: Claude Code (Anthropic)"
 autowrap_mode = 3

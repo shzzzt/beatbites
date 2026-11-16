@@ -2,28 +2,28 @@
 
 ## Game
 
-**Beat Bites**: design, programming and charts by _[Shauntie Velasco]_, for ITSD 85.
+**Beat Bites**: design, programming and charts by Shauntie Velasco, for ITSD 85.
 
 ## Music
 
 | Track | Used for | BPM | Composer / source | License |
 | --- | --- | --- | --- | --- |
-| A Table Under the Stars | Title / menu | 80 | _[CLAUDE]_ | _[fill in]_ |
-| Sunrise Bento | Breakfast | 90 | _[CLAUDE]_ | _[ fillin]_ |
-| Lunchbox Letters | Lunch | 100 | _[CLAUDE]_ | _[fill in]_ |
-| Soda Pop Sidequest | Snack | 115 | _[CLAUDE]_ | _[fill in]_ |
-| Neon Noodle Rush | Dinner | 125 | _[CLAUDE]_ | _[fill in]_ |
-| Sugar Star Sprint | Dessert | 140 | _[CLAUDE]_ | _[fill in]_ |
+| A Table Under the Stars | Title / menu | 80 | AI-generated with Claude (Anthropic) | Made for this project; no third-party license |
+| Sunrise Bento | Breakfast | 90 | AI-generated with Claude (Anthropic) | Made for this project; no third-party license |
+| Lunchbox Letters | Lunch | 100 | AI-generated with Claude (Anthropic) | Made for this project; no third-party license |
+| Soda Pop Sidequest | Snack | 115 | AI-generated with Claude (Anthropic) | Made for this project; no third-party license |
+| Neon Noodle Rush | Dinner | 125 | AI-generated with Claude (Anthropic) | Made for this project; no third-party license |
+| Sugar Star Sprint | Dessert | 140 | AI-generated with Claude (Anthropic) | Made for this project; no third-party license |
 
-Charts (`assets/audio/music_*.json`) come from each song's lead melody (`music_*_lead.mid`).
+All six songs were generated with Claude for Beat Bites and are used under Anthropic's terms of service, which assign the outputs to the user. Charts (`assets/audio/music_*.json`) come from each song's lead melody (`music_*_lead.mid`).
 
 ## Art
 
 | Asset | Files | Artist / source | License |
 | --- | --- | --- | --- |
-| Axolotl catcher and rival | `catcher_*.png`, `rival_*.png` | _[Shauntie Velasco]_ | _[fill in]_ |
-| Food (good and rotten) | `good_*.png`, `bad_*.png` | _[Shauntie Velasco]_ | _[fill in]_ |
-| UI icons (pause, sound, arrows, heart, star, lock) | `icon_*.png`, `ui_*.png` | _[Shauntie Velasco]_ | _[fill in]_ |
+| Axolotl catcher and rival | `catcher_*.png`, `rival_*.png` | Shauntie Velasco | Original work |
+| Food (good and rotten) | `good_*.png`, `bad_*.png` | Shauntie Velasco | Original work |
+| UI icons (pause, sound, arrows, heart, star, lock) | `icon_*.png`, `ui_*.png` | Shauntie Velasco | Original work |
 
 ## Fonts
 
@@ -39,4 +39,4 @@ Charts (`assets/audio/music_*.json`) come from each song's lead melody (`music_*
 
 ## Playtesters
 
-_[Jan Eduard Sanchez]_
+- Jan Eduard Sanchez
