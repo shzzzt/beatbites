@@ -6,6 +6,7 @@
 [ext_resource type="Texture2D" path="res://assets/art/good_donut.png" id="4_donut"]
 [ext_resource type="Texture2D" path="res://assets/art/rival_idle.png" id="5_rival"]
 [ext_resource type="Texture2D" path="res://assets/art/catcher_idle.png" id="6_catcher"]
+[ext_resource type="Texture2D" path="res://assets/art/good_icecream.png" id="7_icecream"]
 
 [node name="OfflineSelect" type="Control" unique_id=1103033410]
 layout_mode = 3
@@ -166,6 +167,56 @@ text = "VS CPU"
 layout_mode = 2
 theme_type_variation = &"CardBody"
 text = "Race a rival · it gets better each meal"
+autowrap_mode = 3
+
+[node name="Endless" type="Button" parent="Margin/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 216)
+layout_mode = 2
+theme_type_variation = &"PurpleButton"
+
+[node name="Margin" type="MarginContainer" parent="Margin/Content/Endless"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 36
+theme_override_constants/margin_top = 36
+theme_override_constants/margin_right = 36
+theme_override_constants/margin_bottom = 36
+
+[node name="Row" type="HBoxContainer" parent="Margin/Content/Endless/Margin"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 32
+
+[node name="Icon" type="TextureRect" parent="Margin/Content/Endless/Margin/Row"]
+custom_minimum_size = Vector2(96, 96)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("7_icecream")
+expand_mode = 1
+
+[node name="Text" type="VBoxContainer" parent="Margin/Content/Endless/Margin/Row"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+mouse_filter = 2
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="Margin/Content/Endless/Margin/Row/Text"]
+layout_mode = 2
+theme_type_variation = &"CardTitle"
+text = "ENDLESS"
+
+[node name="Body" type="Label" parent="Margin/Content/Endless/Margin/Row/Text"]
+layout_mode = 2
+theme_type_variation = &"CardBody"
+text = "Pick a song · it loops faster and faster"
 autowrap_mode = 3
 
 [node name="Filler" type="Control" parent="Margin/Content" unique_id=1415512633]

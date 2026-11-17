@@ -66,6 +66,26 @@ var max_combo: int = 0 # Longest streak during this attempt.
 var lives: int = 3 # Every new attempt starts with three lives.
 var cpu_outcome: String = "" # Final CPU match message.
 
+# Food spawning state (kept between calls so Endless loops continue the pattern).
+var picker := RandomNumberGenerator.new() # Food pictures.
+var power_picker := RandomNumberGenerator.new() # Shuffles the power "bag".
+var power_bag: Array[String] = []
+var food_index: int = 0 # Counts every food created so far.
+var last_variant: int = -1
+
+# Endless mode: the song loops forever. Loop 1 starts slower than the normal
+# level; every loop the music plays 8% faster and food falls faster.
+const ENDLESS_START_SLOW: float = 1.25 # Loop 1 fall time = level fall_time × 1.25.
+const ENDLESS_FALL_SHRINK: float = 0.9 # Each loop falls in 90% of the previous time.
+const ENDLESS_MIN_FALL: float = 0.75 # Never faster than this (seconds, real time).
+const ENDLESS_SPEEDUP: float = 0.08 # Music speed +8% per loop...
+const ENDLESS_MAX_SPEED: float = 1.6 # ...up to 1.6× speed.
+const MISSES_PER_HEART: int = 5 # Endless: every 5th miss costs a heart.
+var endless_loop: int = 0 # 0 = first loop.
+var loop_length: float = 0.0 # Song length in song seconds.
+var loop_base: float = 0.0 # Song time when the current loop started.
+var endless_misses: int = 0
+
 
 @onready var music: AudioStreamPlayer = $Music # Find our Music child.
 @onready var output_latency: float = AudioServer.get_output_latency()
@@ -83,45 +103,18 @@ func _ready() -> void:
 	assign_lanes(breakfast_notes) # Give every note a lane from the melody's shape.
 	catcher.setup(lane_count)
 
-	var food_index: int = 0 # Count foods as we create them.
 	# Pick food pictures with a random generator seeded by the level number,
 	# so the same meal always shows the same foods (on both phones online).
-	var picker := RandomNumberGenerator.new()
 	picker.seed = level_number
-	var last_variant: int = -1
-	var power_picker := RandomNumberGenerator.new() # Shuffles the power "bag".
 	power_picker.seed = level_number + 1000
-	var power_bag: Array[String] = []
-	# Preview the chart after its opening three seconds.
-	for note in breakfast_notes:
-		var food: FallingFood = FOOD_SCENE.instantiate() as FallingFood
-		# Snack onward: every tenth food is rotten.
-		food.is_bad = level_number >= 3 and food_index % 10 == 9
-		# VS CPU / Online: power foods (same ones on both phones, never rotten).
-		if GameState.mode != "solo" and not food.is_bad and food_index % POWER_EVERY == POWER_OFFSET:
-			if power_bag.is_empty():
-				power_bag = shuffled_powers(power_picker) # Refill: every kind comes up again.
-			food.power_kind = power_bag.pop_back()
-		food_index += 1 # Advance to the next food number.
-		# Random picture, but never the same food twice in a row.
-		var variant: int = picker.randi_range(0, FallingFood.GOOD_TEXTURES.size() - 2)
-		if variant >= last_variant and last_variant >= 0:
-			variant += 1
-		food.variant = variant
-		last_variant = variant
-		food.arrival_time = float(note["time"]) # Each gets its own timing.
-		food.lane = int(note["lane"]) # Each gets its own lane.
-		food.lane_count = lane_count
-		food.fall_time = fall_time
-		food.catch_y = catcher.position.y # Land on the axolotl exactly on the beat.
-		food.hide() # Stay hidden until the fall begins.
-		# bind() adds the food itself as an extra argument, so the handler
-		# knows which food was judged (e.g. whether it was a power food).
-		food.judgment_made.connect(_on_food_judgment.bind(food))
-		add_child(food) # Put this instance into the level.
-		active_food.append(food) # Remember it for updates.
+	if is_endless():
+		loop_length = music.stream.get_length()
+		spawn_loop(0)
+		spawn_loop(1) # The next loop's first bites must start falling before this loop ends.
+	else:
+		spawn_loop(0)
 
-	# End the attempt when the non-looping song finishes.
+	# When the song finishes: end the attempt (or start the next loop in Endless).
 	music.finished.connect(_on_song_finished)
 	setup_hud()
 	setup_pause_menu()
@@ -177,7 +170,7 @@ func _process(_delta: float) -> void:
 	for hazard in hazards: # Rotten foods the rival tossed at us.
 		hazard.update_from_song(song_time, width)
 		hazard.judge_catch(song_time, catcher.lane)
-	if GameState.mode != "solo":
+	if is_versus():
 		hud.set_status(has_shield, maxf(0.0, double_until - song_time))
 
 	send_online_stats() # Share any changes made by those judgments.
@@ -213,6 +206,17 @@ func _on_food_judgment(result: String, food: FallingFood) -> void:
 	judgment_counts[result] += 1 # Count this food's judgment once.
 	if result == "MISS":
 		combo = 0 # A missed good food breaks the streak.
+		if is_endless():
+			# Endless has no goal, so misses must matter: every 5th one costs a heart.
+			endless_misses += 1
+			if endless_misses % MISSES_PER_HEART == 0:
+				lives = maxi(0, lives - 1)
+				sfx.play("bonk")
+				hud.show_judgment("TOO HUNGRY!", 0)
+				refresh_hud()
+				if lives == 0:
+					end_attempt(false)
+				return
 	else:
 		combo += 1 # PERFECT and GOOD both continue the streak.
 		max_combo = maxi(max_combo, combo) # Keep the highest streak.
@@ -227,6 +231,89 @@ func _on_food_judgment(result: String, food: FallingFood) -> void:
 	# Show the result in the middle and update the HUD numbers.
 	hud.show_judgment(result, combo)
 	refresh_hud()
+
+# --- Spawning food and Endless loops ------------------------------------------
+
+func is_endless() -> bool:
+	return GameState.mode == "endless"
+
+
+func is_versus() -> bool:
+	return GameState.mode == "cpu" or GameState.mode == "online"
+
+
+# Music speed for an Endless loop (1.0 = normal).
+func loop_speed(loop: int) -> float:
+	return minf(1.0 + ENDLESS_SPEEDUP * loop, ENDLESS_MAX_SPEED)
+
+
+# Creates one food for every chart note. loop > 0 (Endless) shifts the notes
+# to that repeat of the song and uses that loop's faster fall speed.
+func spawn_loop(loop: int) -> void:
+	var offset: float = loop * loop_length # Song time when this repeat starts.
+	var fall: float = fall_time
+	var window_scale: float = 1.0
+	if is_endless():
+		var speed: float = loop_speed(loop)
+		var real_fall: float = maxf(ENDLESS_MIN_FALL,
+			fall_time * ENDLESS_START_SLOW * pow(ENDLESS_FALL_SHRINK, loop))
+		# Song time runs `speed` times faster than real time, so convert.
+		fall = real_fall * speed
+		window_scale = speed # Keeps PERFECT/GOOD windows the same in real time.
+	for note in breakfast_notes:
+		var food: FallingFood = FOOD_SCENE.instantiate() as FallingFood
+		# Snack onward (and always in Endless): every tenth food is rotten.
+		food.is_bad = (level_number >= 3 or is_endless()) and food_index % 10 == 9
+		# VS CPU / Online: power foods (same ones on both phones, never rotten).
+		if is_versus() and not food.is_bad and food_index % POWER_EVERY == POWER_OFFSET:
+			if power_bag.is_empty():
+				power_bag = shuffled_powers(power_picker) # Refill: every kind comes up again.
+			food.power_kind = power_bag.pop_back()
+		food_index += 1 # Advance to the next food number.
+		# Random picture, but never the same food twice in a row.
+		var variant: int = picker.randi_range(0, FallingFood.GOOD_TEXTURES.size() - 2)
+		if variant >= last_variant and last_variant >= 0:
+			variant += 1
+		food.variant = variant
+		last_variant = variant
+		food.arrival_time = offset + float(note["time"]) # Each gets its own timing.
+		food.lane = int(note["lane"]) # Each gets its own lane.
+		food.lane_count = lane_count
+		food.fall_time = fall
+		food.window_scale = window_scale
+		food.catch_y = catcher.position.y # Land on the axolotl exactly on the beat.
+		food.hide() # Stay hidden until the fall begins.
+		# bind() adds the food itself as an extra argument, so the handler
+		# knows which food was judged (e.g. whether it was a power food).
+		food.judgment_made.connect(_on_food_judgment.bind(food))
+		add_child(food) # Put this instance into the level.
+		active_food.append(food) # Remember it for updates.
+
+
+# Endless: the song just ended, so start it again a bit faster.
+func next_loop() -> void:
+	endless_loop += 1
+	loop_base += loop_length
+	music.pitch_scale = loop_speed(endless_loop) # Faster (and a little higher) music.
+	music.play()
+	# Throw away foods that are already done, so memory doesn't keep growing.
+	var still_falling: Array[FallingFood] = []
+	for food in active_food:
+		if food.judged:
+			food.queue_free()
+		else:
+			still_falling.append(food)
+	active_food = still_falling
+	spawn_loop(endless_loop + 1) # Queue up the loop after this one.
+	# Reward for surviving a loop: one heart back.
+	var subtitle: String = "Speed x%.2f" % loop_speed(endless_loop)
+	if lives < MAX_LIVES:
+		lives += 1
+		subtitle += " · +1 heart!"
+		sfx.play("heart")
+	hud.show_message("LOOP %d" % (endless_loop + 1), subtitle, false, 1.6)
+	refresh_hud()
+
 
 # Choose which melody notes become food.
 #  1. Only notes on the allowed grid (notes_per_beat): e.g. with 2, a note on
@@ -309,6 +396,11 @@ func assign_lanes(notes: Array[Dictionary]) -> void:
 		previous_midi = midi
 
 func _on_song_finished() -> void:
+	if finished:
+		return
+	if is_endless():
+		next_loop() # Endless never ends on its own: play the song again, faster.
+		return
 	if cpu != null:
 		end_cpu_match() # Compare surviving players' scores.
 	else:
@@ -342,6 +434,10 @@ func end_attempt(won: bool) -> void:
 	if won and GameState.mode == "solo":
 		# Only Solo clears update campaign unlocks and best stars.
 		GameState.complete_level(level_number, stars)
+	var new_best: bool = false
+	if is_endless():
+		stars = 0
+		new_best = GameState.record_endless(level_number, score, endless_loop + 1)
 
 	# Preserve the final numbers before leaving gameplay.
 	GameState.last_result = {
@@ -360,6 +456,8 @@ func end_attempt(won: bool) -> void:
 		"cpu_score": cpu.score if cpu != null else 0,
 		"cpu_lives": cpu.lives if cpu != null else 0,
 		"cpu_outcome": cpu_outcome,
+		"endless_loop": endless_loop + 1, # Loops reached (Endless).
+		"new_best": new_best,
 	}
 	# Switch after the current food callbacks finish.
 	get_tree().call_deferred("change_scene_to_file", "res://scenes/ui/result.tscn")
@@ -367,12 +465,15 @@ func end_attempt(won: bool) -> void:
 func start_countdown() -> void:
 	countdown_start_ms = Time.get_ticks_msec() # Read the elapsed-time clock.
 	# Count backward: 3, 2, 1. The goal is shown underneath (R2).
+	var goal: String = "Goal: catch %d bites!" % TARGET_CATCHES
+	if is_endless():
+		goal = "Endless: survive as long as you can!"
 	for number in range(3, 0, -1):
-		hud.show_message(str(number), "Goal: catch %d bites!" % TARGET_CATCHES, true)
+		hud.show_message(str(number), goal, true)
 		# Wait one second; this timer will respect a future pause.
 		await get_tree().create_timer(1.0, false).timeout
 
-	hud.show_message("GO!", "Goal: catch %d bites!" % TARGET_CATCHES, true, 0.8)
+	hud.show_message("GO!", goal, true, 0.8)
 	music_started = true # The countdown has finished.
 	music.play() # Begin playback from the start.
 
@@ -382,12 +483,13 @@ func read_song_time() -> float:
 	var offset: float = GameState.timing_offset_ms / 1000.0
 
 	if music.playing:
-		# Use the audio clock once playback starts.
+		# Use the audio clock once playback starts. pitch_scale is the music
+		# speed (Endless speeds it up): real seconds count that many song seconds.
+		var rate: float = music.pitch_scale
 		var clock: float = music.get_playback_position()
-		clock += AudioServer.get_time_since_last_mix()
-		clock -= output_latency
-		clock -= offset
-		return maxf(song_time, clock) # Prevent backward jumps.
+		clock += (AudioServer.get_time_since_last_mix() - output_latency - offset) * rate
+		# loop_base = song time when this Endless loop began (0 otherwise).
+		return maxf(song_time, loop_base + clock) # Prevent backward jumps.
 
 	if music_started:
 		return song_time # Hold the clock when playback ends.
@@ -455,7 +557,11 @@ func setup_hud() -> void:
 func refresh_hud() -> void:
 	hud.set_score(score)
 	hud.set_lives(lives)
-	hud.set_goal(caught_count, TARGET_CATCHES)
+	if is_endless():
+		hud.set_endless(endless_loop + 1, loop_speed(endless_loop),
+			endless_misses % MISSES_PER_HEART, MISSES_PER_HEART)
+	else:
+		hud.set_goal(caught_count, TARGET_CATCHES)
 	if cpu != null:
 		hud.set_versus(score, lives, cpu.score, cpu.lives)
 	elif GameState.mode == "online":
@@ -788,9 +894,14 @@ func setup_pause_menu() -> void:
 
 
 func _on_pause_opened() -> void:
-	pause_menu.set_info("LV %d · %s · %d / %d bites" % [
-		level_number, GameState.meal_name(level_number), caught_count, TARGET_CATCHES
-	])
+	if is_endless():
+		pause_menu.set_info("ENDLESS · %s · loop %d" % [
+			GameState.meal_name(level_number), endless_loop + 1
+		])
+	else:
+		pause_menu.set_info("LV %d · %s · %d / %d bites" % [
+			level_number, GameState.meal_name(level_number), caught_count, TARGET_CATCHES
+		])
 	if GameState.mode == "online":
 		return # We can't freeze the other phone, so the match keeps going.
 	pause_started_ms = Time.get_ticks_msec()
@@ -823,5 +934,8 @@ func _on_pause_quit() -> void:
 		Net.leave_game() # The rival sees "OPPONENT LEFT".
 		Net.lobby_message = "You left the match."
 		get_tree().change_scene_to_file("res://scenes/ui/Lobby.tscn")
+		return
+	if is_endless():
+		get_tree().change_scene_to_file("res://scenes/ui/EndlessSelect.tscn")
 		return
 	get_tree().change_scene_to_file("res://scenes/ui/LevelSelect.tscn")

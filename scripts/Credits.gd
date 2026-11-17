@@ -26,7 +26,8 @@ var SECTIONS: Array[Dictionary] = [
 			["Soda Pop Sidequest", "Snack", "track"],
 			["Neon Noodle Rush", "Dinner", "track"],
 			["Sugar Star Sprint", "Dessert", "track"],
-			["Sound effects", "Original 8-bit sounds made with our own script"],
+			["Stardust Lullaby", "Endless bonus", "track"],
+			["Bonus song & sound effects", "Composed in code with Claude Code (our own scripts)"],
 		],
 	},
 	{

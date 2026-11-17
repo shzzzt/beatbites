@@ -264,6 +264,27 @@ launch the Godot exe; `_console.exe` is missing). Waiting for one combined phone
   with ±5% pitch. Level creates it in `setup_hud()` and sets `hud.sfx`; HUD plays sounds at the
   animation moments (`_sound()`); Level plays `bonk` on HIT_BAD and the CPU's powers at −6 dB.
 
+- Endless mode + bonus song (2026-11-18; checked in Godot: loops via seeking near the song end,
+  screenshots; NOT played for real or on a phone, song not heard by anyone yet):
+  - `GameState.mode = "endless"`. OfflineSelect has an ENDLESS card → `EndlessSelect.tscn`/`.gd`
+	(6 cards built in code; `GameState.meal_info()`, `SONG_TITLES`, `ENDLESS_LEVELS` 6).
+  - Level: `spawn_loop(loop)` (refactor of the old food loop; Solo/CPU produce identical food);
+	Endless spawns loops 0 and 1, `_on_song_finished` → `next_loop()`: loop_base += loop_length,
+	`music.pitch_scale = loop_speed()` (1 + 0.08/loop, max 1.6), frees judged food, spawns loop+1,
+	+1 heart, "LOOP n" message. `read_song_time()` multiplies real-time terms by pitch_scale and
+	adds loop_base. Fall per loop = max(0.75, fall_time × 1.25 × 0.9^loop) × speed (song seconds);
+	`Food.window_scale` = speed. Every 10th food rotten on every song; every 5th miss −1 heart.
+	`is_versus()` now gates power foods / status chip (Endless has none).
+  - HUD: Solo layout, `set_endless()` (goal text "Loop n · x1.08 speed", MISS n/5 bar), level name
+	"ENDLESS · MEAL". Pause info shows the loop; pause QUIT → EndlessSelect. Result: GAME OVER /
+	NEW BEST!, "Reached loop n · best …", SONGS → EndlessSelect. `GameState.record_endless()`,
+	`endless_best` saved in `[endless]`, cleared by reset_progress.
+  - Bonus song "Stardust Lullaby" (Midnight Snack, level_06.tscn: 92 BPM, 4 lanes, fall 2.0,
+	notes_per_beat 2, min_gap 0.3, 120 foods): composed + synthesized by `tools/make_song.py`
+	(pure Python, ~1 min) → `music_midnight.wav` (32 kHz mono, imported as QOA) + `.json` chart.
+	D major; verses Canon progression, chorus Bm-G-D-A; music box arps, pulse lead + vibrato +
+	echo, pad, bass, drums in verse2/chorus/verse3. Endless only (not in MEALS / Solo).
+
 ## Remaining work (in order; batch related tasks together)
 
 1. Phone-test the batch above. Fill in the Credits / docs placeholders.

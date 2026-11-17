@@ -15,6 +15,9 @@ var variant: int = 0 # Which picture to use (set by the level before add_child).
 var power_kind: String = ""
 # A rotten food thrown onto our field stays hidden until it lands (Level sets this).
 var waiting_to_land: bool = false
+# Endless plays the music faster; song-time catch windows are multiplied by this
+# so PERFECT/GOOD still feel the same in real time.
+var window_scale: float = 1.0
 
 # Each power: glow color, sparkle color, label under the food.
 const POWERS: Dictionary = {
@@ -73,7 +76,7 @@ func judge_catch(time: float, catcher_lane: int) -> void:
 	
 	# Rotten food reports different outcomes from good food.
 	if is_bad:
-		if lateness > 0.16:
+		if lateness > 0.16 * window_scale:
 			judged = true
 			hide()
 			judgment_made.emit("AVOIDED") # Safely passed the catcher.
@@ -85,11 +88,11 @@ func judge_catch(time: float, catcher_lane: int) -> void:
 	
 	var result: String = ""
 
-	if lateness > 0.16:
+	if lateness > 0.16 * window_scale:
 		result = "MISS" # The catch window has ended.
 	elif catcher_lane != lane:
 		return # Allow time to move into this food's lane.
-	elif lateness <= 0.06:
+	elif lateness <= 0.06 * window_scale:
 		result = "PERFECT" # Catcher was ready on time.
 	else:
 		result = "GOOD" # Catcher arrived slightly late.

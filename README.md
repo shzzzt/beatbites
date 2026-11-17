@@ -33,6 +33,7 @@ Food falls in lanes on the beat of the music (3 lanes at first, up to 5 in Desse
 - **Level progression:** each meal unlocks after you clear the one before it. Progress and best stars are saved on the phone.
 - **Solo:** the campaign, with 0–3 stars per level.
 - **VS CPU (offline):** race a CPU rival whose accuracy goes up each level. Works in airplane mode.
+- **Endless (offline):** pick any song (the 5 meals or the bonus song *Stardust Lullaby*). It loops forever, faster every loop, until you run out of hearts. Best score and loop are saved per song.
 - **Online (2 phones):** host/join over local Wi-Fi or a phone hotspot. The host picks the meal, both phones start in sync, and each sees the other's live score and lives. Catch glowing power foods (also in VS CPU): THROW tosses rotten food onto your rival's field, INK splats their screen, SHIELD blocks an attack, x2 doubles your points, HEART gives back a life. The host decides the winner.
 - Title screen, credits, pause menu, sound on/off (saved), and a pixel-art UI theme.
 
@@ -75,11 +76,12 @@ autoload/      GameState.gd (mode, unlocks, stars, sound, saving)
                Net.gd (ENet hosting/joining, RPCs, clock sync, results)
 scripts/       Level.gd (gameplay), Food.gd, catcher.gd, CpuRival.gd,
                PauseMenu.gd and the menu/UI scripts
-scenes/levels/ level_01.tscn … level_05.tscn
-scenes/ui/     Title, ModeSelect, OfflineSelect, LevelSelect, Lobby,
+scenes/levels/ level_01.tscn … level_05.tscn, level_06.tscn (Endless bonus song)
+scenes/ui/     Title, ModeSelect, OfflineSelect, LevelSelect, EndlessSelect, Lobby,
                result, PauseMenu, Credits
 scenes/actors/ catcher.tscn, food.tscn
-assets/        art, audio (songs + JSON charts), fonts, ui_theme.tres
+assets/        art, audio (songs + JSON charts, sfx), fonts, ui_theme.tres
+tools/         make_theme.py, make_sfx.py, make_song.py (generate theme, sounds, bonus song)
 docs/          GDD.md, CREDITS.md, playtest notes, screenshots
 ```
 

@@ -39,6 +39,16 @@ func _ready() -> void:
 	%ComboValue.text = str(result["max_combo"])
 
 	match mode:
+		"endless":
+			var meal: String = GameState.meal_name(level).to_upper()
+			%LevelLine.text = "ENDLESS · %s" % meal
+			%Heading.text = "NEW BEST!" if result.get("new_best", false) else "GAME OVER"
+			var best: Dictionary = GameState.endless_best.get(level, {"score": 0, "loop": 0})
+			%SubLine.text = "Reached loop %d · best %05d (loop %d)" % [
+				int(result["endless_loop"]), int(best["score"]), int(best["loop"])
+			]
+			%Stars.hide() # Endless has no stars; the score is the reward.
+			meals_button.text = "SONGS"
 		"online":
 			# Online matches end by leaving the connection and going back to the lobby.
 			%Heading.text = result["online_outcome"] # YOU WIN!, YOU LOSE, DRAW...
@@ -110,5 +120,8 @@ func _on_meals_pressed() -> void:
 	if GameState.last_result.get("mode", "solo") == "online":
 		Net.leave_game() # Close the connection so the next match starts clean.
 		get_tree().change_scene_to_file("res://scenes/ui/Lobby.tscn")
+		return
+	if GameState.last_result.get("mode", "solo") == "endless":
+		get_tree().change_scene_to_file("res://scenes/ui/EndlessSelect.tscn")
 		return
 	get_tree().change_scene_to_file("res://scenes/ui/LevelSelect.tscn")

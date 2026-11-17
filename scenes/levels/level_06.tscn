@@ -1,0 +1,22 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" uid="uid://cmln44kna2xf0" path="res://scripts/Level.gd" id="1_lvl6"]
+[ext_resource type="PackedScene" uid="uid://kx4571higceq" path="res://scenes/actors/catcher.tscn" id="2_lvl6"]
+[ext_resource type="AudioStream" path="res://assets/audio/music_midnight.wav" id="3_lvl6"]
+
+[node name="Level06" type="Node2D"]
+script = ExtResource("1_lvl6")
+level_number = 6
+chart_path = "res://assets/audio/music_midnight.json"
+lane_count = 4
+fall_time = 2.0
+notes_per_beat = 2
+min_gap = 0.3
+
+[node name="Catcher" parent="." instance=ExtResource("2_lvl6")]
+position = Vector2(360, 1080)
+
+[node name="Music" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("3_lvl6")
+
+[node name="HUD" type="CanvasLayer" parent="."]

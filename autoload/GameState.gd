@@ -4,7 +4,7 @@ const SAVE_PATH: String = "user://save.cfg"
 var last_result: Dictionary = {} # Results stay available between scenes.
 var unlocked_level: int = 1 # New players start with Breakfast.
 var best_stars: Dictionary = {} # Level number → highest earned stars.
-var mode: String = "solo" # Current choice: "solo" or "cpu".
+var mode: String = "solo" # "solo", "cpu", "online" or "endless".
 var sound_on: bool = true # Saved setting; mutes every sound when false.
 var volume: float = 1.0 # Saved master volume, 0.0 (silent) to 1.0 (full).
 # Saved audio delay in ms. Positive = the player hears the music late (e.g.
@@ -26,8 +26,38 @@ const MEALS: Array[Dictionary] = [
 ]
 
 
+# Endless mode songs: the 5 meals plus the bonus song (level_06.tscn), which
+# is only played in Endless.
+const BONUS_MEAL: Dictionary = {"name": "Midnight Snack", "bpm": 92, "info": "bonus song"}
+const SONG_TITLES: Array[String] = [
+	"Sunrise Bento", "Lunchbox Letters", "Soda Pop Sidequest",
+	"Neon Noodle Rush", "Sugar Star Sprint", "Stardust Lullaby",
+]
+const ENDLESS_LEVELS: int = 6
+# Saved Endless records: level number → {"score": int, "loop": int}.
+var endless_best: Dictionary = {}
+
+
 func meal_name(level: int) -> String:
+	if level == 6:
+		return str(BONUS_MEAL["name"])
 	return str(MEALS[clampi(level, 1, 5) - 1]["name"])
+
+
+func meal_info(level: int) -> Dictionary:
+	return BONUS_MEAL if level == 6 else MEALS[clampi(level, 1, 5) - 1]
+
+
+# Remember an Endless run. Returns true if it beat the saved best score.
+func record_endless(level: int, score: int, loop: int) -> bool:
+	var best: Dictionary = endless_best.get(level, {"score": 0, "loop": 0})
+	var new_best: bool = score > int(best["score"])
+	endless_best[level] = {
+		"score": maxi(score, int(best["score"])),
+		"loop": maxi(loop, int(best["loop"])),
+	}
+	save_game()
+	return new_best
 
 
 # Sum of the best Solo stars for every meal (max 15).
@@ -45,6 +75,7 @@ func _ready() -> void:
 			int(config.get_value("progress", "unlocked_level", 1)), 1, 5
 		)
 		best_stars = config.get_value("progress", "best_stars", {})
+		endless_best = config.get_value("endless", "best", {})
 		sound_on = bool(config.get_value("settings", "sound_on", true))
 		volume = clampf(float(config.get_value("settings", "volume", 1.0)), 0.0, 1.0)
 		timing_offset_ms = clampi(int(config.get_value("settings", "timing_offset_ms", 0)),
@@ -115,6 +146,7 @@ func set_username(text: String) -> void:
 func reset_progress() -> void:
 	unlocked_level = 1
 	best_stars = {}
+	endless_best = {}
 	save_game()
 
 
@@ -122,6 +154,7 @@ func save_game() -> void:
 	var config := ConfigFile.new()
 	config.set_value("progress", "unlocked_level", unlocked_level)
 	config.set_value("progress", "best_stars", best_stars)
+	config.set_value("endless", "best", endless_best)
 	config.set_value("settings", "sound_on", sound_on)
 	config.set_value("settings", "volume", volume)
 	config.set_value("settings", "timing_offset_ms", timing_offset_ms)

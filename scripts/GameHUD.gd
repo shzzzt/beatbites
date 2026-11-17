@@ -37,11 +37,14 @@ func _ready() -> void:
 	_fill_hearts(%RivalHearts)
 
 
-# mode: "solo", "cpu" or "online".
+# mode: "solo", "cpu", "online" or "endless".
 func setup(mode: String, level: int, meal: String) -> void:
 	%LevelName.text = "LV %d · %s" % [level, meal.to_upper()]
-	%SoloTop.visible = mode == "solo"
-	%VersusTop.visible = mode != "solo"
+	var versus: bool = mode == "cpu" or mode == "online"
+	%SoloTop.visible = not versus # Solo and Endless use the single-player layout.
+	%VersusTop.visible = versus
+	if mode == "endless":
+		%LevelName.text = "ENDLESS · %s" % meal.to_upper()
 	%RivalName.text = "CPU" if mode == "cpu" else "RIVAL"
 	if mode == "online":
 		# Show both usernames (shared when the phones connected).
@@ -64,6 +67,15 @@ func set_goal(caught: int, goal: int) -> void:
 	%GoalCount.text = "%d / %d" % [mini(caught, goal), goal]
 	%GoalBar.max_value = goal
 	%GoalBar.value = mini(caught, goal)
+
+
+# Endless: the goal panel shows the loop and speed, and the bar fills with
+# misses (a full bar = a heart lost).
+func set_endless(loop: int, speed: float, misses: int, misses_per_heart: int) -> void:
+	%GoalText.text = "Loop %d · x%.2f speed" % [loop, speed]
+	%GoalCount.text = "MISS %d/%d" % [misses, misses_per_heart]
+	%GoalBar.max_value = misses_per_heart
+	%GoalBar.value = misses
 
 
 func set_versus(my_score: int, my_lives: int, opp_score: int, opp_lives: int) -> void:
