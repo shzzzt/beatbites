@@ -101,6 +101,7 @@ All five levels use the same scene script (`Level.gd`). Each level scene sets it
 - **Getting hit by INK:** "INK INCOMING!", an ink ball flies in and splats big purple pixel blobs over part of the field (food passes underneath), which fade after 4 s.
 - **SHIELD / x2 / HEART:** the name pops up above your axolotl; a status chip under the score panel shows "SHIELD" and/or "x2 5s". A shield is used up by the next attack (BLOCKED!).
 - Missing a power food does nothing special. (This replaced the earlier 10-combo throw meter.)
+- **Sound effects** (8-bit, made by `tools/make_sfx.py`): *throw* (rising fwip) when a THROW/INK leaves your hand or a rotten food is tossed at you, *splat* / *ink* when it hits, *incoming* (alarm beeps) with the warning banner, *land* (thud) when a tossed hazard lands on your field, *blocked* (metallic clang) for shields, *shield* (chime), *double* (coin), *heart* (rising arpeggio) when you catch those powers, and *bonk* when you catch rotten food. The CPU's own power sounds play quieter. All sounds use the Master bus, so SOUND OFF and the volume slider apply.
 
 ## 6. Online design
 

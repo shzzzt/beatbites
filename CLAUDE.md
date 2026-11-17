@@ -257,6 +257,12 @@ launch the Godot exe; `_console.exe` is missing). Waiting for one combined phone
   - HUD: `%Status` chip (y 204: "SHIELD  x2 5s"), INCOMING! banner at y 252 with `%IncomingText`.
   - Judgment signal is bound with the food: `judgment_made.connect(_on_food_judgment.bind(food))`.
   - 10-combo throw meter removed. Not a bug: food passes UNDER the HUD (checked with a cover rect).
+- Sound effects (2026-11-18; checked in Godot that each sound starts, NOT heard on a phone):
+  `tools/make_sfx.py` generates 10 original 8-bit WAVs in `assets/audio/sfx/` (throw, splat,
+  incoming, land, ink, shield, blocked, double, heart, bonk); edit the recipes and rerun.
+  `scripts/Sfx.gd` (class Sfx): pool of 8 AudioStreamPlayers on Master, `play(name, volume_db)`
+  with ±5% pitch. Level creates it in `setup_hud()` and sets `hud.sfx`; HUD plays sounds at the
+  animation moments (`_sound()`); Level plays `bonk` on HIT_BAD and the CPU's powers at −6 dB.
 
 ## Remaining work (in order; batch related tasks together)
 

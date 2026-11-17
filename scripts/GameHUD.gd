@@ -29,6 +29,7 @@ var judgment_tween: Tween
 var message_tween: Tween
 var incoming_tween: Tween
 var shake_bases: Dictionary = {} # Control -> its resting position while shaking.
+var sfx: Sfx # Sound effects player, set by Level.gd (null = silent).
 
 
 func _ready() -> void:
@@ -93,13 +94,16 @@ const PIXEL: float = 12.0 # Ink blobs are drawn as 12×12 squares (pixel style).
 # rival's side of the score panel. blocked = the rival had a shield up.
 func play_throw(from: Vector2, kind: String, blocked: bool) -> void:
 	_float_text(from + Vector2(0, -130), "INK!" if kind == "ink" else "THROW!", PINK)
+	_sound("throw")
 	var target: Vector2 = _center_of(%Rival)
 	var projectile: Node2D = _make_ink_ball() if kind == "ink" else _make_rotten_sprite()
 	_launch(projectile, from, func() -> Vector2: return target, Vector2(110, -320), 1.5,
 		func() -> void:
 			if blocked:
+				_sound("blocked")
 				_impact(target, "BLOCKED!", BLUE, SHIELD_DEBRIS)
 				return
+			_sound("ink" if kind == "ink" else "splat")
 			_impact(target, "SPLAT!", ROTTEN, INK_DEBRIS if kind == "ink" else DEBRIS_COLORS)
 			_shake(%VersusPanel)
 			_flash(%VersusPanel)
@@ -109,6 +113,7 @@ func play_throw(from: Vector2, kind: String, blocked: bool) -> void:
 # The rival is about to throw at us: banner, and their side of the panel winds up.
 func play_warning(kind: String) -> void:
 	show_incoming("INK INCOMING!" if kind == "ink" else "INCOMING!")
+	_sound("incoming")
 	var panel: Control = %VersusPanel
 	panel.pivot_offset = panel.size / 2.0
 	var wind_up := create_tween()
@@ -125,10 +130,12 @@ func toss_rotten(delay: float, target: Vector2, on_land: Callable) -> void:
 		await get_tree().create_timer(delay, false).timeout
 	var bend := Vector2(randf_range(-280.0, 280.0), randf_range(-140.0, 40.0))
 	var spins: float = randf_range(1.0, 2.5) * (1.0 if randf() < 0.5 else -1.0)
+	_sound("throw", -8.0) # Quieter: three of these come in a row.
 	_launch(_make_rotten_sprite(), _center_of(%Rival), func() -> Vector2: return target,
 		bend, spins,
 		func() -> void:
 			on_land.call()
+			_sound("land")
 			_impact(target, "", ROTTEN, DEBRIS_COLORS)
 	)
 
@@ -140,6 +147,7 @@ func play_ink_hit(duration: float) -> void:
 	_launch(_make_ink_ball(), _center_of(%Rival), func() -> Vector2: return land,
 		Vector2(-160, -60), 1.0,
 		func() -> void:
+			_sound("ink")
 			_impact(land, "INKED!", INK_COLOR, INK_DEBRIS)
 			_spawn_ink(duration)
 	)
@@ -149,7 +157,9 @@ func play_ink_hit(duration: float) -> void:
 func play_blocked(at: Vector2) -> void:
 	_launch(_make_rotten_sprite(), _center_of(%Rival), func() -> Vector2: return at,
 		Vector2(140, -80), 1.5,
-		func() -> void: _impact(at, "BLOCKED!", BLUE, SHIELD_DEBRIS)
+		func() -> void:
+			_sound("blocked")
+			_impact(at, "BLOCKED!", BLUE, SHIELD_DEBRIS)
 	)
 
 
@@ -161,10 +171,14 @@ func show_power(at: Vector2, text: String, kind: String) -> void:
 		"shield":
 			debris = SHIELD_DEBRIS
 			color = BLUE
+			_sound("shield")
 		"life":
 			debris = HEART_DEBRIS
 			color = PINK
+			_sound("heart")
 			_flying_heart(at, %YouHearts)
+		_:
+			_sound("double")
 	_impact(at + Vector2(0, -40), "", color, debris)
 	_float_text(at + Vector2(0, -130), text, color)
 
@@ -361,6 +375,11 @@ func _shake(node: Control) -> void:
 func _flash(node: CanvasItem) -> void:
 	node.modulate = Color(1.0, 0.55, 0.65)
 	create_tween().tween_property(node, "modulate", Color.WHITE, 0.35)
+
+
+func _sound(sound: String, volume_db: float = 0.0) -> void:
+	if sfx != null:
+		sfx.play(sound, volume_db)
 
 
 func _center_of(node: Control) -> Vector2:

@@ -37,6 +37,8 @@ const DOUBLE_TIME: float = 6.0 # Seconds of double points from x2.
 var hazards: Array[FallingFood] = [] # Rotten foods the rival tossed onto our field.
 var has_shield: bool = false # SHIELD power: blocks the next attack.
 var double_until: float = -INF # x2 power: song time when double points end.
+var sfx: Sfx # Sound effects player (created in setup_hud).
+const CPU_SOUND_DB: float = -6.0 # The CPU's own power sounds are quieter than ours.
 const PAUSE_SCENE = preload("res://scenes/ui/PauseMenu.tscn")
 const HUD_SCENE = preload("res://scenes/ui/GameHUD.tscn")
 const BACKDROP_SCENE = preload("res://scenes/ui/GameBackdrop.tscn")
@@ -197,6 +199,7 @@ func _on_food_judgment(result: String, food: FallingFood) -> void:
 
 	if result == "HIT_BAD":
 		lives = maxi(0, lives - 1) # Lose exactly one life.
+		sfx.play("bonk")
 		hud.show_judgment("ROTTEN!", 0)
 		refresh_hud()
 		if lives == 0 and cpu == null:
@@ -442,6 +445,9 @@ func setup_hud() -> void:
 	hud = HUD_SCENE.instantiate() as GameHUD
 	$HUD.add_child(hud) # The HUD CanvasLayer draws above the food.
 	hud.setup(GameState.mode, level_number, GameState.meal_name(level_number))
+	sfx = Sfx.new() # Sound effects (power foods, throws, rotten food).
+	add_child(sfx)
+	hud.sfx = sfx # The HUD plays sounds at the exact moment of each animation.
 	refresh_hud()
 
 
@@ -569,11 +575,14 @@ func cpu_use_power(kind: String) -> void:
 	match kind:
 		"shield":
 			cpu.shield = true
+			sfx.play("shield", CPU_SOUND_DB)
 			hud.show_rival_power("CPU SHIELD!")
 		"double":
 			cpu.double_until = song_time + DOUBLE_TIME
+			sfx.play("double", CPU_SOUND_DB)
 			hud.show_rival_power("CPU x2!")
 		"life":
+			sfx.play("heart", CPU_SOUND_DB)
 			if cpu.lives < MAX_LIVES:
 				cpu.lives += 1
 				hud.show_rival_power("CPU +1 LIFE!")
