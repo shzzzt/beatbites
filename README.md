@@ -1,3 +1,5 @@
+<p align="center"><img src="assets/branding/logo_banner.png" alt="Beat Bites logo: a pink pixel axolotl catching an apple next to the words BEAT BITES" width="640"></p>
+
 # Beat Bites
 
 A rhythm catching game for Android, made with Godot 4 for ITSD 85 (Mobile Game with Level Progression and Offline/Online Multiplayer).
@@ -81,7 +83,8 @@ scenes/ui/     Title, ModeSelect, OfflineSelect, LevelSelect, EndlessSelect, Lob
                result, PauseMenu, Credits
 scenes/actors/ catcher.tscn, food.tscn
 assets/        art, audio (songs + JSON charts, sfx), fonts, ui_theme.tres
-tools/         make_theme.py, make_sfx.py, make_song.py (generate theme, sounds, bonus song)
+tools/         make_theme.py, make_sfx.py, make_song.py, LogoMaker.tscn
+               (generate the theme, sounds, bonus song and logo images)
 docs/          GDD.md, CREDITS.md, playtest notes, screenshots
 ```
 

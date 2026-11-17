@@ -25,6 +25,7 @@ The first six songs were generated with ChatGPT for Beat Bites and are used unde
 | Axolotl catcher and rival | `catcher_*.png`, `rival_*.png` | Shauntie Velasco | Original work |
 | Food (good and rotten) | `good_*.png`, `bad_*.png` | Shauntie Velasco | Original work |
 | UI icons (pause, sound, arrows, heart, star, lock) | `icon_*.png`, `ui_*.png` | Shauntie Velasco | Original work |
+| Logo, app icon and banner | `assets/branding/*.png` | Composed from the art above by `tools/LogoMaker.tscn` | Original work |
 
 **Stardust Lullaby** is written note by note in `tools/make_song.py` (D major, the "Canon" progression in the verses and vi-IV-I-V in the chorus) and every instrument is synthesized there from simple waves, so it contains no samples or third-party audio. Its chart `music_midnight.json` is generated from the same notes.
 

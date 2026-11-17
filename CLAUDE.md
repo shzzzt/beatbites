@@ -285,6 +285,14 @@ launch the Godot exe; `_console.exe` is missing). Waiting for one combined phone
 	D major; verses Canon progression, chorus Bm-G-D-A; music box arps, pulse lead + vibrato +
 	echo, pad, bass, drums in verse2/chorus/verse3. Endless only (not in MEALS / Solo).
 
+- Logo (2026-11-18; rendered and checked as images, NOT seen on a phone yet): `tools/LogoMaker.tscn`
+  + `tools/make_logo.gd` (run NON-headless: `--path . res://tools/LogoMaker.tscn`) render the axolotl
+  catching an apple (64×64 grid × whole-number scale) into `assets/branding/`: icon_512 / icon_192
+  (pink rounded tile, transparent corners), adaptive icon_foreground_432 / icon_background_432, and
+  logo_banner.png (1280×640, top of README). project.godot: config/icon + boot_splash image
+  (lavender bg, use_filter false); export_presets.cfg: launcher icons + Android splash icon/bg.
+  The Godot editor was open when these files were edited: reload the project before saving there.
+
 ## Remaining work (in order; batch related tasks together)
 
 1. Phone-test the batch above. Fill in the Credits / docs placeholders.

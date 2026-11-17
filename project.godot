@@ -13,7 +13,10 @@ config_version=5
 config/name="Beat Bites"
 run/main_scene="res://scenes/ui/Title.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
-config/icon="res://icon.svg"
+config/icon="res://assets/branding/icon_512.png"
+boot_splash/bg_color=Color(0.9843137, 0.95686275, 1, 1)
+boot_splash/image="res://assets/branding/icon_512.png"
+boot_splash/use_filter=false
 
 [autoload]
 
